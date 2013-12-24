@@ -22,21 +22,28 @@ module VagrantPlugins
       # Include the built-in modules so we can use them as top-level things.
       include Vagrant::Action::Builtin
 
-      def self.action_prepare_boot
+      def self.action_reload
         Vagrant::Action::Builder.new.tap do |b|
-          b.use Provision
-          b.use SyncFolders
+          b.use ConfigValidate
+          b.use ConnectHyperv
+          b.use Call, IsCreated do |env, b2|
+            if !env[:result]
+              b2.use MessageNotCreated
+              next
+            end
+            b2.use action_halt
+            b2.use Call, WaitForState, :disabled, 120 do |env2, b3|
+              if env2[:result]
+                b3.use action_up
+              else
+                env2.info("Machine did not come to reload, Check machine's status")
+              end
+            end
+          end
         end
       end
 
       def self.action_halt
-        Vagrant::Action::Builder.new.tap do |b|
-          b.use Provision
-          b.use SyncFolders
-        end
-      end
-
-      def self.action_halts
         Vagrant::Action::Builder.new.tap do |b|
           b.use ConfigValidate
           b.use Call, IsCreated do |env, b2|
@@ -50,19 +57,6 @@ module VagrantPlugins
         end
       end
 
-      def self.action_start
-        #TODO: Check for instance already running.
-        Vagrant::Action::Builder.new.tap do |b|
-          b.use action_boot
-        end
-      end
-
-      def self.action_boot
-        Vagrant::Action::Builder.new.tap do |b|
-          b.use StartInstance
-        end
-      end
-
       def self.action_up
         Vagrant::Action::Builder.new.tap do |b|
           b.use HandleBoxUrl
@@ -72,16 +66,15 @@ module VagrantPlugins
             if env1[:result]
               b1.use Call, IsStopped do |env2, b2|
                 if env2[:result]
-                  b2.use action_prepare_boot
                   b2.use StartInstance
                 else
                   b2.use MessageAlreadyCreated
                 end
               end
             else
-              b1.use action_prepare_boot
               b1.use Import
-              b1.use action_start
+              b1.use StartInstance
+              b1.use SyncFolders
             end
           end
         end
@@ -96,7 +89,6 @@ module VagrantPlugins
       end
 
       def self.action_ssh
-        # TODO: Check for machine ready state.
         Vagrant::Action::Builder.new.tap do |b|
           b.use ConfigValidate
           b.use Call, IsCreated do |env, b2|
@@ -115,6 +107,7 @@ module VagrantPlugins
         end
       end
 
+
       # The autoload farm
       action_root = Pathname.new(File.expand_path("../action", __FILE__))
       autoload :IsCreated, action_root.join("is_created")
@@ -129,6 +122,7 @@ module VagrantPlugins
       autoload :MessageNotRunning, action_root.join('message_not_running')
       autoload :ForwardPorts, action_root.join('forward_ports')
       autoload :SyncFolders, action_root.join('sync_folders')
+      autoload :WaitForState, action_root.join('wait_for_state')
     end
   end
 end
