@@ -25,11 +25,18 @@ module VagrantPlugins
       def self.action_prepare_boot
         Vagrant::Action::Builder.new.tap do |b|
           b.use Provision
-          # b.use SyncFolders
+          b.use SyncFolders
         end
       end
 
       def self.action_halt
+        Vagrant::Action::Builder.new.tap do |b|
+          b.use Provision
+          b.use SyncFolders
+        end
+      end
+
+      def self.action_halts
         Vagrant::Action::Builder.new.tap do |b|
           b.use ConfigValidate
           b.use Call, IsCreated do |env, b2|
@@ -89,6 +96,7 @@ module VagrantPlugins
       end
 
       def self.action_ssh
+        # TODO: Check for machine ready state.
         Vagrant::Action::Builder.new.tap do |b|
           b.use ConfigValidate
           b.use Call, IsCreated do |env, b2|
@@ -96,7 +104,13 @@ module VagrantPlugins
               b2.use MessageNotCreated
               next
             end
-            b2.use SSHExec
+            b2.use Call, IsStopped do |env1, b3|
+              if env1[:result]
+                b3.use MessageNotRunning
+              else
+                b3.use SSHExec
+              end
+            end
           end
         end
       end
@@ -112,6 +126,7 @@ module VagrantPlugins
       autoload :StopInstance, action_root.join('stop_instance')
       autoload :MessageNotCreated, action_root.join('message_not_created')
       autoload :MessageAlreadyCreated, action_root.join('message_already_created')
+      autoload :MessageNotRunning, action_root.join('message_not_running')
       autoload :ForwardPorts, action_root.join('forward_ports')
       autoload :SyncFolders, action_root.join('sync_folders')
     end

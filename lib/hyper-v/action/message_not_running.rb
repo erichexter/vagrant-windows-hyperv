@@ -12,28 +12,20 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #--------------------------------------------------------------------------
+
+require "log4r"
 module VagrantPlugins
   module HyperV
-    module Putty
-      class Config < Vagrant.plugin("2", :config)
-        attr_accessor :private_key_path
-
-        def errors
-          @errors
+    module Action
+      class MessageNotRunning
+        def initialize(app, env)
+          @app = app
         end
 
-        def validate
-          @errors = []
-          if private_key_path.nil?
-            @errors << "Please configure a putty private key path"
-          end
+        def call(env)
+          env[:ui].info("Machine is not running, Please turn it on.")
+          @app.call(env)
         end
-
-        def valid_config?
-          validate
-          errors.empty?
-        end
-
       end
     end
   end
