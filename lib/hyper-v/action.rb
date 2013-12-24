@@ -25,6 +25,7 @@ module VagrantPlugins
       def self.action_prepare_boot
         Vagrant::Action::Builder.new.tap do |b|
           b.use Provision
+          # b.use SyncFolders
         end
       end
 
@@ -112,6 +113,7 @@ module VagrantPlugins
       autoload :MessageNotCreated, action_root.join('message_not_created')
       autoload :MessageAlreadyCreated, action_root.join('message_already_created')
       autoload :ForwardPorts, action_root.join('forward_ports')
+      autoload :SyncFolders, action_root.join('sync_folders')
     end
   end
 end

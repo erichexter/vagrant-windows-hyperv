@@ -62,11 +62,12 @@ module VagrantPlugins
         # Return what we know. The host is always "127.0.0.1" because
         # VirtualBox VMs are always local. The port we try to discover
         # by reading the forwarded ports.
-        # TODO: Write a method in wmi-provider to read the ssh config and
-        # Update the IP Address
+
+        # FIXME: Try to get the Host IP Through WMI Call.  Currently this is fed 
+        # Internally
         return {
-          :host => "10.18.20.181",
-          :port => 22
+          :host => @machine.config.ssh.host,
+          :port => @machine.config.ssh.guest_port
         }
       end
     end

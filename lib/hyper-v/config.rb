@@ -14,6 +14,7 @@
 #--------------------------------------------------------------------------
 
 require "vagrant"
+require_relative "putty/config"
 module VagrantPlugins
   module HyperV
     class Config < Vagrant.plugin("2", :config)
@@ -22,12 +23,30 @@ module VagrantPlugins
       # @return [Boolean]
       attr_accessor :gui
 
-      def finalize!
+      attr_reader :putty
+      
+      def putty_config(&block)
+        block.call(@putty)
+      end
+
+      def finalize!        
+        # @putty_private_key_path = nil if @putty_private_key_path == UNSET_VALUE
+        @gui = nil if @gui == UNSET_VALUE
       end
 
       def initialize(region_specific=false)
-        @gui = true
+        @gui = UNSET_VALUE
+        @putty = Putty::Config.new
       end
+
+      def validate(machine)
+        errors = _detected_errors
+        unless putty.valid_config?
+          errors << putty.errors.flatten.join(" ")
+        end
+        { "HyperV" => errors }
+      end
+
     end
   end
 end
