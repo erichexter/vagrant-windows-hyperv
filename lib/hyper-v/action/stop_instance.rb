@@ -27,6 +27,7 @@ module VagrantPlugins
                 hyperv_server = env[:hyperv_connection].find_vm_by_id(env[:machine].id)
                 env[:ui].info('Stopping the Machine')
                 hyperv_server.stop
+                @app.call(env)
             end
         end
     end

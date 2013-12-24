@@ -12,20 +12,41 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #--------------------------------------------------------------------------
-
 require "log4r"
+require "timeout"
+require "vagrant/util/subprocess"
+
 module VagrantPlugins
   module HyperV
     module Action
-      class IsStopped
+      class WaitForFirstPing
+
         def initialize(app, env)
-          @app    = app
+          @app  = app
         end
 
         def call(env)
-          env[:result] = env[:machine].state.id == :stopped
+          env[:result] = true
+          # Wait until the Machine's responds for a Ping.
+          # This is to ensure the machine is completely ready
+           ssh_info = env[:machine].ssh_info
+            env[:ui].info("Waiting for machine to respond")
+            command = ["ping", ssh_info[:host]]
+            begin
+              Timeout.timeout(120) do
+                begin
+                  r = Vagrant::Util::Subprocess.execute(*command)
+                  result = r.stdout.match(/Received = \d/).to_s
+                  received_ping = result.split("=").last.to_i
+                end until received_ping > 2
+              end
+              env[:ui].info("Receive first packet from machine")
+            rescue Timeout::Error
+              env[:result] = false # couldn't reach state in time
+            end
           @app.call(env)
         end
+
       end
     end
   end

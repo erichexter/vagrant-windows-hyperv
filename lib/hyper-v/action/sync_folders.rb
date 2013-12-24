@@ -49,9 +49,12 @@ module VagrantPlugins
 
             hostpath  = File.expand_path(data[:hostpath], env[:root_path])
             guestpath = data[:guestpath]
+            env[:ui].info('Starting Sync folders')
             command = ["pscp", "-r", "-i", "#{putty_private_key}", hostpath,
               "#{ssh_info[:username]}@#{ssh_info[:host]}:#{guestpath}"]
             r = Vagrant::Util::Subprocess.execute(*command)
+            # TODO:
+            # Check for error state when command fails
           end
         end
       end

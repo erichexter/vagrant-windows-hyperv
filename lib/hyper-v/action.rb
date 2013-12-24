@@ -32,11 +32,11 @@ module VagrantPlugins
               next
             end
             b2.use action_halt
-            b2.use Call, WaitForState, :disabled, 120 do |env2, b3|
+            b2.use Call, WaitForState, :stopped, 120 do |env2, b3|
               if env2[:result]
                 b3.use action_up
               else
-                env2.info("Machine did not come to reload, Check machine's status")
+                env2[:ui].info("Machine did not reload, Check machine's status")
               end
             end
           end
@@ -57,6 +57,25 @@ module VagrantPlugins
         end
       end
 
+      def self.action_start
+        Vagrant::Action::Builder.new.tap do |b|
+          b.use StartInstance
+          b.use Call, WaitForState, :enabled, 120 do |env1, b1|
+            if env1[:result]
+              b1.use Call, WaitForFirstPing  do |env2, b2|
+                if env2[:result]
+                  b2.use SyncFolders
+                else
+                  env2[:ui].info("Unable to reach the Machine, check network settings")
+                end
+              end
+            else
+              env1[:ui].info("Machine did not start, Please check machine's status")
+            end
+          end
+        end
+      end
+
       def self.action_up
         Vagrant::Action::Builder.new.tap do |b|
           b.use HandleBoxUrl
@@ -66,15 +85,14 @@ module VagrantPlugins
             if env1[:result]
               b1.use Call, IsStopped do |env2, b2|
                 if env2[:result]
-                  b2.use StartInstance
+                  b2.use action_start
                 else
                   b2.use MessageAlreadyCreated
                 end
               end
             else
               b1.use Import
-              b1.use StartInstance
-              b1.use SyncFolders
+              b1.use action_start
             end
           end
         end
@@ -123,6 +141,7 @@ module VagrantPlugins
       autoload :ForwardPorts, action_root.join('forward_ports')
       autoload :SyncFolders, action_root.join('sync_folders')
       autoload :WaitForState, action_root.join('wait_for_state')
+      autoload :WaitForFirstPing, action_root.join('wait_for_first_ping')
     end
   end
 end

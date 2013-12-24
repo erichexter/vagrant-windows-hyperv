@@ -15,91 +15,93 @@
 
 module VagrantPlugins
   module HyperV
-  	module WMIProvider
-  		class Machine
-  		  attr_reader :machine
-  		  MachineState = {
-  		  	'0' => "unknown",
-  		  	'1' => "other",
-  		  	'2' => "enabled",
-  		  	'3' =>  "disabled",
-  		  	'4' => "shutting_down",
-  		  	'5' => "not_applicable",
-  		  	'6' => "enabled_but_offline",
-  		  	'7' => "in_test",
-  		  	'8' => "deferred",
-  		  	'9' => "quiesce",
-  		  	'10' => "starting"
-  		  }
+    module WMIProvider
+      class Machine
+        attr_reader :machine
+        attr_reader :connection
+        MachineState = {
+          '0' => "unknown",
+          '1' => "other",
+          '2' => "enabled",
+          '3' =>  "stopped",
+          '4' => "shutting_down",
+          '5' => "not_applicable",
+          '6' => "enabled_but_offline",
+          '7' => "in_test",
+          '8' => "deferred",
+          '9' => "quiesce",
+          '10' => "starting"
+        }
 
-  		  def initialize(machine)
-  		    @machine = machine
-  		  end
+        def initialize(machine, connection)
+          @machine = machine
+          @connection = connection
+        end
 
-  		  def name
-  		    machine.ElementName
-  		  end
+        def name
+          machine.ElementName
+        end
 
-  		  def state
-  		    MachineState[machine.EnabledState.to_s]
-  		  end
+        def state
+          MachineState[machine.EnabledState.to_s]
+        end
 
-  		  def id
-  		    machine.Name
-  		  end
+        def id
+          machine.Name
+        end
 
-  		  def path
-  		    machine.Path_.Path
-  		  end
+        def path
+          machine.Path_.Path
+        end
 
-  		  def start
-  		    machine.RequestStateChange(2)
-  		  end
+        def start
+          job = Object.new
+          machine.RequestStateChange(2, job, nil)
+        end
 
-  		  def export(options)
-  		    # Make a Query to get Export configurations
-  		    query = "ASSOCIATORS OF {#{path}} WHERE resultClass = Msvm_VirtualSystemExportSettingData"
-  		    config = Services.execute(query)
-  		    config.each do |c|
-  		      # TODO: Check for nil in each of the options and set the default value
-  		      c.CopySnapshotConfiguration = options[:copy_snapshot]
-  		      c.CopyVmStorage = options[:copy_vm_storgae]
-  		      c.CopyVmRuntimeInformation = options[:copy_run_time_info]
-  		      # TODO: Check if a valid directory exists
-  		      c.CreateVmExportSubdirectory = options[:export_sub_dir]
-  		    end
-  		    # Build a XML data for this config Using (GetText_(1))
-  		    export_settings = ''
-  		    config.each do |c|
-  		      export_settings = c.GetText_(1)
-  		    end
-  		    # Export this machine from virtual host
-  		    exportJobRef = Object.new
-  		    Services.virtual_host.ExportSystemDefinition(path, options[:path_to_export], export_settings, exportJobRef)
-  		    get_job_status
-  		  end
+        def stop
+          job = Object.new
+          machine.RequestStateChange(3, job, nil)
+        end
 
-  		  def get_job_status
-  		    # This method is to tell the curret job status when an export or import function is called.
-  		    # ARGV[3] is the Fourth argument passed to ExportSystemDefinition
-  		    status = WIN32OLE::ARGV[3]
-  		    sleep 1
-  		    job = Services.connection.Get(status)
-  		    print "Started #{job.Caption}"
-  		    while (job && job.PercentComplete < 100) do
-  		      print "--%03d%" % job.PercentComplete
-  		      sleep 1
-  		      print "\b" * 6
-  		      job = Services.connection.Get(status)
-  		    end
-  		    puts "\nExpot Complete"
-  		  end
+        def export(options)
+          # Make a Query to get Export configurations
+          query = "ASSOCIATORS OF {#{path}} WHERE resultClass = Msvm_VirtualSystemExportSettingData"
+          config = Services.execute(query)
+          config.each do |c|
+            # TODO: Check for nil in each of the options and set the default value
+            c.CopySnapshotConfiguration = options[:copy_snapshot]
+            c.CopyVmStorage = options[:copy_vm_storgae]
+            c.CopyVmRuntimeInformation = options[:copy_run_time_info]
+            # TODO: Check if a valid directory exists
+            c.CreateVmExportSubdirectory = options[:export_sub_dir]
+          end
+          # Build a XML data for this config Using (GetText_(1))
+          export_settings = ''
+          config.each do |c|
+            export_settings = c.GetText_(1)
+          end
+          # Export this machine from virtual host
+          exportJobRef = Object.new
+          Services.virtual_host.ExportSystemDefinition(path, options[:path_to_export], export_settings, exportJobRef)
+          get_job_status(WIN32OLE::ARGV[3])
+        end
 
-  		  def stop
-          WMILogger.info "Stopping Machine"
-  		    machine.RequestStateChange(3)
-  		  end
-  		end
-  	end
+        def get_job_status(status)
+          # This method is to tell the current job status when an export or import function is called.
+          # ARGV[3] is the Fourth argument passed to ExportSystemDefinition
+          sleep 1
+          job = connection.Get(status)
+          while (job && job.PercentComplete < 100 && job.ErrorCode == 0) do
+            print " -- #{job.ErrorCode} -- Started #{job.Caption} --%02d%" % job.PercentComplete
+            sleep 1
+            print "\r"
+            job = connection.Get(status)
+          end
+          puts "\n #{job.Caption} Complete"
+        end
+
+      end
+    end
   end
 end

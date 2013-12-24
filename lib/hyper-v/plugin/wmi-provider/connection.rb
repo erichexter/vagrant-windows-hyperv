@@ -38,7 +38,7 @@ module VagrantPlugins
           # If this is required in more than one place. find a better place to make it generic.
           machine_id = machine_id.to_s.gsub(/\\/, '\&\&').gsub(/'/, "''")
     	    execute("Select * from Msvm_ComputerSystem where Caption = 'Virtual Machine' AND Name = '#{machine_id}'").each do |m|
-    	      machine = WMIProvider::Machine.new(m)
+    	      machine = WMIProvider::Machine.new(m, connection)
     	    end
     	    machine
     	  end
@@ -50,7 +50,7 @@ module VagrantPlugins
           job = Object.new
           virtual_host.RealizePlannedSystem(planned_vm,nil, job)
           get_job_status(WIN32OLE::ARGV[2])
-          return WMIProvider::Machine.new(vm)
+          return WMIProvider::Machine.new(vm, connection)
         end
 
         def get_job_status(status)

@@ -29,7 +29,7 @@ module VagrantPlugins
           env[:result] = true
           # Wait until the Machine's state is disabled (ie State of Halt)
           unless env[:machine].state.id == @state
-            env[:ui].info("Waiting for machine to stop")
+            env[:ui].info("Waiting for machine to #{@state}")
             begin
               Timeout.timeout(@timeout) do
                 until env[:machine].state.id == @state
