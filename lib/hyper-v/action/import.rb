@@ -31,17 +31,25 @@ module VagrantPlugins
           path.each_child do |f|
             config_path = f.to_s if f.extname.downcase == ".xml"
           end
+
+          path = Pathname.new(box_directory.to_s + '/Virtual Hard Disks')
+          vhdx_path = ""
+          path.each_child do |f|
+            vhdx_path = f.to_s if f.extname.downcase == ".vhdx"
+          end
+
           options = {
-            :xml_path => config_path,
-            :root_folder => box_directory,
-            :need_unique_id => true
+            xml_path:  config_path,
+            root_folder:  box_directory,
+            need_unique_id: true,
+            vhdx_path: vhdx_path
           }
           env[:ui].info "Importing a Hyper-V instance"
           begin
             server = env[:hyperv_connection].import(options)
           # TODO: Handle exception from WMIProvider
           rescue => e
-            # Raise the exception
+            e.inspect
           end
           env[:machine].id = server.id
           @app.call(env)

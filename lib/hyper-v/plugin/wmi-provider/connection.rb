@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #--------------------------------------------------------------------------
+require "vagrant/util/subprocess"
 
 module VagrantPlugins
   module HyperV
@@ -43,14 +44,51 @@ module VagrantPlugins
     	    machine
     	  end
 
+        def find_vm_by_name(name)
+          machine = nil
+          #FIXME:sanitize string to avoid SQL injection
+          # If this is required in more than one place. find a better place to make it generic.
+          name = name.to_s.gsub(/\\/, '\&\&').gsub(/'/, "''")
+          execute("Select * from Msvm_ComputerSystem where Caption = 'Virtual Machine' AND ElementName = '#{name}'").each do |m|
+            machine = WMIProvider::Machine.new(m, connection)
+          end
+          machine
+        end
+
         def import(options)
+          # Define a Virtual Machine.
           virtual_host.ImportSystemDefinition(options[:xml_path], options[:root_folder], options[:need_unique_id], nil, nil)
           planned_vm = WIN32OLE::ARGV[3]
-          vm = connection.Get(planned_vm)
+          machine = connection.Get(planned_vm)
+          # Get a setting object for the machine
+          settings = nil
+          connection.ExecQuery("Select * from Msvm_VirtualSystemSettingData where ElementName = '#{machine.ElementName}'").each do |host|
+            next if !host.InstanceID.include?(machine.Name)
+            settings = host
+          end
+
+          # Set a Unique Name for this VM
+          begin
+            machine_exist = find_vm_by_name(settings.ElementName)
+            settings.ElementName = settings.ElementName + "_1" if machine_exist
+          end until machine_exist.nil?
+          settings.NetworkBootPreferredProtocol = nil
+          # Modify the system
+          s_result = virtual_host.ModifySystemSettings(settings.GetText_(1))
+
+          # Define a System
           job = Object.new
-          virtual_host.RealizePlannedSystem(planned_vm,nil, job)
-          get_job_status(WIN32OLE::ARGV[2])
-          return WMIProvider::Machine.new(vm, connection)
+          comp = Object.new
+          a = virtual_host.DefineSystem(settings.GetText_(1), [], nil, comp, job)
+          comp = WIN32OLE::ARGV[3]
+          machine = connection.Get(comp)
+          # Attach a VHD To Virtual Machine, Using powershell.
+          command = [
+            "powershell", "Add-VMHardDiskDrive", "-VMName", machine.ElementName,
+            "-Path", "'#{options[:vhdx_path]}'"
+          ]
+          r = Vagrant::Util::Subprocess.execute(*command)
+          return WMIProvider::Machine.new(machine, connection)
         end
 
         def get_job_status(status)
