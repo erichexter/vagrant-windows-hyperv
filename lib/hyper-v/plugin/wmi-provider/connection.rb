@@ -12,8 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #--------------------------------------------------------------------------
-require "vagrant/util/subprocess"
-
 module VagrantPlugins
   module HyperV
   	module WMIProvider
@@ -60,6 +58,7 @@ module VagrantPlugins
           virtual_host.ImportSystemDefinition(options[:xml_path], options[:root_folder], options[:need_unique_id], nil, nil)
           planned_vm = WIN32OLE::ARGV[3]
           machine = connection.Get(planned_vm)
+
           # Get a setting object for the machine
           settings = nil
           connection.ExecQuery("Select * from Msvm_VirtualSystemSettingData where ElementName = '#{machine.ElementName}'").each do |host|
@@ -84,10 +83,19 @@ module VagrantPlugins
           machine = connection.Get(comp)
           # Attach a VHD To Virtual Machine, Using powershell.
           command = [
-            "powershell", "Add-VMHardDiskDrive", "-VMName", machine.ElementName,
+            "powershell", "Add-VMHardDiskDrive", "-VMName", "'#{machine.ElementName}'",
             "-Path", "'#{options[:vhdx_path]}'"
           ]
-          r = Vagrant::Util::Subprocess.execute(*command)
+          Vagrant::Util::Subprocess.execute(*command)
+
+          # Add a Network Switch
+          # TODO: Read the exact switch name from config
+          switch_name = "External Switch"
+          command = [
+            "powershell", "Add-VMNetworkAdapter", "-VMName", machine.ElementName,
+            "-SwitchName", "'#{switch_name}'"
+          ]
+          Vagrant::Util::Subprocess.execute(*command)
           return WMIProvider::Machine.new(machine, connection)
         end
 

@@ -16,6 +16,8 @@
 require "win32ole"
 require "pathname"
 require "logger"
+require "vagrant/util/subprocess"
+
 module VagrantPlugins
   module HyperV
   	module WMIProvider

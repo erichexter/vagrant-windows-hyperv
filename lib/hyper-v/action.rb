@@ -60,17 +60,11 @@ module VagrantPlugins
       def self.action_start
         Vagrant::Action::Builder.new.tap do |b|
           b.use StartInstance
-          b.use Call, WaitForState, :enabled, 120 do |env1, b1|
-            if env1[:result]
-              b1.use Call, WaitForFirstPing  do |env2, b2|
-                if env2[:result]
-                  b2.use SyncFolders
-                else
-                  env2[:ui].info("Unable to reach the Machine, check network settings")
-                end
-              end
+          b.use Call, WaitForFirstPing  do |env2, b2|
+            if env2[:result]
+              b2.use SyncFolders
             else
-              env1[:ui].info("Machine did not start, Please check machine's status")
+              env2[:ui].info("Unable to reach the Machine, check network settings")
             end
           end
         end

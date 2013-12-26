@@ -14,6 +14,7 @@
 #--------------------------------------------------------------------------
 require "log4r"
 require "timeout"
+require "debugger"
 
 module VagrantPlugins
   module HyperV

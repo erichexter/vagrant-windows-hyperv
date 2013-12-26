@@ -60,8 +60,8 @@ module VagrantPlugins
         end
 
         def stop
-          job = Object.new
-          machine.RequestStateChange(3, job, nil)
+          command = ["powershell", "Stop-VM", "-Name", machine.ElementName]
+          r = Vagrant::Util::Subprocess.execute(*command)
         end
 
         def export(options)

@@ -40,7 +40,6 @@ module VagrantPlugins
                   received_ping = result.split("=").last.to_i
                 end until received_ping > 2
               end
-              env[:ui].info("Receive first packet from machine")
             rescue Timeout::Error
               env[:result] = false # couldn't reach state in time
             end
