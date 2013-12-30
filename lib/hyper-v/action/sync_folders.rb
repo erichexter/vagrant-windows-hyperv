@@ -13,11 +13,8 @@
 # limitations under the License.
 #--------------------------------------------------------------------------
 require "log4r"
-
 require "vagrant/util/subprocess"
-
 require "vagrant/util/scoped_hash_override"
-
 require "vagrant/util/which"
 
 module VagrantPlugins
@@ -33,9 +30,7 @@ module VagrantPlugins
 
         def call(env)
           @app.call(env)
-
           ssh_info = env[:machine].ssh_info
-
           putty_private_key = env[:machine].provider_config.putty.private_key_path
           unless Vagrant::Util::Which.which('pscp')
             env[:ui].warn("PSCP Not found in host")

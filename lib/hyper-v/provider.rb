@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #--------------------------------------------------------------------------
-
 require "log4r"
 require "vagrant"
 
@@ -55,20 +54,11 @@ module VagrantPlugins
       end
 
       def ssh_info
-        # If the VM is not created then we cannot possibly SSH into it, so
-        # we return nil.
-        return nil if state.id == :not_created
-
-        # Return what we know. The host is always "127.0.0.1" because
-        # VirtualBox VMs are always local. The port we try to discover
-        # by reading the forwarded ports.
-
-        # FIXME: Try to get the Host IP Through WMI Call.  Currently this is fed 
-        # Internally
-        return {
-          :host => @machine.config.ssh.host,
-          :port => @machine.config.ssh.guest_port
-        }
+        # Run a custom action called "read_ssh_info" which does what it
+        # says and puts the resulting SSH info into the `:machine_ssh_info`
+        # key in the environment.
+        env = @machine.action("read_guest_ip")
+        env[:machine_ssh_info].merge!(:port => @machine.config.ssh.guest_port)
       end
     end
   end

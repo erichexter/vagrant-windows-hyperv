@@ -64,6 +64,15 @@ module VagrantPlugins
           r = Vagrant::Util::Subprocess.execute(*command)
         end
 
+        def ip_address
+          network_apaters = adapters = connection.ExecQuery("Select * from Msvm_GuestNetworkAdapterConfiguration")
+          for adapter in network_apaters
+            if adapter.InstanceID.split('\\').include?(self.id)
+              return adapter.IPAddresses.first
+            end
+          end
+        end
+
         def export(options)
           # Make a Query to get Export configurations
           query = "ASSOCIATORS OF {#{path}} WHERE resultClass = Msvm_VirtualSystemExportSettingData"

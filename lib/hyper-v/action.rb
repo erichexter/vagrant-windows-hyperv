@@ -60,13 +60,7 @@ module VagrantPlugins
       def self.action_start
         Vagrant::Action::Builder.new.tap do |b|
           b.use StartInstance
-          b.use Call, WaitForFirstPing  do |env2, b2|
-            if env2[:result]
-              b2.use SyncFolders
-            else
-              env2[:ui].info("Unable to reach the Machine, check network settings")
-            end
-          end
+          b.use SyncFolders
         end
       end
 
@@ -119,6 +113,14 @@ module VagrantPlugins
         end
       end
 
+      def self.action_read_guest_ip
+        Vagrant::Action::Builder.new.tap do |b|
+          b.use ConfigValidate
+          b.use ConnectHyperv
+          b.use ReadGuestIP
+        end
+      end
+
 
       # The autoload farm
       action_root = Pathname.new(File.expand_path("../action", __FILE__))
@@ -135,7 +137,7 @@ module VagrantPlugins
       autoload :ForwardPorts, action_root.join('forward_ports')
       autoload :SyncFolders, action_root.join('sync_folders')
       autoload :WaitForState, action_root.join('wait_for_state')
-      autoload :WaitForFirstPing, action_root.join('wait_for_first_ping')
+      autoload :ReadGuestIP, action_root.join('read_guest_ip')
     end
   end
 end
