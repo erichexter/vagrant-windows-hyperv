@@ -58,7 +58,9 @@ module VagrantPlugins
         # says and puts the resulting SSH info into the `:machine_ssh_info`
         # key in the environment.
         env = @machine.action("read_guest_ip")
-        env[:machine_ssh_info].merge!(:port => @machine.config.ssh.guest_port)
+        if env[:machine_ssh_info]
+          env[:machine_ssh_info].merge!(:port => @machine.config.ssh.guest_port)
+        end
       end
     end
   end

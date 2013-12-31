@@ -31,6 +31,12 @@ module VagrantPlugins
         def call(env)
           @app.call(env)
           ssh_info = env[:machine].ssh_info
+
+          if ssh_info.nil?
+            env[:ui].info('SSH Info not available, Aborting Sync folder')
+            return
+          end
+
           putty_private_key = env[:machine].provider_config.putty.private_key_path
           unless Vagrant::Util::Which.which('pscp')
             env[:ui].warn("PSCP Not found in host")
@@ -46,8 +52,12 @@ module VagrantPlugins
             guestpath = data[:guestpath]
             env[:ui].info('Starting Sync folders')
             command = ["pscp", "-r", "-i", "#{putty_private_key}", hostpath,
-              "#{ssh_info[:username]}@#{ssh_info[:host]}:#{guestpath}"]
-            r = Vagrant::Util::Subprocess.execute(*command)
+              "#{ssh_info[:username]}@#{ssh_info[:host]}:#{guestpath}", {timeout: 10, notify: ['stdout']}]
+            begin
+              r = Vagrant::Util::Subprocess.execute(*command)
+            rescue Vagrant::Util::Subprocess::TimeoutExceeded
+              env[:ui].info('Sync Process timed out')
+            end
             # TODO:
             # Check for error state when command fails
           end

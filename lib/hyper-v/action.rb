@@ -134,7 +134,6 @@ module VagrantPlugins
       autoload :MessageNotCreated, action_root.join('message_not_created')
       autoload :MessageAlreadyCreated, action_root.join('message_already_created')
       autoload :MessageNotRunning, action_root.join('message_not_running')
-      autoload :ForwardPorts, action_root.join('forward_ports')
       autoload :SyncFolders, action_root.join('sync_folders')
       autoload :WaitForState, action_root.join('wait_for_state')
       autoload :ReadGuestIP, action_root.join('read_guest_ip')

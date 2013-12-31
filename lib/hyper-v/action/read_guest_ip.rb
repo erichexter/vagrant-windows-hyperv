@@ -50,7 +50,7 @@ module VagrantPlugins
             Timeout.timeout(120) do
             begin
               host_ip = hyperv_machine.ip_address
-              sleep 2 if host_ip.nil?
+              sleep 5 if host_ip.nil?
               end while host_ip.nil?
             end
           rescue Timeout::Error
