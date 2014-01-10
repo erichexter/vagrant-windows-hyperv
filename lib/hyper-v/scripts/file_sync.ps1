@@ -18,10 +18,9 @@ function Get-Remote-Session() {
 
 function Get-remote-file-hash($source_path, $delimiter) {
     $session = Get-Remote-Session
-    Write-Host "Call remote command"
     Invoke-Command -Session $session -ScriptBlock ${function:Get-file-hash} -ArgumentList $source_path, $delimiter
     # Always remove the connection after Use
-    Remove-PSSession -ComputerName 10.18.20.62 -Id $session.Id
+    Remove-PSSession -Id $session.Id
 }
 
 function Sync-Remote-Machine($remove_files, $copy_files, $source_root_path, $destination_root_path) {
@@ -51,6 +50,7 @@ function Get-Empty-folders-From-Source($source_root_path) {
 $delimiter = " || "
 $source_root_path = "E:\\Test_Sync"
 $destination_root_path = "C:\\Users\\Vagrant\\Desktop\\Test_Sync"
+$guest_ip = "10.18.20.62"
 
 $source_files = Get-file-hash $source_root_path $delimiter
 $destination_files = Get-remote-file-hash $destination_root_path $delimiter
@@ -74,4 +74,5 @@ $empty_source_folders = @()
 $directories = Get-Empty-folders-From-Source $source_root_path
 $session = Get-Remote-Session
 $result = Invoke-Command -Session $session -ScriptBlock ${function:Create-Remote-Folders} -ArgumentList $empty_source_folders, $destination_root_path
-Remove-PSSession -ComputerName 10.18.20.62 -Id $session.Id
+# Always remove the connection after Use
+Remove-PSSession -Id $session.Id
