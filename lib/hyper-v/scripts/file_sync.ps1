@@ -8,25 +8,22 @@ function Get-file-hash($source_path, $delimiter) {
     $source_files
 }
 
-function Get-Remote-Session() {
-    $username = "vagrant"
-    $password = "happy"
+function Get-Remote-Session($guest_ip, $username, $password) {
     $secstr = convertto-securestring -AsPlainText -Force -String $password
     $cred = new-object -typename System.Management.Automation.PSCredential -argumentlist $username, $secstr
-    New-PSSession -ComputerName 10.18.20.62 -Credential $cred
+    New-PSSession -ComputerName $guest_ip -Credential $cred
 }
 
-function Get-remote-file-hash($source_path, $delimiter) {
-    $session = Get-Remote-Session
+function Get-remote-file-hash($source_path, $delimiter, $session) {
     Invoke-Command -Session $session -ScriptBlock ${function:Get-file-hash} -ArgumentList $source_path, $delimiter
-    # Always remove the connection after Use
-    Remove-PSSession -Id $session.Id
 }
 
 function Sync-Remote-Machine($remove_files, $copy_files, $source_root_path, $destination_root_path) {
     ForEach ($item in $copy_files) {
       $from = $source_root_path + $item
       $to = $destination_root_path + $item
+      # Copy VM can also take a VM object
+      # Copy-VMFile -VM $vm
       Copy-VMFile "Super-Win_orig" -SourcePath $from -DestinationPath $to -CreateFullPath -FileSource Host -Force
     }
 }
@@ -51,9 +48,12 @@ $delimiter = " || "
 $source_root_path = "E:\\Test_Sync"
 $destination_root_path = "C:\\Users\\Vagrant\\Desktop\\Test_Sync"
 $guest_ip = "10.18.20.62"
+$username = "vagrant"
+$password = "happy"
+$session = Get-Remote-Session $guest_ip $username $password
 
 $source_files = Get-file-hash $source_root_path $delimiter
-$destination_files = Get-remote-file-hash $destination_root_path $delimiter
+$destination_files = Get-remote-file-hash $destination_root_path $delimiter $session
 
 # Compare source and destination files
 $remove_files = @()
@@ -72,7 +72,7 @@ Sync-Remote-Machine $remove_files $copy_files $source_root_path $destination_roo
 # Create any empty folders which missed to sync to remote machine
 $empty_source_folders = @()
 $directories = Get-Empty-folders-From-Source $source_root_path
-$session = Get-Remote-Session
+
 $result = Invoke-Command -Session $session -ScriptBlock ${function:Create-Remote-Folders} -ArgumentList $empty_source_folders, $destination_root_path
 # Always remove the connection after Use
 Remove-PSSession -Id $session.Id
