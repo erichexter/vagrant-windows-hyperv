@@ -39,18 +39,17 @@ module VagrantPlugins
           end
 
           options = {
-            xml_path:  config_path,
-            root_folder:  box_directory,
-            need_unique_id: true,
-            vhdx_path: vhdx_path
+            vm_xml_config:  config_path.gsub("/", "\\"),
+            vhdx_path: vhdx_path.gsub("/", "\\")
           }
+
           env[:ui].info "Importing a Hyper-V instance"
-          begin
-            server = env[:hyperv_connection].import(options)
+          # begin
+            server = env[:machine].provider.driver.import(options)
           # TODO: Handle exception from WMIProvider
-          rescue => e
-            e.inspect
-          end
+          # rescue => e
+          #   e.inspect
+          # end
           env[:machine].id = server.id
           @app.call(env)
         end

@@ -62,6 +62,10 @@ module VagrantPlugins
           env[:machine_ssh_info].merge!(:port => @machine.config.ssh.guest_port)
         end
       end
+
+      def driver
+        @driver ||= Driver::Base.new()
+      end
     end
   end
 end

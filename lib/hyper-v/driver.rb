@@ -12,20 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #--------------------------------------------------------------------------
-require "pathname"
-require "hyper-v/plugin/wmi-provider"
-require "hyper-v/plugin"
+
+require "debugger"
 module VagrantPlugins
   module HyperV
-    lib_path = Pathname.new(File.expand_path("../hyper-v", __FILE__))
-    autoload :Action, lib_path.join("action")
-    autoload :Driver, lib_path.join("driver")
-
-    # This returns the path to the source of this plugin.
-    #
-    # @return [Pathname]
-    def self.source_root
-      @source_root ||= Pathname.new(File.expand_path("../../", __FILE__))
+    module Driver
+      lib_path = Pathname.new(File.expand_path("../driver", __FILE__))
+      autoload :Base, lib_path.join("base")
     end
   end
 end

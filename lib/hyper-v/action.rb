@@ -68,7 +68,6 @@ module VagrantPlugins
         Vagrant::Action::Builder.new.tap do |b|
           b.use HandleBoxUrl
           b.use ConfigValidate
-          b.use ConnectHyperv
           b.use Call, IsCreated do |env1, b1|
             if env1[:result]
               b1.use Call, IsStopped do |env2, b2|
