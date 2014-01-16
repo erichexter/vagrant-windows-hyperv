@@ -97,7 +97,7 @@ $controllers = Select-Xml -xml $vmconfig -xpath "//*[starts-with(name(.),'contro
 
 foreach ($controller in $controllers) {
   $node = $controller.Node
-  #Check for SCSI
+  # Check for SCSI
   if ($node.ParentNode.ChannelInstanceGuid) {
      $ControllerType = "SCSI"
   }
@@ -125,3 +125,11 @@ foreach ($controller in $controllers) {
       }
   }
 }
+
+$vm_id = (Get-VM $vm_name).id.guid
+Write-Host "===Begin-Output==="
+Write-Host "{
+  'name' : $vm_name,
+  'id' : $vm_id
+}"
+Write-Host "===End-Output==="

@@ -28,8 +28,13 @@ module VagrantPlugins
         end
 
         def import(options)
-          r = execute_powershell("import_vm.ps1", options)
-          puts r.stderr
+          r = execute_powershell("import_vm.ps1", options) do |type, data|
+            output = ""
+            if type == :stdout
+              output << data
+            end
+          end
+
         end
 
         def check_power_shell
@@ -39,10 +44,9 @@ module VagrantPlugins
         end
 
         protected
-        def execute_powershell(path, options)
+        def execute_powershell(path, options, &block)
           lib_path = Pathname.new(File.expand_path("../../scripts", __FILE__))
           path = lib_path.join(path).to_s.gsub("/", "\\")
-          debugger
           options = options || {}
           ps_options = []
           options.each do |key, value|
@@ -50,9 +54,8 @@ module VagrantPlugins
             ps_options << "'#{value}'"
           end
           command = ["powershell", "-NoProfile", "-ExecutionPolicy",
-              "Bypass", path, ps_options].flatten
-          debugger
-          Vagrant::Util::Subprocess.execute(*command)
+              "Bypass", path, ps_options, {notify: [:stdout, :stderr]}].flatten
+          Vagrant::Util::Subprocess.execute(*command, &block)
         end
       end
     end
