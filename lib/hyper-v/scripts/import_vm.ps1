@@ -129,7 +129,7 @@ foreach ($controller in $controllers) {
 $vm_id = (Get-VM $vm_name).id.guid
 Write-Host "===Begin-Output==="
 Write-Host "{
-  'name' : $vm_name,
-  'id' : $vm_id
+  \'name\' : \'$vm_name\',
+  \'id\' : \'$vm_id\'
 }"
 Write-Host "===End-Output==="

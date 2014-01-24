@@ -28,28 +28,21 @@ module VagrantPlugins
 
         def call(env)
           env[:ui].info("Obtaining Machine's network Info.")
-          env[:machine_ssh_info] = read_host_ip(env[:hyperv_connection], env[:machine])
+          env[:machine_ssh_info] = read_host_ip(env)
           @app.call(env)
         end
 
-        def read_host_ip(connection, machine)
-          return nil if machine.id.nil?
-
-          # Find the machine
-          hyperv_machine = connection.find_vm_by_id(machine.id)
-          if hyperv_machine.nil?
-            # The machine can't be found
-            @logger.info("Machine couldn't be found, assuming it got destroyed.")
-            machine.id = nil
-            return nil
-          end
+        def read_host_ip(env)
+          return nil if env[:machine].id.nil?
           # Get Network details from WMI Provider
           # Wait for 120 sec By then the machine should be ready
           host_ip = nil
           begin
             Timeout.timeout(120) do
             begin
-              host_ip = hyperv_machine.ip_address
+              options = { vm_id: env[:machine].id }
+              network_info  = env[:machine].provider.driver.execute('get_network_config.ps1', options)
+              host_ip = network_info["ip"]
               sleep 5 if host_ip.nil?
               end while host_ip.nil?
             end

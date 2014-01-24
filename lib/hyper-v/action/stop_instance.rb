@@ -13,7 +13,6 @@
 # limitations under the License.
 #--------------------------------------------------------------------------
 
-require "debugger"
 require "log4r"
 module VagrantPlugins
   module HyperV
@@ -26,6 +25,8 @@ module VagrantPlugins
             def call(env)
                 hyperv_server = env[:hyperv_connection].find_vm_by_id(env[:machine].id)
                 env[:ui].info('Stopping the Machine')
+                options = { vm_id: env[:machine].id }
+                response = env[:machine].provider.driver.execute('stop_vm.ps1', options)
                 hyperv_server.stop
                 @app.call(env)
             end

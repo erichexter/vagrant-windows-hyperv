@@ -13,7 +13,6 @@
 # limitations under the License.
 #--------------------------------------------------------------------------
 
-require "debugger"
 require "log4r"
 module VagrantPlugins
   module HyperV
@@ -44,13 +43,13 @@ module VagrantPlugins
           }
 
           env[:ui].info "Importing a Hyper-V instance"
-          # begin
-            server = env[:machine].provider.driver.import(options)
-          # TODO: Handle exception from WMIProvider
-          # rescue => e
-          #   e.inspect
-          # end
-          env[:machine].id = server.id
+          begin
+            server = env[:machine].provider.driver.execute('import_vm.ps1', options)
+            # TODO: Handle exception from WMIProvider
+          rescue => e
+            e.inspect
+          end
+          env[:machine].id = server["id"]
           @app.call(env)
         end
       end

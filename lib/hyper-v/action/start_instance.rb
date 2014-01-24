@@ -23,9 +23,9 @@ module VagrantPlugins
             end
 
             def call(env)
-                hyperv_server = env[:hyperv_connection].find_vm_by_id(env[:machine].id)
                 env[:ui].info('Starting the Machine')
-                hyperv_server.start
+                options = { vm_id: env[:machine].id }
+                response = env[:machine].provider.driver.execute('start_vm.ps1', options)
                 @app.call(env)
             end
         end

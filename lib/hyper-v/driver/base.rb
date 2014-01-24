@@ -13,6 +13,7 @@
 # limitations under the License.
 #--------------------------------------------------------------------------
 
+require "json"
 require "vagrant/util/which"
 require "vagrant/util/subprocess"
 
@@ -25,16 +26,52 @@ module VagrantPlugins
         def initialize(id=nil)
           @vmid = id
           check_power_shell
+          @output = nil
         end
 
-        def import(options)
-          r = execute_powershell("import_vm.ps1", options) do |type, data|
-            output = ""
-            if type == :stdout
-              output << data
-            end
+        def execute(command, options)
+          r = execute_powershell(command, options) do |type, data|
+            process_output(type, data)
           end
+          if success? and !@output.empty?
+            JSON.parse(json_output)
+          else
+            # raise VagrantPlugins::HyperV::Subprocess::Error => @error_messages
+          end
+        end
 
+        protected
+
+        def json_output
+          json_begin = false
+          json_resp = []
+          @output.split("\n").each do |line|
+            json_begin = false if line.include?("===End-Output===")
+            json_resp << line.gsub("\\'","\"") if json_begin
+            json_begin = true if line.include?("===Begin-Output===")
+          end
+          json_resp.join()
+        end
+
+        def success?
+          @error_messages.empty?
+        end
+
+        def process_output(type, data)
+          if type == :stdout
+            @output = data.gsub("\r\n", "\n")
+          end
+          if type == :stdin
+            # $stdin.gets.chomp || ""
+          end
+          if type == :stderr
+            @error_messages = data
+          end
+        end
+
+        def clear_output_buffer
+          @output = ""
+          @error_messages = ""
         end
 
         def check_power_shell
@@ -43,7 +80,6 @@ module VagrantPlugins
           end
         end
 
-        protected
         def execute_powershell(path, options, &block)
           lib_path = Pathname.new(File.expand_path("../../scripts", __FILE__))
           path = lib_path.join(path).to_s.gsub("/", "\\")
@@ -53,8 +89,9 @@ module VagrantPlugins
             ps_options << "-#{key}"
             ps_options << "'#{value}'"
           end
+          clear_output_buffer
           command = ["powershell", "-NoProfile", "-ExecutionPolicy",
-              "Bypass", path, ps_options, {notify: [:stdout, :stderr]}].flatten
+              "Bypass", path, ps_options, {notify: [:stdout, :stderr, :stdin]}].flatten
           Vagrant::Util::Subprocess.execute(*command, &block)
         end
       end
