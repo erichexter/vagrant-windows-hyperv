@@ -14,14 +14,12 @@
 #--------------------------------------------------------------------------
 require "log4r"
 require "vagrant/util/subprocess"
-require "vagrant/util/scoped_hash_override"
 require "vagrant/util/which"
 
 module VagrantPlugins
   module HyperV
     module Action
       class SyncFolders
-        include Vagrant::Util::ScopedHashOverride
 
         def initialize(app, env)
           @app    = app
@@ -43,10 +41,9 @@ module VagrantPlugins
             return
           end
           env[:machine].config.vm.synced_folders.each do |id, data|
-            data = scoped_hash_override(data, :aws)
 
             # Ignore disabled shared folders
-            next if data[:disabled]
+            next if data[:disabled] || data[:smb]
 
             hostpath  = File.expand_path(data[:hostpath], env[:root_path])
             guestpath = data[:guestpath]
