@@ -34,7 +34,8 @@ module VagrantPlugins
             process_output(type, data)
           end
           if success? and !@output.empty?
-            JSON.parse(json_output)
+            data = json_output
+            JSON.parse(data.join) unless data.empty?
           else
             # raise VagrantPlugins::HyperV::Subprocess::Error => @error_messages
           end
@@ -50,7 +51,7 @@ module VagrantPlugins
             json_resp << line.gsub("\\'","\"") if json_begin
             json_begin = true if line.include?("===Begin-Output===")
           end
-          json_resp.join()
+          json_resp
         end
 
         def success?
