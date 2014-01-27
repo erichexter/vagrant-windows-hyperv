@@ -60,6 +60,7 @@ module VagrantPlugins
       def self.action_start
         Vagrant::Action::Builder.new.tap do |b|
           b.use StartInstance
+          b.use ShareFolders
           b.use SyncFolders
         end
       end
@@ -136,6 +137,7 @@ module VagrantPlugins
       autoload :SyncFolders, action_root.join('sync_folders')
       autoload :WaitForState, action_root.join('wait_for_state')
       autoload :ReadGuestIP, action_root.join('read_guest_ip')
+      autoload :ShareFolders, action_root.join('share_folders')
     end
   end
 end
