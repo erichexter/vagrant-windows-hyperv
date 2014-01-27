@@ -44,7 +44,7 @@ module VagrantPlugins
               network_info  = env[:machine].provider.driver.execute('get_network_config.ps1', options)
               host_ip = network_info["ip"]
               sleep 5 if host_ip.nil?
-              end while host_ip.nil?
+              end while host_ip.empty?
             end
           rescue Timeout::Error
             @logger.info("Cannot find the IP address of the virtual machine")
