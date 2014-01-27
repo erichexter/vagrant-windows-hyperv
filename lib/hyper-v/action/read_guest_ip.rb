@@ -27,7 +27,6 @@ module VagrantPlugins
         end
 
         def call(env)
-          env[:ui].info("Obtaining Machine's network Info.")
           env[:machine_ssh_info] = read_host_ip(env)
           @app.call(env)
         end
