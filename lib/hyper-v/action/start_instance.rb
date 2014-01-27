@@ -13,22 +13,21 @@
 # limitations under the License.
 #--------------------------------------------------------------------------
 
-require "log4r"
 module VagrantPlugins
   module HyperV
     module Action
-        class StartInstance
-            def initialize(app, env)
-              @app    = app
-            end
-
-            def call(env)
-                env[:ui].info('Starting the Machine')
-                options = { vm_id: env[:machine].id }
-                response = env[:machine].provider.driver.execute('start_vm.ps1', options)
-                @app.call(env)
-            end
+      class StartInstance
+        def initialize(app, env)
+          @app = app
         end
+
+        def call(env)
+          env[:ui].info('Starting the Machine')
+          options = { vm_id: env[:machine].id }
+          response = env[:machine].provider.driver.execute('start_vm.ps1', options)
+          @app.call(env)
+        end
+      end
     end
   end
 end
