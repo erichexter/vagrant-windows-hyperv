@@ -25,7 +25,7 @@ module VagrantPlugins
 
         def call(env)
           @env = env
-          env[:ui].info('Setting up Folders Share')
+          env[:ui].info('Setting up Folders Share, This process may take few minutes.')
           smb_shared_folders
           prepare_smb_share
           mount_shared_folders
@@ -63,7 +63,7 @@ module VagrantPlugins
                         :guest_ip => ssh_info[:host],
                         :username => ssh_info[:username],
                         :password => "happy" }
-            response = @env[:machine].provider.driver.execute('mount_share.ps1', options)
+            @env[:machine].provider.driver.execute('mount_share.ps1', options)
           end
         end
       end
