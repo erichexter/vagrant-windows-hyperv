@@ -16,7 +16,20 @@ function Mount-File($share_name, $guest_path, $host_path) {
   $guest_path = $guest_path.replace("/", "\")
   cmd /c  mklink /d $guest_path  $host_path
 }
-$session = Get-Remote-Session $guest_ip $username $password
+
+$session = ""
+$count = 0
+do {
+    $count++
+    try {
+        $session = Get-Remote-Session $guest_ip $username $password
+    }
+    catch {
+        Start-Sleep -s 10
+        $session = ""
+    }
+}
+while (!$session -and $count -lt 20)
 
 Set-Item wsman:\localhost\client\trustedhosts *
 $host_ip = '10.18.20.77'
