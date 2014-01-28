@@ -27,40 +27,45 @@ module VagrantPlugins
           @env = env
           env[:ui].info('Setting up Folders Share')
           smb_shared_folders
-          # prepare_smb_share
-          # mount_shared_folders
+          prepare_smb_share
+          mount_shared_folders
           @app.call(env)
         end
 
         def smb_shared_folders
-          {}.tap do |result|
-            @env[:machine].config.vm.synced_folders.each do |id, data|
-              # Ignore disabled shared folders
-              next if data[:disabled]
+          @smb_shared_folders = {}
+          @env[:machine].config.vm.synced_folders.each do |id, data|
+            # Ignore disabled shared folders
+            next if data[:disabled]
 
-              # Collect all SMB shares
-              next unless data[:smb]
-
-              # This to prevent overwriting the actual shared folders data
-              result[id] = data.dup
-            end
+            # Collect all SMB shares
+            next unless data[:smb]
+            # This to prevent overwriting the actual shared folders data
+            @smb_shared_folders[id] = data.dup
           end
         end
 
         def prepare_smb_share
-          smb_shared_folders.each do |id, data|
+          @smb_shared_folders.each do |id, data|
             hostpath  = File.expand_path(data[:hostpath], @env[:root_path])
-            hostpath = hostpath.gsub("/", "\\")
             options = {:path => hostpath, :name => data[:share_name]}
-            response = @env[:machine].provider.driver.execute('set_smb_share.ps1', options)
+            command = ["net", "share", "#{data[:share_name]}=#{hostpath}"]
+            r = Vagrant::Util::Subprocess.execute(*command)
           end
         end
 
         # Use different mount commands when the guest is Windows or Linux
         def mount_shared_folders
-          @env[:machine].communicate.sudo("ls")
+          ssh_info = @env[:machine].ssh_info
+          @smb_shared_folders.each do |id, data|
+            options = { :share_name => data[:share_name],
+                        :guest_path => data[:guestpath],
+                        :guest_ip => ssh_info[:host],
+                        :username => ssh_info[:username],
+                        :password => "happy" }
+            response = @env[:machine].provider.driver.execute('mount_share.ps1', options)
+          end
         end
-
       end
     end
   end
