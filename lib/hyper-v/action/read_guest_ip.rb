@@ -42,7 +42,7 @@ module VagrantPlugins
               options = { vm_id: env[:machine].id }
               network_info  = env[:machine].provider.driver.execute('get_network_config.ps1', options)
               host_ip = network_info["ip"]
-              sleep 5 if host_ip.nil?
+              sleep 10 if host_ip.empty?
               end while host_ip.empty?
             end
           rescue Timeout::Error
