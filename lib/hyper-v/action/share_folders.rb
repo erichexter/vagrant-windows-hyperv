@@ -28,7 +28,9 @@ module VagrantPlugins
           env[:ui].info('Setting up Folders Share, This process may take few minutes.')
           smb_shared_folders
           prepare_smb_share
-          mount_shared_folders
+          if env[:machine].config.vm.guest == :windows
+            mount_shared_folders
+          end
           @app.call(env)
         end
 
@@ -56,6 +58,9 @@ module VagrantPlugins
 
         # Use different mount commands when the guest is Windows or Linux
         def mount_shared_folders
+          # Make the host trust the guest
+          command = ["powershell", "Set-Item",  "wsman:\localhost\client\trustedhosts",  "*"]
+          r = Vagrant::Util::Subprocess.execute(*command)
           ssh_info = @env[:machine].ssh_info
           @smb_shared_folders.each do |id, data|
             options = { :share_name => data[:share_name],
@@ -63,6 +68,7 @@ module VagrantPlugins
                         :guest_ip => ssh_info[:host],
                         :username => ssh_info[:username],
                         :password => "happy" }
+            env[:ui].info("Linking #{data[:share_name]} to Guest at #{data[:guestpath]} ...")
             @env[:machine].provider.driver.execute('mount_share.ps1', options)
           end
         end

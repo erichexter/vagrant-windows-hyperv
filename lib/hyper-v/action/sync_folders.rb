@@ -27,6 +27,8 @@ module VagrantPlugins
         end
 
         def call(env)
+          return if env[:machine].config.vm.guest != :linux
+
           @app.call(env)
           ssh_info = env[:machine].ssh_info
 

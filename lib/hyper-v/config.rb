@@ -24,12 +24,12 @@ module VagrantPlugins
       attr_accessor :gui
 
       attr_reader :putty
-      
+
       def putty_config(&block)
         block.call(@putty)
       end
 
-      def finalize!        
+      def finalize!
         # @putty_private_key_path = nil if @putty_private_key_path == UNSET_VALUE
         @gui = nil if @gui == UNSET_VALUE
       end

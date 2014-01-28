@@ -13,6 +13,8 @@ function Get-Remote-Session($guest_ip, $username, $password) {
 }
 
 function Mount-File($share_name, $guest_path, $host_path) {
+  #TODO: Check for folder exist.
+  # Use net use and prompt for password
   $guest_path = $guest_path.replace("/", "\")
   cmd /c  mklink /d $guest_path  $host_path
 }
@@ -31,7 +33,6 @@ do {
 }
 while (!$session -and $count -lt 20)
 
-Set-Item wsman:\localhost\client\trustedhosts *
 $host_ip = '10.18.20.77'
 $host_path = "\\$host_ip\$share_name"
 Invoke-Command -Session $session -ScriptBlock ${function:Mount-File} -ArgumentList $share_name, $guest_path, $host_path

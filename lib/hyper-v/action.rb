@@ -60,7 +60,7 @@ module VagrantPlugins
         Vagrant::Action::Builder.new.tap do |b|
           b.use StartInstance
           b.use ShareFolders
-          #b.use SyncFolders
+          b.use SyncFolders
         end
       end
 
