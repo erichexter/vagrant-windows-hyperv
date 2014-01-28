@@ -25,7 +25,6 @@ module VagrantPlugins
       def self.action_reload
         Vagrant::Action::Builder.new.tap do |b|
           b.use ConfigValidate
-          b.use ConnectHyperv
           b.use Call, IsCreated do |env, b2|
             if !env[:result]
               b2.use MessageNotCreated
@@ -61,7 +60,7 @@ module VagrantPlugins
         Vagrant::Action::Builder.new.tap do |b|
           b.use StartInstance
           b.use ShareFolders
-          b.use SyncFolders
+          #b.use SyncFolders
         end
       end
 
