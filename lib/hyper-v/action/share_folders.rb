@@ -68,7 +68,7 @@ module VagrantPlugins
                         :guest_ip => ssh_info[:host],
                         :username => ssh_info[:username],
                         :password => "happy" }
-            env[:ui].info("Linking #{data[:share_name]} to Guest at #{data[:guestpath]} ...")
+            @env[:ui].info("Linking #{data[:share_name]} to Guest at #{data[:guestpath]} ...")
             @env[:machine].provider.driver.execute('mount_share.ps1', options)
           end
         end
