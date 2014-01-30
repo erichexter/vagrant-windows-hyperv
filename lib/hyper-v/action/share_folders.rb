@@ -30,6 +30,8 @@ module VagrantPlugins
           prepare_smb_share
           if env[:machine].config.vm.guest == :windows
             mount_shared_folders
+          elsif env[:machine].config.vm.guest == :linux
+            mount_shared_folders_to_linux
           end
           @app.call(env)
         end
@@ -52,7 +54,7 @@ module VagrantPlugins
             hostpath  = File.expand_path(data[:hostpath], @env[:root_path])
             options = {:path => hostpath, :name => data[:share_name]}
             command = ["net", "share", "#{data[:share_name]}=#{hostpath}"]
-            r = Vagrant::Util::Subprocess.execute(*command)
+            @env[:machine].provider.driver.raw_execute(command)
           end
         end
 
@@ -60,17 +62,40 @@ module VagrantPlugins
         def mount_shared_folders
           # Make the host trust the guest
           command = ["powershell", "Set-Item",  "wsman:\localhost\client\trustedhosts",  "*"]
-          r = Vagrant::Util::Subprocess.execute(*command)
+          @env[:machine].provider.driver.raw_execute(command)
+
+          # Find Host Machine's credentials
+          result = @env[:machine].provider.driver.execute('host_info.ps1', {})
+
           ssh_info = @env[:machine].ssh_info
           @smb_shared_folders.each do |id, data|
             options = { :share_name => data[:share_name],
                         :guest_path => data[:guestpath],
                         :guest_ip => ssh_info[:host],
                         :username => ssh_info[:username],
+                        :host_ip => result["host_ip"],
                         :password => "happy" }
             @env[:ui].info("Linking #{data[:share_name]} to Guest at #{data[:guestpath]} ...")
             @env[:machine].provider.driver.execute('mount_share.ps1', options)
           end
+        end
+
+        def mount_shared_folders_to_linux
+          # FIXME
+          # Remove this class once the sudoers is fixed in Linux
+          # All sudo commands need not prompt for password.
+          communicate = Communicator::SSH.new(@env[:machine])
+          # Find Host Machine's credentials
+          result = @env[:machine].provider.driver.execute('host_info.ps1', {})
+          @smb_shared_folders.each do |id, data|
+            # Create a folder in /mnt with the share_name
+            communicate.sudo("mkdir -p /mnt/#{data[:share_name]}")
+            # Mount the Network drive to Guest VM
+            command  = "sudo mount -t cifs //#{result["host_ip"]}/#{data[:share_name]}"
+            command  += " -o username='#{result["host_name"]}',sec=ntlm /mnt/#{data[:share_name]}"
+            communicate.sudo(command)
+          end
+
         end
       end
     end
