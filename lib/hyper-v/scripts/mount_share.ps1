@@ -3,7 +3,8 @@ param (
     [string]$guest_path = $(throw "-guest_path is required."),
     [string]$guest_ip = $(throw "-guest_ip is required."),
     [string]$username = $(throw "-username is required."),
-    [string]$password = $(throw "-password is required.")
+    [string]$password = $(throw "-password is required."),
+    [string]$host_ip  = $(throw "-host_ip is required.")
  )
 
 function Get-Remote-Session($guest_ip, $username, $password) {
@@ -13,7 +14,7 @@ function Get-Remote-Session($guest_ip, $username, $password) {
 }
 
 function Mount-File($share_name, $guest_path, $host_path) {
-  #TODO: Check for folder exist.
+  # TODO: Check for folder exist.
   # Use net use and prompt for password
   $guest_path = $guest_path.replace("/", "\")
   cmd /c  mklink /d $guest_path  $host_path
@@ -32,7 +33,6 @@ do {
     }
 }
 while (!$session -and $count -lt 20)
-
 $host_ip = '10.18.20.77'
 $host_path = "\\$host_ip\$share_name"
 Invoke-Command -Session $session -ScriptBlock ${function:Mount-File} -ArgumentList $share_name, $guest_path, $host_path
