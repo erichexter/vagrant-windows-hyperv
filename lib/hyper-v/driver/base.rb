@@ -41,6 +41,14 @@ module VagrantPlugins
           end
         end
 
+        def raw_execute(command)
+          command.push {notify: [:stdout, :stderr, :stdin]}
+          clear_output_buffer
+          Vagrant::Util::Subprocess.execute(*command) do |type, data|
+            process_output(type, data)
+          end
+        end
+
         protected
 
         def json_output
