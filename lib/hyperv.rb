@@ -20,6 +20,7 @@ module VagrantPlugins
     lib_path = Pathname.new(File.expand_path("../hyper-v", __FILE__))
     autoload :Action, lib_path.join("action")
     autoload :Driver, lib_path.join("driver")
+    autoload :Communicator, lib_path.join("communicator")
 
     # This returns the path to the source of this plugin.
     #
