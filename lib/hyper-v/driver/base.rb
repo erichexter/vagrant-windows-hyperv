@@ -29,8 +29,8 @@ module VagrantPlugins
           @output = nil
         end
 
-        def execute(command, options)
-          r = execute_powershell(command, options) do |type, data|
+        def execute(path, options)
+          r = execute_powershell(path, options) do |type, data|
             process_output(type, data)
           end
           if success? and !@output.empty?
@@ -42,7 +42,7 @@ module VagrantPlugins
         end
 
         def raw_execute(command)
-          command.push {notify: [:stdout, :stderr, :stdin]}
+          command = [command , {notify: [:stdout, :stderr, :stdin]}].flatten
           clear_output_buffer
           Vagrant::Util::Subprocess.execute(*command) do |type, data|
             process_output(type, data)
