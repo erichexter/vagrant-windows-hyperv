@@ -27,9 +27,11 @@ module VagrantPlugins
           @env = env
           env[:ui].info('Setting up Folders Share, This process may take few minutes.')
           smb_shared_folders
-          prepare_smb_share
+          # FIXME:
+          # Need to change the logic in how share folders are created in Windows
+          # prepare_smb_share
           if env[:machine].config.vm.guest == :windows
-            mount_shared_folders
+            mount_shared_folders_to_windows
           elsif env[:machine].config.vm.guest == :linux
             mount_shared_folders_to_linux
           end
@@ -49,6 +51,8 @@ module VagrantPlugins
           end
         end
 
+        # FIXME:
+        # Need to change the logic in how share folders are created in Windows
         def prepare_smb_share
           @smb_shared_folders.each do |id, data|
             hostpath  = File.expand_path(data[:hostpath], @env[:root_path])
@@ -58,8 +62,7 @@ module VagrantPlugins
           end
         end
 
-        # Use different mount commands when the guest is Windows or Linux
-        def mount_shared_folders
+        def mount_shared_folders_to_windows
           # Make the host trust the guest
           command = ["powershell", "Set-Item",  "wsman:\localhost\client\trustedhosts",  "*"]
           @env[:machine].provider.driver.raw_execute(command)
@@ -81,19 +84,32 @@ module VagrantPlugins
         end
 
         def mount_shared_folders_to_linux
-          # FIXME
-          # Remove this class once the sudoers is fixed in Linux
-          # All sudo commands need not prompt for password.
-          communicate = Communicator::SSH.new(@env[:machine])
+
           # Find Host Machine's credentials
           result = @env[:machine].provider.driver.execute('host_info.ps1', {})
+          host_share_username = @env[:machine].provider_config.host_share.username
+          host_share_password = @env[:machine].provider_config.host_share.password
+
           @smb_shared_folders.each do |id, data|
             # Create a folder in /mnt with the share_name
-            communicate.sudo("mkdir -p /mnt/#{data[:share_name]}")
+            @env[:machine].communicate.sudo("mkdir -p /mnt/#{data[:share_name]}")
+
+            # FIXME:
+            # Set proper folder permissions and owner permissions
+            # Change permissions set chmod to 644
+            @env[:machine].communicate.sudo("chmod 644 /mnt/#{data[:share_name]}")
+
             # Mount the Network drive to Guest VM
-            command  = "sudo mount -t cifs //#{result["host_ip"]}/#{data[:share_name]}"
-            command  += " -o username='#{result["host_name"]}',sec=ntlm /mnt/#{data[:share_name]}"
-            communicate.sudo(command)
+            command  = "mount -t cifs //#{result["host_ip"]}/#{data[:share_name]}"
+            command  += " -o username=#{host_share_username},pass=#{host_share_password},sec=ntlm /mnt/#{data[:share_name]}"
+            @env[:machine].communicate.sudo(command)
+
+            # Create a location in guest to guestpath
+            @env[:machine].communicate.sudo("mkdir -p #{data[:guestpath]}")
+
+            # Create a symlink from mount point to the actual location to guest path
+            command = "ln -s /mnt/#{data[:share_name]} #{data[:guestpath]}"
+            @env[:machine].communicate.sudo(command)
           end
 
         end
