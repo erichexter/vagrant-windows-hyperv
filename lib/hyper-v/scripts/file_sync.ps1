@@ -1,9 +1,33 @@
+#-------------------------------------------------------------------------
+# Copyright 2013 Microsoft Open Technologies, Inc.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#--------------------------------------------------------------------------
+
+param (
+    [string]$vm_id = $(throw "-vm_id is required."),
+    [string]$guest_ip = $(throw "-guest_ip is required."),
+    [string]$username = $(throw "-guest_username is required."),
+    [string]$password = $(throw "-guest_password is required."),
+    [string]$host_path = $(throw "-host_path is required."),
+    [string]$guest_path = $(throw "-guest_path is required.")
+ )
+
 function Get-file-hash($source_path, $delimiter) {
     $source_files = @()
     (Get-ChildItem $source_path -rec | ForEach-Object -Process {
       Get-FileHash -Path $_.FullName -Algorithm MD5 } ) |
         ForEach-Object -Process {
-          $source_files += ($_.Path -replace $source_path, "") + $delimiter + $_.Hash
+          $source_files += $_.Path.Replace($source_path, "") + $delimiter + $_.Hash
         }
     $source_files
 }
@@ -18,48 +42,64 @@ function Get-remote-file-hash($source_path, $delimiter, $session) {
     Invoke-Command -Session $session -ScriptBlock ${function:Get-file-hash} -ArgumentList $source_path, $delimiter
 }
 
-function Sync-Remote-Machine($remove_files, $copy_files, $source_root_path, $destination_root_path) {
+function Sync-Remote-Machine($machine, $remove_files, $copy_files, $host_path, $guest_path) {
     ForEach ($item in $copy_files) {
-      $from = $source_root_path + $item
-      $to = $destination_root_path + $item
+      $from = $host_path + $item
+      $to = $guest_path + $item
       # Copy VM can also take a VM object
-      # Copy-VMFile -VM $vm
-      Copy-VMFile "Super-Win_orig" -SourcePath $from -DestinationPath $to -CreateFullPath -FileSource Host -Force
+      Copy-VMFile  -VM $machine -SourcePath $from -DestinationPath $to -CreateFullPath -FileSource Host -Force
     }
 }
 
-function Create-Remote-Folders($empty_source_folders, $destination_root_path) {
+function Create-Remote-Folders($empty_source_folders, $guest_path) {
     ForEach ($item in $empty_source_folders) {
-        $new_name =  $destination_root_path + $item
+        $new_name =  $guest_path + $item
         New-Item "$new_name" -type directory -Force
     }
 }
 
-function Get-Empty-folders-From-Source($source_root_path) {
-  Get-ChildItem $source_root_path -recurse |
+function Get-Empty-folders-From-Source($host_path) {
+  Get-ChildItem $host_path -recurse |
         Where-Object {$_.PSIsContainer -eq $True} |
             Where-Object {$_.GetFiles().Count -eq 0} |
                 Select-Object FullName | ForEach-Object -Process {
-                    $empty_source_folders += ($_.FullName -replace $source_root_path, "")
+                    $empty_source_folders += ($_.FullName.Replace($host_path, ""))
                 }
 }
 
 $delimiter = " || "
-$source_root_path = "E:\\Test_Sync"
-$destination_root_path = "C:\\Users\\Vagrant\\Desktop\\Test_Sync"
-$guest_ip = "10.18.20.62"
-$username = "vagrant"
-$password = "happy"
+
+$machine = Get-VM -Id $vm_id
+
+# FIXME: PowerShell guys please fix this.
+# The below script checks for all VMIntegrationService which are not enabled
+# and will enable this.
+# When when all the services are enabled this throws an error.
+# Enable VMIntegrationService to true
+try {
+  Get-VM -Id $vm_id | Get-VMIntegrationService | ?  {-not($_.Enabled)} | Enable- VMIntegrationService -Verbose
+  }
+  catch { }
+
 $session = Get-Remote-Session $guest_ip $username $password
 
-$source_files = Get-file-hash $source_root_path $delimiter
-$destination_files = Get-remote-file-hash $destination_root_path $delimiter $session
+$source_files = Get-file-hash $host_path $delimiter
+$destination_files = Get-remote-file-hash $guest_path $delimiter $session
+
+if (!$destination_files) {
+  $destination_files = @()
+}
+if (!$source_files) {
+  $source_files = @()
+}
 
 # Compare source and destination files
 $remove_files = @()
 $copy_files = @()
+
+
 Compare-Object -ReferenceObject $source_files -DifferenceObject $destination_files | ForEach-Object {
-  if ($_.SideIndicator -eq "=>") {
+  if ($_.SideIndicator -eq '=>') {
       $remove_files += $_.InputObject.Split($delimiter)[0]
   } else {
       $copy_files += $_.InputObject.Split($delimiter)[0]
@@ -67,12 +107,12 @@ Compare-Object -ReferenceObject $source_files -DifferenceObject $destination_fil
 }
 
 # Update the files to remote machine
-Sync-Remote-Machine $remove_files $copy_files $source_root_path $destination_root_path
+Sync-Remote-Machine $machine $remove_files $copy_files $host_path $guest_path
 
 # Create any empty folders which missed to sync to remote machine
 $empty_source_folders = @()
-$directories = Get-Empty-folders-From-Source $source_root_path
+$directories = Get-Empty-folders-From-Source $host_path
 
-$result = Invoke-Command -Session $session -ScriptBlock ${function:Create-Remote-Folders} -ArgumentList $empty_source_folders, $destination_root_path
+$result = Invoke-Command -Session $session -ScriptBlock ${function:Create-Remote-Folders} -ArgumentList $empty_source_folders, $guest_path
 # Always remove the connection after Use
 Remove-PSSession -Id $session.Id
