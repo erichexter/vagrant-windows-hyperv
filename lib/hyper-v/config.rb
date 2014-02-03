@@ -30,13 +30,11 @@ module VagrantPlugins
       end
 
       def finalize!
-        # @putty_private_key_path = nil if @putty_private_key_path == UNSET_VALUE
         @gui = nil if @gui == UNSET_VALUE
       end
 
       def initialize(region_specific=false)
         @gui = UNSET_VALUE
-        @putty = Putty::Config.new
         @host_share = HostShare::Config.new
       end
 

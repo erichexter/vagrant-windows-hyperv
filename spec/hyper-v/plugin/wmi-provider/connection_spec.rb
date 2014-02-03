@@ -1,3 +1,4 @@
+=begin
 require "minitest/autorun"
 require 'mocha/setup'
 require "hyper-v/plugin/wmi-provider"
@@ -32,3 +33,4 @@ module VagrantPlugins
     end
   end
 end
+=end
