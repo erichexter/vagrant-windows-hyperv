@@ -63,33 +63,18 @@ module VagrantPlugins
             return
           end
 
-          putty_private_key = @env[:machine].provider_config.putty.private_key_path
-          unless Vagrant::Util::Which.which('pscp')
-            @env[:ui].warn("PSCP Not found in host")
-            return
-          end
-
           @env[:machine].config.vm.synced_folders.each do |id, data|
-
             # Ignore disabled shared folders
             next if data[:disabled] || data[:smb]
-
             hostpath  = File.expand_path(data[:hostpath], @env[:root_path])
             guestpath = data[:guestpath]
             @env[:ui].info('Starting Sync folders')
-
-            # TODO:
-            # There is a timeout is passed to this command, should be a good thing
-            # to have this as a config set in Vagrantfile
-            command = ["pscp", "-r", "-i", "#{putty_private_key}", hostpath,
-              "#{ssh_info[:username]}@#{ssh_info[:host]}:#{guestpath}", {timeout: 60, notify: ['stdout']}]
             begin
-              r = Vagrant::Util::Subprocess.execute(*command)
-            rescue Vagrant::Util::Subprocess::TimeoutExceeded
-              @env[:ui].info('Sync Process timed out')
+              @env[:machine].communicate.upload(hostpath, guestpath)
+            rescue RuntimeError => e
+              @env[:ui].info(e.message)
             end
-            # TODO:
-            # Check for error state when command fails
+
           end
         end
 

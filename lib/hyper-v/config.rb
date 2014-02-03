@@ -14,7 +14,7 @@
 #--------------------------------------------------------------------------
 
 require "vagrant"
-require_relative "putty/config"
+
 require_relative "host_share/config"
 module VagrantPlugins
   module HyperV
@@ -23,12 +23,7 @@ module VagrantPlugins
       #
       # @return [Boolean]
       attr_accessor :gui
-
-      attr_reader :putty, :host_share
-
-      def putty_config(&block)
-        block.call(@putty)
-      end
+      attr_reader :host_share
 
       def host_config(&block)
         block.call(@host_share)
@@ -47,9 +42,6 @@ module VagrantPlugins
 
       def validate(machine)
         errors = _detected_errors
-        unless putty.valid_config?
-          errors << putty.errors.flatten.join(" ")
-        end
         unless host_share.valid_config?
           errors << host_share.errors.flatten.join(" ")
         end
