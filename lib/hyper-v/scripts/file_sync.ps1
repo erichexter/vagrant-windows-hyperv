@@ -36,10 +36,15 @@ function Get-Remote-Session($guest_ip, $username, $password) {
     $secstr = convertto-securestring -AsPlainText -Force -String $password
     $cred = new-object -typename System.Management.Automation.PSCredential -argumentlist $username, $secstr
     New-PSSession -ComputerName $guest_ip -Credential $cred
+    # TODO:
+    # Check for max connection, in-case when the previous open connections are
+    # not closed
 }
 
 function Get-remote-file-hash($source_path, $delimiter, $session) {
     Invoke-Command -Session $session -ScriptBlock ${function:Get-file-hash} -ArgumentList $source_path, $delimiter
+    # TODO:
+    # Check if remote PS Scripting errors
 }
 
 function Sync-Remote-Machine($machine, $remove_files, $copy_files, $host_path, $guest_path) {

@@ -72,7 +72,7 @@ module VagrantPlugins
             begin
               @env[:machine].communicate.upload(hostpath, guestpath)
             rescue RuntimeError => e
-              @env[:ui].info(e.message)
+              @env[:ui].error(e.message)
             end
 
           end
