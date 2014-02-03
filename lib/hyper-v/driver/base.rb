@@ -74,7 +74,7 @@ module VagrantPlugins
             # $stdin.gets.chomp || ""
           end
           if type == :stderr
-            @error_messages = data
+            @error_messages = data.gsub("\r\n", "\n")
           end
         end
 
