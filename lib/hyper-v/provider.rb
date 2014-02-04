@@ -41,8 +41,8 @@ module VagrantPlugins
 
         # Get the short and long description
         # TODO
-        short = "Use the short description from WMI #{state_id}"
-        long  = "Use the long description from WMI"
+        short = "Machine's current state is #{state_id}"
+        long  = ""
 
         # Return the MachineState object
         Vagrant::MachineState.new(state_id, short, long)

@@ -48,7 +48,6 @@ do {
     }
 }
 while (!$session -and $count -lt 20)
-$host_ip = '10.18.20.77'
 $host_path = "\\$host_ip\$share_name"
 Invoke-Command -Session $session -ScriptBlock ${function:Mount-File} -ArgumentList $share_name, $guest_path, $host_path
 Remove-PSSession -Id $session.Id

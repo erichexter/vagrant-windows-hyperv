@@ -24,7 +24,10 @@ module VagrantPlugins
         end
 
         def call(env)
-          env[:machine_state_id] = read_state(env[:hyperv_connection], env[:machine])
+          options = { vm_id: env[:machine].id }
+          response = env[:machine].provider.driver.execute('get_vm_status.ps1', options)
+          env[:machine_state_id] = response["state"].downcase.to_sym
+          env[:machine_status] = response["status"]
           @app.call(env)
         end
 

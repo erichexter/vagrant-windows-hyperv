@@ -13,7 +13,6 @@
 # limitations under the License.
 #--------------------------------------------------------------------------
 require "pathname"
-require "hyper-v/plugin/wmi-provider"
 require "hyper-v/plugin"
 module VagrantPlugins
   module HyperV

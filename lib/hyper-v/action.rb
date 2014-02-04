@@ -31,7 +31,7 @@ module VagrantPlugins
               next
             end
             b2.use action_halt
-            b2.use Call, WaitForState, :stopped, 120 do |env2, b3|
+            b2.use Call, WaitForState, :off, 120 do |env2, b3|
               if env2[:result]
                 b3.use action_up
               else
@@ -50,7 +50,6 @@ module VagrantPlugins
               b2.use MessageNotCreated
               next
             end
-            b2.use ConnectHyperv
             b2.use StopInstance
           end
         end
@@ -88,7 +87,6 @@ module VagrantPlugins
       def self.action_read_state
         Vagrant::Action::Builder.new.tap do |b|
           b.use ConfigValidate
-          b.use ConnectHyperv
           b.use ReadState
         end
       end
@@ -115,7 +113,6 @@ module VagrantPlugins
       def self.action_read_guest_ip
         Vagrant::Action::Builder.new.tap do |b|
           b.use ConfigValidate
-          b.use ConnectHyperv
           b.use ReadGuestIP
         end
       end
@@ -125,7 +122,6 @@ module VagrantPlugins
       action_root = Pathname.new(File.expand_path("../action", __FILE__))
       autoload :IsCreated, action_root.join("is_created")
       autoload :IsStopped, action_root.join("is_stopped")
-      autoload :ConnectHyperv, action_root.join("connect_hyperv")
       autoload :ReadState, action_root.join("read_state")
       autoload :Import, action_root.join("import")
       autoload :StartInstance, action_root.join('start_instance')
