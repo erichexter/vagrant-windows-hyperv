@@ -16,5 +16,13 @@
 param (
     [string]$vm_id = $(throw "-vm_id is required.")
  )
-$vm = Get-VM -Id $vm_id
-Start-VM $vm
+try {
+  $vm = Get-VM -Id $vm_id -ErrorAction stop
+  Start-VM $vm
+catch {
+  Write-Host "===Begin-Error==="
+  Write-Host "{
+    \'message\' : \'$_.Exception.Message\'
+  }"
+  Write-Host "===End-Error==="
+}

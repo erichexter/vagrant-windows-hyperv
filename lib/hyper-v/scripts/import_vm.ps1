@@ -78,7 +78,12 @@ $vm_params = @{
 }
 
 # Create the VM using the values in the hash map
-$vm = New-VM @vm_params
+try {
+  $vm = New-VM @vm_params
+} catch {
+  Write-Host $_
+  return
+}
 
 $notes = (Select-Xml -xml $vmconfig -XPath "//notes").node.'#text'
 
@@ -140,8 +145,12 @@ foreach ($controller in $controllers) {
       }
   }
 }
-
-$vm_id = (Get-VM $vm_name).id.guid
+try {
+$vm_id = (Get-VM $vm_name).id.guid -ErrorAction stop
+} catch {
+  # TODO
+  Write-Host $_
+}
 Write-Host "===Begin-Output==="
 Write-Host "{
   \'name\' : \'$vm_name\',

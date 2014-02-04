@@ -14,6 +14,7 @@
 #--------------------------------------------------------------------------
 require "pathname"
 require "hyper-v/plugin"
+
 module VagrantPlugins
   module HyperV
     lib_path = Pathname.new(File.expand_path("../hyper-v", __FILE__))

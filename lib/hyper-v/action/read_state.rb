@@ -24,25 +24,16 @@ module VagrantPlugins
         end
 
         def call(env)
-          options = { vm_id: env[:machine].id }
-          response = env[:machine].provider.driver.execute('get_vm_status.ps1', options)
-          env[:machine_state_id] = response["state"].downcase.to_sym
-          env[:machine_status] = response["status"]
+          unless env[:machine].id.nil?
+            options = { vm_id: env[:machine].id }
+            response = env[:machine].provider.driver.execute('get_vm_status.ps1', options)
+            env[:machine_state_id] = response["state"].downcase.to_sym
+          else
+            env[:machine_state_id] = :not_created
+          end
           @app.call(env)
         end
 
-        def read_state(connection, machine)
-          return :not_created if machine.id.nil?
-          # When machine exist find a machine
-          hyperv_machine = connection.find_vm_by_id(machine.id)
-          if hyperv_machine.nil?
-            @logger.info("Machine not found or terminated, assuming it got destroyed.")
-            machine.id = nil
-            return :not_created
-          end
-          # Return the state
-          return hyperv_machine.state.to_sym
-        end
       end
     end
   end

@@ -52,7 +52,7 @@ module VagrantPlugins
                         :host_path => hostpath,
                         :guest_path => guestpath,
                         :vm_id => @env[:machine].id,
-                        :password => "happy" }
+                        :password => @env[:machine].provider_config.guest.password }
             response = @env[:machine].provider.driver.execute('file_sync.ps1', options)
             end
         end

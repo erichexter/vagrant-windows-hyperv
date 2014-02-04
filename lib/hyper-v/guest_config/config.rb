@@ -12,11 +12,32 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #--------------------------------------------------------------------------
+module VagrantPlugins
+  module HyperV
+    module GuestConfig
+      class Config < Vagrant.plugin("2", :config)
+        attr_accessor :username, :password
 
-param (
-    [string]$vm_id = $(throw "-vm_id is required.")
- )
+        def errors
+          @errors
+        end
 
-$vm = Get-VM -Id $vm_id -ErrorAction stop
-# Shuts down virtual machine regardless of any unsaved application data
-Stop-VM $vm -Force
+        def validate
+          @errors = []
+          if username.nil?
+            @errors << "Please configure a Guest VM's username"
+          end
+          if password.nil?
+            @errors << "Please configure a Guest VM's password"
+          end
+        end
+
+        def valid_config?
+          validate
+          errors.empty?
+        end
+
+      end
+    end
+  end
+end
