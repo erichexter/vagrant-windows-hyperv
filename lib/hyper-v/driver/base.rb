@@ -37,7 +37,7 @@ module VagrantPlugins
             JSON.parse(json_output[:success].join) unless json_output[:success].empty?
           else
             message = json_output[:error].join unless json_output[:error].empty?
-            raise Error::SubprocessError, message
+            raise Error::SubprocessError, message if message
           end
         end
 

@@ -16,20 +16,22 @@
 param (
     [string]$vm_id = $(throw "-vm_id is required.")
  )
+
+# Include the following modules
+$presentDir = Split-Path -parent $PSCommandPath
+$modules = @()
+$modules += $presentDir + "\utils\write_messages.ps1"
+forEach ($module in $modules) { . $module }
+
 try {
   $vm = Get-VM -Id $vm_id -ErrorAction "stop"
   $network = Get-VMNetworkAdapter  -VM $vm
   $ip_address = $network.IpAddresses[0]
-  Write-Host "===Begin-Output==="
-  Write-Host "{
-    \'ip\' : \'$ip_address\'
-  }"
-  Write-Host "===End-Output==="
+  $resultHash = @{
+    ip = $ip_address
+  }
+  Write-Output-Message $resultHash
 }
 catch {
-  Write-Host "===Begin-Error==="
-  Write-Host "{
-    \'error\' : \'$_\'
-  }"
-  Write-Host "===End-Error==="
+  Write-Error-Message "Failed to obtain network info of VM $_"
 }

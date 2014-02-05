@@ -83,7 +83,6 @@ module VagrantPlugins
                           :host_ip => result["host_ip"],
                           :password => @env[:machine].provider_config.guest.password }
               @env[:ui].info("Linking #{data[:share_name]} to Guest at #{data[:guestpath]} ...")
-              debugger
               @env[:machine].provider.driver.execute('mount_share.ps1', options)
             rescue Error::SubprocessError => e
               @env[:ui].info "Failed to link #{data[:share_name]} to Guest"

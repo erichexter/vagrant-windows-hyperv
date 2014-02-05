@@ -23,6 +23,12 @@
       [string]$vhdx_path = $(throw "-vhdx_path is required.")
    )
 
+  # Include the following modules
+  $presentDir = Split-Path -parent $PSCommandPath
+  $modules = @()
+  $modules += $presentDir + "\utils\write_messages.ps1"
+  forEach ($module in $modules) { . $module }
+
   try {
     [xml]$vmconfig = Get-Content -Path  $vm_xml_config
 
@@ -145,19 +151,13 @@
     }
 
     $vm_id = (Get-VM $vm_name).id.guid
-
-    Write-Host "===Begin-Output==="
-    Write-Host "{
-      \'name\' : \'$vm_name\',
-      \'id\' : \'$vm_id\'
-    }"
-    Write-Host "===End-Output==="
+    $resultHash = @{
+      name = $vm_name
+      id = $vm_id
+    }
+    Write-Output-Message $resultHash
   }
   catch {
-    Write-Host "===Begin-Error==="
-    Write-Host "{
-      \'error\' : \'Hyper-V Import failed $_\'
-    }"
-    Write-Host "===End-Error==="
+    Write-Error-Message $_
     return
   }

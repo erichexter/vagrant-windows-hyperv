@@ -13,6 +13,7 @@
 # limitations under the License.
 #--------------------------------------------------------------------------
 
+
 param (
     [string]$share_name = $(throw "-share_name is required."),
     [string]$guest_path = $(throw "-guest_path is required."),
@@ -22,13 +23,15 @@ param (
     [string]$host_ip  = $(throw "-host_ip is required.")
  )
 
-try {
-    function Get-Remote-Session($guest_ip, $username, $password) {
-        $secstr = convertto-securestring -AsPlainText -Force -String $password
-        $cred = new-object -typename System.Management.Automation.PSCredential -argumentlist $username, $secstr
-        New-PSSession -ComputerName $guest_ip -Credential $cred -ErrorAction "stop"
-    }
+# Include the following modules
+$presentDir = Split-Path -parent $PSCommandPath
+$modules = @()
+$modules += $presentDir + "\utils\create_session.ps1"
+$modules += $presentDir + "\utils\write_messages.ps1"
 
+forEach ($module in $modules) { . $module }
+
+try {
     function Mount-File($share_name, $guest_path, $host_path) {
       # TODO: Check for folder exist.
       # Use net use and prompt for password
@@ -36,38 +39,17 @@ try {
       cmd /c  mklink /d $guest_path  $host_path
     }
 
-    $session = ""
-    $count = 0
-    $session_error = ""
-    do {
-        $count++
-        try {
-            $session = Get-Remote-Session $guest_ip $username $password
-            $session_error = ""
-        }
-        catch {
-            Start-Sleep -s 1
-            $session_error = $_
-            $session = ""
-        }
-    }
-    while (!$session -and $count -lt 2)
-    if (!$session -and $count -eq 2) {
-        Write-Host "===Begin-Error==="
-        Write-Host "{
-          \'error\' : \'$session_error\'
-        }"
-        Write-Host "===End-Error==="
+    $response = Create-Remote-Session $guest_ip $username $password
+
+    if (!$response["session"] -and $response["error"]) {
+        Write-Error-Message $response["error"]
         return
     }
     $host_path = "\\$host_ip\$share_name"
-    Invoke-Command -Session $session -ScriptBlock ${function:Mount-File} -ArgumentList $share_name, $guest_path, $host_path -ErrorAction "stop"
-    Remove-PSSession -Id $session.Id
+    Invoke-Command -Session $response["session"] -ScriptBlock ${function:Mount-File} -ArgumentList $share_name, $guest_path, $host_path -ErrorAction "stop"
+    Remove-PSSession -Id $response["session"].Id
 }
 catch {
-    Write-Host "===Begin-Error==="
-    Write-Host "{
-      \'error\' : \'Failed to mount files VM $_\'
-    }"
-    Write-Host "===End-Error==="
+    Write-Error-Message "Failed to mount files VM  $_"
+    return
 }

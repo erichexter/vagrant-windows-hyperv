@@ -22,6 +22,12 @@ param (
     [string]$guest_path = $(throw "-guest_path is required.")
  )
 
+# Include the following modules
+$presentDir = Split-Path -parent $PSCommandPath
+$modules = @()
+$modules += $presentDir + "\utils\write_messages.ps1"
+forEach ($module in $modules) { . $module }
+
 function Get-file-hash($source_path, $delimiter) {
     $source_files = @()
     (Get-ChildItem $source_path -rec | ForEach-Object -Process {
@@ -36,9 +42,6 @@ function Get-Remote-Session($guest_ip, $username, $password) {
     $secstr = convertto-securestring -AsPlainText -Force -String $password
     $cred = new-object -typename System.Management.Automation.PSCredential -argumentlist $username, $secstr
     New-PSSession -ComputerName $guest_ip -Credential $cred
-    # TODO:
-    # Check for max connection, in-case when the previous open connections are
-    # not closed
 }
 
 function Get-remote-file-hash($source_path, $delimiter, $session) {
@@ -82,7 +85,7 @@ $machine = Get-VM -Id $vm_id
 # When when all the services are enabled this throws an error.
 # Enable VMIntegrationService to true
 try {
-  Get-VM -Id $vm_id | Get-VMIntegrationService | ?  {-not($_.Enabled)} | Enable- VMIntegrationService -Verbose
+  Get-VM -Id $vm_id | Get-VMIntegrationService -Name "Guest Service Interface" | Enable-VMIntegrationService -Passthru
   }
   catch { }
 
@@ -121,3 +124,8 @@ $directories = Get-Empty-folders-From-Source $host_path
 $result = Invoke-Command -Session $session -ScriptBlock ${function:Create-Remote-Folders} -ArgumentList $empty_source_folders, $guest_path
 # Always remove the connection after Use
 Remove-PSSession -Id $session.Id
+
+$resultHash = @{
+  message = "OK"
+}
+Write-Output-Message $resultHash

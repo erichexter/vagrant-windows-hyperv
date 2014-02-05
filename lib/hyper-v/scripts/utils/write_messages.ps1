@@ -13,22 +13,24 @@
 # limitations under the License.
 #--------------------------------------------------------------------------
 
-# Include the following modules
-$presentDir = Split-Path -parent $PSCommandPath
-$modules = @()
-$modules += $presentDir + "\utils\write_messages.ps1"
-forEach ($module in $modules) { . $module }
+function Write-Error-Message($message) {
+  Write-Host "===Begin-Error==="
+  Write-Host "{
+    \'error\' : \'$message\'
+  }"
+  Write-Host "===End-Error==="
+}
 
-try {
-$hostname =  $(whoami)
-$ip = (Get-WmiObject -class win32_NetworkAdapterConfiguration -Filter 'ipenabled = "true"').ipaddress[0]
-  $resultHash = @{
-    host_name = $username
-    host_ip = $ip
+function Write-Output-Message($hash) {
+  $result = @()
+  forEach($key in $hash.keys) {
+    $value = $hash.$key
+    $result += "\'$key\' : \'$value\'"
   }
-  Write-Output-Message $resultHash
+  $result = $result -join(" ,")
+  Write-Host "===Begin-Output==="
+  Write-Host "{
+    $result
+  }"
+  Write-Host "===End-Output==="
 }
-catch {
-  Write-Error-Message $_
-}
-
