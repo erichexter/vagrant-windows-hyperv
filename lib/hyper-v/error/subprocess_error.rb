@@ -12,21 +12,23 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #--------------------------------------------------------------------------
-require "pathname"
-require "hyper-v/plugin"
+
+require "json"
+require "vagrant/util/which"
+require "vagrant/util/subprocess"
 
 module VagrantPlugins
   module HyperV
-    lib_path = Pathname.new(File.expand_path("../hyper-v", __FILE__))
-    autoload :Action, lib_path.join("action")
-    autoload :Driver, lib_path.join("driver")
-    autoload :Error, lib_path.join("error")
+    module Error
+      class SubprocessError < RuntimeError
+        def initialize(message)
+          @message = JSON.parse(message) if message
+        end
 
-    # This returns the path to the source of this plugin.
-    #
-    # @return [Pathname]
-    def self.source_root
-      @source_root ||= Pathname.new(File.expand_path("../../", __FILE__))
+        def message
+          @message["error"]
+        end
+      end
     end
   end
 end

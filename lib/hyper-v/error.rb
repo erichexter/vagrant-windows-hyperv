@@ -12,21 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #--------------------------------------------------------------------------
-require "pathname"
-require "hyper-v/plugin"
 
 module VagrantPlugins
   module HyperV
-    lib_path = Pathname.new(File.expand_path("../hyper-v", __FILE__))
-    autoload :Action, lib_path.join("action")
-    autoload :Driver, lib_path.join("driver")
-    autoload :Error, lib_path.join("error")
-
-    # This returns the path to the source of this plugin.
-    #
-    # @return [Pathname]
-    def self.source_root
-      @source_root ||= Pathname.new(File.expand_path("../../", __FILE__))
+    module Error
+      lib_path = Pathname.new(File.expand_path("../error", __FILE__))
+      autoload :SubprocessError, lib_path.join("subprocess_error")
     end
   end
 end
