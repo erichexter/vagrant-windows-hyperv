@@ -57,8 +57,8 @@ module VagrantPlugins
 
       def self.action_start
         Vagrant::Action::Builder.new.tap do |b|
-          # b.use StartInstance
-          # b.use ShareFolders
+          b.use StartInstance
+          b.use ShareFolders
           b.use SyncFolders
         end
       end
