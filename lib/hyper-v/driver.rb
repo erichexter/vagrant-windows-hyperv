@@ -13,7 +13,6 @@
 # limitations under the License.
 #--------------------------------------------------------------------------
 
-require "debugger"
 module VagrantPlugins
   module HyperV
     module Driver

@@ -16,7 +16,15 @@
 param (
     [string]$vm_id = $(throw "-vm_id is required.")
  )
-
-$vm = Get-VM -Id $vm_id -ErrorAction stop
-# Shuts down virtual machine regardless of any unsaved application data
-Stop-VM $vm -Force
+try {
+  $vm = Get-VM -Id $vm_id -ErrorAction stop
+  # Shuts down virtual machine regardless of any unsaved application data
+  Stop-VM $vm -Force
+}
+catch {
+  Write-Host "===Begin-Error==="
+  Write-Host "{
+    \'error\' : \'Failed to stop a VM $_\'
+  }"
+  Write-Host "===End-Error==="
+}

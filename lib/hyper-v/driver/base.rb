@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #--------------------------------------------------------------------------
-
+require "debugger"
 require "json"
 require "vagrant/util/which"
 require "vagrant/util/subprocess"
@@ -33,11 +33,11 @@ module VagrantPlugins
           r = execute_powershell(path, options) do |type, data|
             process_output(type, data)
           end
-          if success? and !@output.empty?
-            data = json_output
-            JSON.parse(data.join) unless data.empty?
+          if success?
+            JSON.parse(json_output[:success].join) unless json_output[:success].empty?
           else
-            # raise VagrantPlugins::HyperV::Subprocess::Error => @error_messages
+            message = json_output[:error].join unless json_output[:error].empty?
+            raise Error::SubprocessError, message
           end
         end
 
@@ -52,18 +52,24 @@ module VagrantPlugins
         protected
 
         def json_output
-          json_begin = false
-          json_resp = []
+          return @json_output if @json_output
+          json_success_begin = false
+          json_error_begin = false
+          success = []
+          error = []
           @output.split("\n").each do |line|
-            json_begin = false if line.include?("===End-Output===")
-            json_resp << line.gsub("\\'","\"") if json_begin
-            json_begin = true if line.include?("===Begin-Output===")
+            json_error_begin = false if line.include?("===End-Error===")
+            json_success_begin = false if line.include?("===End-Output===")
+            success << line.gsub("\\'","\"") if json_success_begin
+            error << line.gsub("\\'","\"") if json_error_begin
+            json_success_begin = true if line.include?("===Begin-Output===")
+            json_error_begin = true if line.include?("===Begin-Error===")
           end
-          json_resp
+          @json_output = { :success => success, :error => error }
         end
 
         def success?
-          @error_messages.empty?
+          @error_messages.empty? && json_output[:error].empty?
         end
 
         def process_output(type, data)
@@ -81,6 +87,7 @@ module VagrantPlugins
         def clear_output_buffer
           @output = ""
           @error_messages = ""
+          @json_output = nil
         end
 
         def check_power_shell

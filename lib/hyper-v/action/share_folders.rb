@@ -64,22 +64,31 @@ module VagrantPlugins
 
         def mount_shared_folders_to_windows
           # Make the host trust the guest
-          command = ["powershell", "Set-Item",  "wsman:\localhost\client\trustedhosts",  "*"]
-          @env[:machine].provider.driver.raw_execute(command)
-
+          begin
+            command = ["powershell", "Set-Item",  "wsman:\localhost\client\trustedhosts",  "*"]
+            @env[:machine].provider.driver.raw_execute(command)
+          rescue Error::SubprocessError => e
+            @env[:ui].info e.message
+          end
           # Find Host Machine's credentials
           result = @env[:machine].provider.driver.execute('host_info.ps1', {})
 
-          ssh_info = @env[:machine].ssh_info
-          @smb_shared_folders.each do |id, data|
-            options = { :share_name => data[:share_name],
-                        :guest_path => data[:guestpath],
-                        :guest_ip => ssh_info[:host],
-                        :username => ssh_info[:username],
-                        :host_ip => result["host_ip"],
-                        :password => @env[:machine].provider_config.guest.password }
-            @env[:ui].info("Linking #{data[:share_name]} to Guest at #{data[:guestpath]} ...")
-            @env[:machine].provider.driver.execute('mount_share.ps1', options)
+            ssh_info = @env[:machine].ssh_info
+            @smb_shared_folders.each do |id, data|
+              begin
+              options = { :share_name => data[:share_name],
+                          :guest_path => data[:guestpath],
+                          :guest_ip => ssh_info[:host],
+                          :username => ssh_info[:username],
+                          :host_ip => result["host_ip"],
+                          :password => @env[:machine].provider_config.guest.password }
+              @env[:ui].info("Linking #{data[:share_name]} to Guest at #{data[:guestpath]} ...")
+              debugger
+              @env[:machine].provider.driver.execute('mount_share.ps1', options)
+            rescue Error::SubprocessError => e
+              @env[:ui].info "Failed to link #{data[:share_name]} to Guest"
+              @env[:ui].info e.message
+            end
           end
         end
 

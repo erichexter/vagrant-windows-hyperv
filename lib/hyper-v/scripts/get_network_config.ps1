@@ -16,12 +16,20 @@
 param (
     [string]$vm_id = $(throw "-vm_id is required.")
  )
-
-$vm = Get-VM -Id $vm_id
-$network = Get-VMNetworkAdapter  -VM $vm
-$ip_address = $network.IpAddresses[0]
-Write-Host "===Begin-Output==="
-Write-Host "{
-  \'ip\' : \'$ip_address\'
-}"
-Write-Host "===End-Output==="
+try {
+  $vm = Get-VM -Id $vm_id -ErrorAction "stop"
+  $network = Get-VMNetworkAdapter  -VM $vm
+  $ip_address = $network.IpAddresses[0]
+  Write-Host "===Begin-Output==="
+  Write-Host "{
+    \'ip\' : \'$ip_address\'
+  }"
+  Write-Host "===End-Output==="
+}
+catch {
+  Write-Host "===Begin-Error==="
+  Write-Host "{
+    \'error\' : \'$_\'
+  }"
+  Write-Host "===End-Error==="
+}

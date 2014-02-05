@@ -17,12 +17,13 @@ param (
     [string]$vm_id = $(throw "-vm_id is required.")
  )
 try {
-  $vm = Get-VM -Id $vm_id -ErrorAction stop
+  $vm = Get-VM -Id $vm_id -ErrorAction "stop"
   Start-VM $vm
+}
 catch {
   Write-Host "===Begin-Error==="
   Write-Host "{
-    \'message\' : \'$_.Exception.Message\'
+    \'error\' : \'Failed to start a VM $_\'
   }"
   Write-Host "===End-Error==="
 }

@@ -24,7 +24,12 @@ module VagrantPlugins
         def call(env)
           env[:ui].info('Starting the Machine')
           options = { vm_id: env[:machine].id }
-          response = env[:machine].provider.driver.execute('start_vm.ps1', options)
+          begin
+            response = env[:machine].provider.driver.execute('start_vm.ps1', options)
+          rescue Error::SubprocessError => e
+            env[:ui].info e.message
+            return
+          end
           @app.call(env)
         end
       end

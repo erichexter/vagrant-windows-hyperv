@@ -16,12 +16,21 @@
 param (
     [string]$vm_id = $(throw "-vm_id is required.")
  )
-$vm = Get-VM -Id $vm_id
-$state = $vm.state
-$status = $vm.status
-Write-Host "===Begin-Output==="
-Write-Host "{
-  \'state\' : \'$state\',
-  \'status\' : \'$status\'
-}"
-Write-Host "===End-Output==="
+try {
+  $vm = Get-VM -Id $vm_id -ErrorAction "stop"
+  $state = $vm.state
+  $status = $vm.status
+  Write-Host "===Begin-Output==="
+  Write-Host "{
+    \'state\' : \'$state\',
+    \'status\' : \'$status\'
+  }"
+  Write-Host "===End-Output==="
+}
+catch {
+  Write-Host "===Begin-Error==="
+  Write-Host "{
+    \'error\' : \'$_\'
+  }"
+  Write-Host "===End-Error==="
+}
