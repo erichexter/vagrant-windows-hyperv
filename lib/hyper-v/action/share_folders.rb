@@ -27,11 +27,11 @@ module VagrantPlugins
           @env = env
           env[:ui].info('Setting up Folders Share, This process may take few minutes.')
           smb_shared_folders
-          # FIXME:
-          # Need to change the logic in how share folders are created in Windows
-          # prepare_smb_share
+          # Use Net share to share a folder and use a default shared folder set by user
+          # to copy the ACL options
+          prepare_smb_share
           if env[:machine].config.vm.guest == :windows
-            mount_shared_folders_to_windows
+            # mount_shared_folders_to_windows
           elsif env[:machine].config.vm.guest == :linux
             mount_shared_folders_to_linux
           end
@@ -55,33 +55,34 @@ module VagrantPlugins
         # Need to change the logic in how share folders are created in Windows
         def prepare_smb_share
           @smb_shared_folders.each do |id, data|
-            hostpath  = File.expand_path(data[:hostpath], @env[:root_path])
-            options = {:path => hostpath, :name => data[:share_name]}
-            command = ["net", "share", "#{data[:share_name]}=#{hostpath}"]
-            @env[:machine].provider.driver.raw_execute(command)
+            begin
+              hostpath  = File.expand_path(data[:hostpath], @env[:root_path])
+              options = {:path => hostpath,
+                         :share_name => data[:share_name]}
+              response = @env[:machine].provider.driver.execute('set_smb_share.ps1', options)
+              if response["message"] == "OK"
+                @env[:ui].info "Successfully created SMB share for #{hostpath} with name #{data[:share_name]}"
+              end
+            rescue Error::SubprocessError => e
+              @env[:ui].info e.message
+            end
           end
         end
 
         def mount_shared_folders_to_windows
-          # Make the host trust the guest
-          begin
-            command = ["powershell", "Set-Item",  "wsman:\localhost\client\trustedhosts",  "*"]
-            @env[:machine].provider.driver.raw_execute(command)
-          rescue Error::SubprocessError => e
-            @env[:ui].info e.message
-          end
           # Find Host Machine's credentials
           result = @env[:machine].provider.driver.execute('host_info.ps1', {})
-
-            ssh_info = @env[:machine].ssh_info
-            @smb_shared_folders.each do |id, data|
-              begin
+          ssh_info = @env[:machine].ssh_info
+          @smb_shared_folders.each do |id, data|
+            begin
               options = { :share_name => data[:share_name],
                           :guest_path => data[:guestpath],
                           :guest_ip => ssh_info[:host],
                           :username => ssh_info[:username],
                           :host_ip => result["host_ip"],
-                          :password => @env[:machine].provider_config.guest.password }
+                          :password => @env[:machine].provider_config.guest.password,
+                          :host_share_username => @env[:machine].provider_config.host_share.username,
+                          :host_share_password => @env[:machine].provider_config.host_share.password}
               @env[:ui].info("Linking #{data[:share_name]} to Guest at #{data[:guestpath]} ...")
               @env[:machine].provider.driver.execute('mount_share.ps1', options)
             rescue Error::SubprocessError => e
@@ -92,7 +93,6 @@ module VagrantPlugins
         end
 
         def mount_shared_folders_to_linux
-
           # Find Host Machine's credentials
           result = @env[:machine].provider.driver.execute('host_info.ps1', {})
           host_share_username = @env[:machine].provider_config.host_share.username

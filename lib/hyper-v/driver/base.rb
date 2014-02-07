@@ -33,6 +33,7 @@ module VagrantPlugins
           r = execute_powershell(path, options) do |type, data|
             process_output(type, data)
           end
+
           if success?
             JSON.parse(json_output[:success].join) unless json_output[:success].empty?
           else
