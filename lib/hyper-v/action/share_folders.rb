@@ -31,6 +31,9 @@ module VagrantPlugins
           # to copy the ACL options
           prepare_smb_share
           if env[:machine].config.vm.guest == :windows
+            # FIXME:
+            # There are some permission issues while mounting a windows share to
+            # Windows Guest VM
             # mount_shared_folders_to_windows
           elsif env[:machine].config.vm.guest == :linux
             mount_shared_folders_to_linux
