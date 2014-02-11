@@ -12,29 +12,23 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #--------------------------------------------------------------------------
-module VagrantPlugins
-  module HyperV
-    module Putty
-      class Config < Vagrant.plugin("2", :config)
-        attr_accessor :private_key_path
 
-        def errors
-          @errors
-        end
+# Include the following modules
+$presentDir = Split-Path -parent $PSCommandPath
+$modules = @()
+$modules += $presentDir + "\utils\write_messages.ps1"
+forEach ($module in $modules) { . $module }
 
-        def validate
-          @errors = []
-          if private_key_path.nil?
-            @errors << "Please configure a putty private key path"
-          end
-        end
+try {
+$hostname =  $(whoami)
+$ip = (Get-WmiObject -class win32_NetworkAdapterConfiguration -Filter 'ipenabled = "true"').ipaddress[0]
+  $resultHash = @{
+    host_name = $username
+    host_ip = $ip
+  }
+  Write-Output-Message $resultHash
+}
+catch {
+  Write-Error-Message $_
+}
 
-        def valid_config?
-          validate
-          errors.empty?
-        end
-
-      end
-    end
-  end
-end

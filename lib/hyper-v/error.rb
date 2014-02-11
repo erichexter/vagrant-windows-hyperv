@@ -13,22 +13,11 @@
 # limitations under the License.
 #--------------------------------------------------------------------------
 
-require "log4r"
 module VagrantPlugins
   module HyperV
-    module Action
-        class StopInstance
-            def initialize(app, env)
-              @app    = app
-            end
-
-            def call(env)
-                env[:ui].info('Stopping the Machine')
-                options = { vm_id: env[:machine].id }
-                response = env[:machine].provider.driver.execute('stop_vm.ps1', options)
-                @app.call(env)
-            end
-        end
+    module Error
+      lib_path = Pathname.new(File.expand_path("../error", __FILE__))
+      autoload :SubprocessError, lib_path.join("subprocess_error")
     end
   end
 end

@@ -15,19 +15,9 @@
 
 module VagrantPlugins
   module HyperV
-    module Action
-      class ConnectHyperv
-        def initialize(app, env)
-          @app = app
-          @logger = Log4r::Logger.new("vagrant::hyperv::connection")
-        end
-
-        def call(env)
-          env[:hyperv_connection] = WMIProvider::Connection.new('winmgmts://localhost/root/virtualization/v2')
-          @logger.info "Established connection with win32 WMI provider"
-          @app.call(env)
-        end
-      end
+    module Communicator
+      lib_path = Pathname.new(File.expand_path("../communicator", __FILE__))
+      autoload :SSH, lib_path.join("ssh")
     end
   end
 end

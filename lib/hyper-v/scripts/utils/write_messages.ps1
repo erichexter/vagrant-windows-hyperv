@@ -13,22 +13,24 @@
 # limitations under the License.
 #--------------------------------------------------------------------------
 
-require "log4r"
-module VagrantPlugins
-  module HyperV
-    module Action
-        class StopInstance
-            def initialize(app, env)
-              @app    = app
-            end
+function Write-Error-Message($message) {
+  Write-Host "===Begin-Error==="
+  Write-Host "{
+    \'error\' : \'$message\'
+  }"
+  Write-Host "===End-Error==="
+}
 
-            def call(env)
-                env[:ui].info('Stopping the Machine')
-                options = { vm_id: env[:machine].id }
-                response = env[:machine].provider.driver.execute('stop_vm.ps1', options)
-                @app.call(env)
-            end
-        end
-    end
-  end
-end
+function Write-Output-Message($hash) {
+  $result = @()
+  forEach($key in $hash.keys) {
+    $value = $hash.$key
+    $result += "\'$key\' : \'$value\'"
+  }
+  $result = $result -join(" ,")
+  Write-Host "===Begin-Output==="
+  Write-Host "{
+    $result
+  }"
+  Write-Host "===End-Output==="
+}

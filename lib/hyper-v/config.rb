@@ -14,7 +14,8 @@
 #--------------------------------------------------------------------------
 
 require "vagrant"
-require_relative "putty/config"
+require_relative "guest_config/config"
+require_relative "host_share/config"
 module VagrantPlugins
   module HyperV
     class Config < Vagrant.plugin("2", :config)
@@ -22,27 +23,34 @@ module VagrantPlugins
       #
       # @return [Boolean]
       attr_accessor :gui
+      attr_reader :host_share, :guest
 
-      attr_reader :putty
-      
-      def putty_config(&block)
-        block.call(@putty)
+      def host_config(&block)
+        block.call(@host_share)
       end
 
-      def finalize!        
-        # @putty_private_key_path = nil if @putty_private_key_path == UNSET_VALUE
+      def guest_config(&block)
+        block.call(@guest)
+      end
+
+      def finalize!
         @gui = nil if @gui == UNSET_VALUE
       end
 
       def initialize(region_specific=false)
         @gui = UNSET_VALUE
-        @putty = Putty::Config.new
+        @host_share = HostShare::Config.new
+        @guest = GuestConfig::Config.new
       end
 
       def validate(machine)
         errors = _detected_errors
-        unless putty.valid_config?
-          errors << putty.errors.flatten.join(" ")
+        unless host_share.valid_config?
+          errors << host_share.errors.flatten.join(" ")
+        end
+
+        unless guest.valid_config?
+          errors << guest.errors.flatten.join(" ")
         end
         { "HyperV" => errors }
       end

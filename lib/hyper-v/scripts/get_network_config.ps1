@@ -13,22 +13,25 @@
 # limitations under the License.
 #--------------------------------------------------------------------------
 
-require "log4r"
-module VagrantPlugins
-  module HyperV
-    module Action
-        class StopInstance
-            def initialize(app, env)
-              @app    = app
-            end
+param (
+    [string]$vm_id = $(throw "-vm_id is required.")
+ )
 
-            def call(env)
-                env[:ui].info('Stopping the Machine')
-                options = { vm_id: env[:machine].id }
-                response = env[:machine].provider.driver.execute('stop_vm.ps1', options)
-                @app.call(env)
-            end
-        end
-    end
-  end
-end
+# Include the following modules
+$presentDir = Split-Path -parent $PSCommandPath
+$modules = @()
+$modules += $presentDir + "\utils\write_messages.ps1"
+forEach ($module in $modules) { . $module }
+
+try {
+  $vm = Get-VM -Id $vm_id -ErrorAction "stop"
+  $network = Get-VMNetworkAdapter  -VM $vm
+  $ip_address = $network.IpAddresses[0]
+  $resultHash = @{
+    ip = $ip_address
+  }
+  Write-Output-Message $resultHash
+}
+catch {
+  Write-Error-Message "Failed to obtain network info of VM $_"
+}

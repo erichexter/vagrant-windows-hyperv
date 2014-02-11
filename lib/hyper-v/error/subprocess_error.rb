@@ -13,22 +13,22 @@
 # limitations under the License.
 #--------------------------------------------------------------------------
 
-require "log4r"
+require "json"
+require "vagrant/util/which"
+require "vagrant/util/subprocess"
+
 module VagrantPlugins
   module HyperV
-    module Action
-        class StopInstance
-            def initialize(app, env)
-              @app    = app
-            end
-
-            def call(env)
-                env[:ui].info('Stopping the Machine')
-                options = { vm_id: env[:machine].id }
-                response = env[:machine].provider.driver.execute('stop_vm.ps1', options)
-                @app.call(env)
-            end
+    module Error
+      class SubprocessError < RuntimeError
+        def initialize(message)
+          @message = JSON.parse(message) if message
         end
+
+        def message
+          @message["error"]
+        end
+      end
     end
   end
 end

@@ -13,24 +13,11 @@
 # limitations under the License.
 #--------------------------------------------------------------------------
 
-require "win32ole"
-require "pathname"
-require "logger"
-require "vagrant/util/subprocess"
-
 module VagrantPlugins
   module HyperV
-  	module WMIProvider
-
-  		wmi_root = Pathname.new(File.expand_path("../wmi-provider", __FILE__))
-  		autoload :Machine, wmi_root.join('machine')
-      autoload :Connection, wmi_root.join('connection')
-
-      WMILogger = Logger.new(STDOUT)
-      WMILogger.level = Logger::INFO
-      WMILogger.formatter = proc do |severity, datetime, progname, msg|
-        "WIN32 -- #{severity}: #{msg}\n"
-      end
-  	end
+    module Driver
+      lib_path = Pathname.new(File.expand_path("../driver", __FILE__))
+      autoload :Base, lib_path.join("base")
+    end
   end
 end

@@ -13,7 +13,6 @@
 # limitations under the License.
 #--------------------------------------------------------------------------
 
-require "debugger"
 require "log4r"
 module VagrantPlugins
   module HyperV
@@ -39,19 +38,19 @@ module VagrantPlugins
           end
 
           options = {
-            xml_path:  config_path,
-            root_folder:  box_directory,
-            need_unique_id: true,
-            vhdx_path: vhdx_path
+            vm_xml_config:  config_path.gsub("/", "\\"),
+            vhdx_path: vhdx_path.gsub("/", "\\")
           }
+
           env[:ui].info "Importing a Hyper-V instance"
           begin
-            server = env[:hyperv_connection].import(options)
-          # TODO: Handle exception from WMIProvider
-          rescue => e
-            e.inspect
+            server = env[:machine].provider.driver.execute('import_vm.ps1', options)
+          rescue Error::SubprocessError => e
+            env[:ui].info e.message
+            return
           end
-          env[:machine].id = server.id
+          env[:ui].info "Successfully imported a VM with name   #{server['name']}"
+          env[:machine].id = server["id"]
           @app.call(env)
         end
       end

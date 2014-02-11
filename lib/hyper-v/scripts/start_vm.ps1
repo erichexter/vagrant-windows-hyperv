@@ -13,22 +13,25 @@
 # limitations under the License.
 #--------------------------------------------------------------------------
 
-require "log4r"
-module VagrantPlugins
-  module HyperV
-    module Action
-        class StopInstance
-            def initialize(app, env)
-              @app    = app
-            end
+param (
+    [string]$vm_id = $(throw "-vm_id is required.")
+ )
 
-            def call(env)
-                env[:ui].info('Stopping the Machine')
-                options = { vm_id: env[:machine].id }
-                response = env[:machine].provider.driver.execute('stop_vm.ps1', options)
-                @app.call(env)
-            end
-        end
-    end
-  end
-end
+# Include the following modules
+$presentDir = Split-Path -parent $PSCommandPath
+$modules = @()
+$modules += $presentDir + "\utils\write_messages.ps1"
+forEach ($module in $modules) { . $module }
+
+try {
+  $vm = Get-VM -Id $vm_id -ErrorAction "stop"
+  Start-VM $vm
+  $resultHash = @{
+    state = $vm.state
+    status = $vm.status
+  }
+  Write-Output-Message $resultHash
+}
+catch {
+  Write-Error-Message "Failed to start a VM $_"
+}

@@ -12,16 +12,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #--------------------------------------------------------------------------
+require "debugger"
 require "log4r"
 require "vagrant/util/subprocess"
-require "vagrant/util/scoped_hash_override"
 require "vagrant/util/which"
 
 module VagrantPlugins
   module HyperV
     module Action
       class SyncFolders
-        include Vagrant::Util::ScopedHashOverride
 
         def initialize(app, env)
           @app    = app
@@ -29,39 +28,56 @@ module VagrantPlugins
         end
 
         def call(env)
+          @env = env
           @app.call(env)
-          ssh_info = env[:machine].ssh_info
-
-          if ssh_info.nil?
-            env[:ui].info('SSH Info not available, Aborting Sync folder')
-            return
-          end
-
-          putty_private_key = env[:machine].provider_config.putty.private_key_path
-          unless Vagrant::Util::Which.which('pscp')
-            env[:ui].warn("PSCP Not found in host")
-            return
-          end
-          env[:machine].config.vm.synced_folders.each do |id, data|
-            data = scoped_hash_override(data, :aws)
-
-            # Ignore disabled shared folders
-            next if data[:disabled]
-
-            hostpath  = File.expand_path(data[:hostpath], env[:root_path])
-            guestpath = data[:guestpath]
-            env[:ui].info('Starting Sync folders')
-            command = ["pscp", "-r", "-i", "#{putty_private_key}", hostpath,
-              "#{ssh_info[:username]}@#{ssh_info[:host]}:#{guestpath}", {timeout: 10, notify: ['stdout']}]
-            begin
-              r = Vagrant::Util::Subprocess.execute(*command)
-            rescue Vagrant::Util::Subprocess::TimeoutExceeded
-              env[:ui].info('Sync Process timed out')
-            end
-            # TODO:
-            # Check for error state when command fails
+          if env[:machine].config.vm.guest == :windows
+            sync_folders_to_windows
+          elsif env[:machine].config.vm.guest == :linux
+            sync_folders_to_linux
           end
         end
+
+        def ssh_info
+          @ssh_info ||= @env[:machine].ssh_info
+        end
+
+        def sync_folders_to_windows
+          @env[:machine].config.vm.synced_folders.each do |id, data|
+            # Ignore disabled shared folders
+            next if data[:disabled] || data[:smb]
+            hostpath  = File.expand_path(data[:hostpath], @env[:root_path]).gsub("/", "\\")
+            guestpath = data[:guestpath].gsub("/", "\\")
+            options = { :guest_ip => ssh_info[:host],
+                        :username => ssh_info[:username],
+                        :host_path => hostpath,
+                        :guest_path => guestpath,
+                        :vm_id => @env[:machine].id,
+                        :password => @env[:machine].provider_config.guest.password }
+            response = @env[:machine].provider.driver.execute('file_sync.ps1', options)
+            end
+        end
+
+        def sync_folders_to_linux
+          if ssh_info.nil?
+            @env[:ui].info('SSH Info not available, Aborting Sync folder')
+            return
+          end
+
+          @env[:machine].config.vm.synced_folders.each do |id, data|
+            # Ignore disabled shared folders
+            next if data[:disabled] || data[:smb]
+            hostpath  = File.expand_path(data[:hostpath], @env[:root_path])
+            guestpath = data[:guestpath]
+            @env[:ui].info('Starting Sync folders')
+            begin
+              @env[:machine].communicate.upload(hostpath, guestpath)
+            rescue RuntimeError => e
+              @env[:ui].error(e.message)
+            end
+
+          end
+        end
+
       end
     end
   end

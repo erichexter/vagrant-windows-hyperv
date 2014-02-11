@@ -25,14 +25,13 @@ module VagrantPlugins
       def self.action_reload
         Vagrant::Action::Builder.new.tap do |b|
           b.use ConfigValidate
-          b.use ConnectHyperv
           b.use Call, IsCreated do |env, b2|
             if !env[:result]
               b2.use MessageNotCreated
               next
             end
             b2.use action_halt
-            b2.use Call, WaitForState, :stopped, 120 do |env2, b3|
+            b2.use Call, WaitForState, :off, 120 do |env2, b3|
               if env2[:result]
                 b3.use action_up
               else
@@ -51,7 +50,6 @@ module VagrantPlugins
               b2.use MessageNotCreated
               next
             end
-            b2.use ConnectHyperv
             b2.use StopInstance
           end
         end
@@ -60,6 +58,7 @@ module VagrantPlugins
       def self.action_start
         Vagrant::Action::Builder.new.tap do |b|
           b.use StartInstance
+          b.use ShareFolders
           b.use SyncFolders
         end
       end
@@ -68,7 +67,6 @@ module VagrantPlugins
         Vagrant::Action::Builder.new.tap do |b|
           b.use HandleBoxUrl
           b.use ConfigValidate
-          b.use ConnectHyperv
           b.use Call, IsCreated do |env1, b1|
             if env1[:result]
               b1.use Call, IsStopped do |env2, b2|
@@ -89,7 +87,6 @@ module VagrantPlugins
       def self.action_read_state
         Vagrant::Action::Builder.new.tap do |b|
           b.use ConfigValidate
-          b.use ConnectHyperv
           b.use ReadState
         end
       end
@@ -116,7 +113,6 @@ module VagrantPlugins
       def self.action_read_guest_ip
         Vagrant::Action::Builder.new.tap do |b|
           b.use ConfigValidate
-          b.use ConnectHyperv
           b.use ReadGuestIP
         end
       end
@@ -126,7 +122,6 @@ module VagrantPlugins
       action_root = Pathname.new(File.expand_path("../action", __FILE__))
       autoload :IsCreated, action_root.join("is_created")
       autoload :IsStopped, action_root.join("is_stopped")
-      autoload :ConnectHyperv, action_root.join("connect_hyperv")
       autoload :ReadState, action_root.join("read_state")
       autoload :Import, action_root.join("import")
       autoload :StartInstance, action_root.join('start_instance')
@@ -137,6 +132,7 @@ module VagrantPlugins
       autoload :SyncFolders, action_root.join('sync_folders')
       autoload :WaitForState, action_root.join('wait_for_state')
       autoload :ReadGuestIP, action_root.join('read_guest_ip')
+      autoload :ShareFolders, action_root.join('share_folders')
     end
   end
 end

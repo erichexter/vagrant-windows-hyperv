@@ -13,22 +13,26 @@
 # limitations under the License.
 #--------------------------------------------------------------------------
 
-require "log4r"
 module VagrantPlugins
   module HyperV
     module Action
-        class StartInstance
-            def initialize(app, env)
-              @app    = app
-            end
-
-            def call(env)
-                hyperv_server = env[:hyperv_connection].find_vm_by_id(env[:machine].id)
-                env[:ui].info('Starting the Machine')
-                hyperv_server.start
-                @app.call(env)
-            end
+      class StartInstance
+        def initialize(app, env)
+          @app = app
         end
+
+        def call(env)
+          env[:ui].info('Starting the Machine')
+          options = { vm_id: env[:machine].id }
+          begin
+            response = env[:machine].provider.driver.execute('start_vm.ps1', options)
+          rescue Error::SubprocessError => e
+            env[:ui].info e.message
+            return
+          end
+          @app.call(env)
+        end
+      end
     end
   end
 end

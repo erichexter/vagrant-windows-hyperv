@@ -12,23 +12,32 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #--------------------------------------------------------------------------
-
-require "log4r"
 module VagrantPlugins
   module HyperV
-    module Action
-        class StopInstance
-            def initialize(app, env)
-              @app    = app
-            end
+    module GuestConfig
+      class Config < Vagrant.plugin("2", :config)
+        attr_accessor :username, :password
 
-            def call(env)
-                env[:ui].info('Stopping the Machine')
-                options = { vm_id: env[:machine].id }
-                response = env[:machine].provider.driver.execute('stop_vm.ps1', options)
-                @app.call(env)
-            end
+        def errors
+          @errors
         end
+
+        def validate
+          @errors = []
+          if username.nil?
+            @errors << "Please configure a Guest VM's username"
+          end
+          if password.nil?
+            @errors << "Please configure a Guest VM's password"
+          end
+        end
+
+        def valid_config?
+          validate
+          errors.empty?
+        end
+
+      end
     end
   end
 end
