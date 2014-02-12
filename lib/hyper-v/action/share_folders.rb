@@ -76,12 +76,14 @@ module VagrantPlugins
 
         def mount_shared_folders_to_windows
           ssh_info = @env[:machine].ssh_info
+          result = @env[:machine].provider.driver.execute('host_info.ps1', {})
           @smb_shared_folders.each do |id, data|
             begin
               options = { :share_name => data[:share_name],
                           :guest_path => data[:guestpath].gsub("/", "\\"),
                           :guest_ip => ssh_info[:host],
                           :username => ssh_info[:username],
+                          :host_ip => result["host_ip"],
                           :password => @env[:machine].provider_config.guest.password,
                           :host_share_username => @env[:machine].provider_config.host_share.username,
                           :host_share_password => @env[:machine].provider_config.host_share.password}

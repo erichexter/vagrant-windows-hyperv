@@ -20,6 +20,7 @@ param (
     [string]$guest_ip = $(throw "-guest_ip is required."),
     [string]$username = $(throw "-username is required."),
     [string]$password = $(throw "-password is required."),
+    [string]$host_ip  = $(throw "-host_ip is required."),
     [string]$host_share_username  = $(throw "-host_share_username is required."),
     [string]$host_share_password  = $(throw "-host_share_password is required.")
  )
@@ -59,9 +60,8 @@ try {
         Write-Error-Message $response["error"]
         return
     }
-    $host_name = $(Get-WmiObject Win32_Computersystem).name
-    $host_path = "\\$host_name\$share_name"
-    $host_share_username = "$host_name\$host_share_username"
+    $host_path = "\\$host_ip\$share_name"
+    $host_share_username = "$host_ip\$host_share_username"
     $result = Invoke-Command -Session $response["session"] -ScriptBlock ${function:Mount-File} -ArgumentList $share_name, $guest_path, $host_path, $host_share_username, $host_share_password -ErrorAction "stop"
     Remove-PSSession -Id $response["session"].Id
     Write-Error-Message $result
