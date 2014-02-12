@@ -27,7 +27,6 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
   config.vm.synced_folder 'E:/Test_Sync', "/home/vagrant/share",
     :smb => true, :share_name => "test_sync"
-  config.vm.synced_folder 'E:/Test_Sync_2', "/home/vagrant/share/test_2",
 
   config.vm.synced_folder "." , "/vagrant", :disabled => true
 
@@ -57,7 +56,6 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   #
   # Override the default SSH User Name set by vagrant
   # config.ssh.default.username = "vagrant"
-    config.ssh.default.password = "******"  # Password of your Guest VM
 
   # Override the default SSH Port set by vagrant
   # config.ssh.guest_port = 22
