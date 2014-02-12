@@ -34,7 +34,7 @@ module VagrantPlugins
             # FIXME:
             # There are some permission issues while mounting a windows share to
             # Windows Guest VM
-            # mount_shared_folders_to_windows
+            mount_shared_folders_to_windows
           elsif env[:machine].config.vm.guest == :linux
             mount_shared_folders_to_linux
           end
@@ -60,8 +60,10 @@ module VagrantPlugins
           @smb_shared_folders.each do |id, data|
             begin
               hostpath  = File.expand_path(data[:hostpath], @env[:root_path])
+              host_share_username = @env[:machine].provider_config.host_share.username
               options = {:path => hostpath,
-                         :share_name => data[:share_name]}
+                         :share_name => data[:share_name],
+                         :host_share_username => host_share_username}
               response = @env[:machine].provider.driver.execute('set_smb_share.ps1', options)
               if response["message"] == "OK"
                 @env[:ui].info "Successfully created SMB share for #{hostpath} with name #{data[:share_name]}"
@@ -73,13 +75,12 @@ module VagrantPlugins
         end
 
         def mount_shared_folders_to_windows
-          # Find Host Machine's credentials
-          result = @env[:machine].provider.driver.execute('host_info.ps1', {})
           ssh_info = @env[:machine].ssh_info
+          result = @env[:machine].provider.driver.execute('host_info.ps1', {})
           @smb_shared_folders.each do |id, data|
             begin
               options = { :share_name => data[:share_name],
-                          :guest_path => data[:guestpath],
+                          :guest_path => data[:guestpath].gsub("/", "\\"),
                           :guest_ip => ssh_info[:host],
                           :username => ssh_info[:username],
                           :host_ip => result["host_ip"],

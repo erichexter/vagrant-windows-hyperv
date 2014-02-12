@@ -15,7 +15,8 @@
 
 param (
     [string]$path = $(throw "-path is required."),
-    [string]$share_name = $(throw "-share_name is required.")
+    [string]$share_name = $(throw "-share_name is required."),
+    [string]$host_share_username = $(throw "-host_share_username is required")
  )
 
 # Include the following modules
@@ -29,18 +30,33 @@ forEach ($module in $modules) { . $module }
 # to be shared from Host to the Guest VM
 
 try {
-  $sample_smb_share_folder = "E:\\smb_share"
+  function Set-Acl-Rule($host_share_username) {
+    $colRights = [System.Security.AccessControl.FileSystemRights]"Read, Write"
+
+    $InheritanceFlag = [System.Security.AccessControl.InheritanceFlags]::None
+    $PropagationFlag = [System.Security.AccessControl.PropagationFlags]::None
+
+    $objType =[System.Security.AccessControl.AccessControlType]::Allow
+    $computer_name = $(Get-WmiObject Win32_Computersystem).name
+    $objUser = New-Object System.Security.Principal.NTAccount("$computer_name\$host_share_username")
+
+    return New-Object System.Security.AccessControl.FileSystemAccessRule `
+        ($objUser, $colRights, $InheritanceFlag, $PropagationFlag, $objType)
+  }
+
   # See all available shares and check alert user for existing / conflicting share name
   $shared_folders = net share
   $reg = "$share_name(\s+)$path(\s)"
   $existing_share = $shared_folders -Match $reg
   if ($existing_share) {
     # Always clear the existing share name and create a new one
-    net share $share_name /delete
+    net share $share_name /delete /y
   }
-  $result = net share $share_name=$path
+  $result = net share $share_name=$path /unlimited
   if ($result -Match "$share_name was shared successfully.") {
-    $acl = Get-Acl $sample_smb_share_folder
+    $acl = Get-Acl $path
+    $objACE = Set-Acl-Rule $host_share_username
+    $objACE = $acl.AddAccessRule($objACE)
     Set-Acl -Path $path -AclObject $acl
     $resultHash = @{
       message = "OK"

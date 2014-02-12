@@ -44,8 +44,9 @@ try {
           $mapped_drive = (($result -match "\w:") -split (" "))[1]
           Write-Host cmd /c  mklink /d $guest_path  $mapped_drive
           # If a folder exist remove it.
-          if (!(Test-Path $guest_path)) {
-
+          if (Test-Path $guest_path) {
+            $junction = Get-Item $guest_path
+            $junction.Delete()
           }
           cmd /c  mklink /d $guest_path  $mapped_drive
         } catch {
