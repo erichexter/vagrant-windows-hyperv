@@ -97,18 +97,11 @@ module VagrantPlugins
               # Create a folder in /mnt with the share_name
               @env[:machine].communicate.sudo("mkdir -p /mnt/#{data[:share_name]}")
 
-              # FIXME:
-              # Set proper folder permissions and owner permissions
-              # Change permissions set chmod to 644
-              @env[:machine].communicate.sudo("chmod 644 /mnt/#{data[:share_name]}")
-
-              @env[:machine].communicate.sudo("chown vagrant:vagrant /mnt/#{data[:share_name]}")
-
               # Mount the Network drive to Guest VM
               @env[:ui].info("Linking #{data[:share_name]} to Guest at #{data[:guestpath]} ...")
 
               command  = "mount -t cifs //#{result["host_ip"]}/#{data[:share_name]}"
-              command  += " -o username=#{host_share_username},pass=#{host_share_password},sec=ntlm /mnt/#{data[:share_name]}"
+              command  += " -o rw,username=#{host_share_username},pass=#{host_share_password},sec=ntlm,file_mode=0777,dir_mode=0777,uid=`id -u vagrant`,gid=`id -g vagrant`,rw /mnt/#{data[:share_name]}"
               @env[:machine].communicate.sudo(command)
 
               # Remove the guest path is exist
@@ -117,6 +110,9 @@ module VagrantPlugins
 
               # Create a location in guest to guestpath
               @env[:machine].communicate.sudo("mkdir -p #{data[:guestpath]}")
+
+              # Change permissions set chmod to 644
+              @env[:machine].communicate.sudo("chown `id -u vagrant`:`id -g vagrant` #{data[:guestpath]}")
 
               # Create a symlink from mount point to the actual location to guest path
               command = "ln -s /mnt/#{data[:share_name]} #{data[:guestpath]}"

@@ -20,8 +20,9 @@ forEach ($module in $modules) { . $module }
 # to be shared from Host to the Guest VM
 
 try {
+  # http://technet.microsoft.com/en-us/library/ff730951.aspx
   function Set-Acl-Rule($host_share_username) {
-    $colRights = [System.Security.AccessControl.FileSystemRights]"Read, Write"
+    $colRights = [System.Security.AccessControl.FileSystemRights]"Read, Modify, FullControl"
 
     $InheritanceFlag = [System.Security.AccessControl.InheritanceFlags]::None
     $PropagationFlag = [System.Security.AccessControl.PropagationFlags]::None
@@ -42,12 +43,26 @@ try {
     # Always clear the existing share name and create a new one
     net share $share_name /delete /y
   }
-  $result = net share $share_name=$path /unlimited
+
+  # Set ACL for all files in the folder
+  foreach ($file in $(Get-ChildItem $path -recurse)) {
+    $acl = get-acl $file.FullName
+
+    $permissions = Set-Acl-Rule $host_share_username
+    $acl.SetAccessRule($permissions)
+
+    # Write the changes to the object
+    try {
+      set-acl $File.Fullname $acl -ErrorAction stop
+      } catch {
+
+      }
+    }
+
+  $computer_name = $(Get-WmiObject Win32_Computersystem).name
+  $grant_permission = "$computer_name\$host_share_username,Full"
+  $result = net share $share_name=$path /unlimited /GRANT:$grant_permission
   if ($result -Match "$share_name was shared successfully.") {
-    $acl = Get-Acl $path
-    $objACE = Set-Acl-Rule $host_share_username
-    $objACE = $acl.AddAccessRule($objACE)
-    Set-Acl -Path $path -AclObject $acl
     $resultHash = @{
       message = "OK"
     }
