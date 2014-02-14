@@ -118,4 +118,6 @@ Remove-PSSession -Id $session.Id
 $resultHash = @{
   message = "OK"
 }
-Write-Output-Message $resultHash
+$result = ConvertTo-Json $resultHash
+Write-Output-Message $result
+

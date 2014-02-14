@@ -17,11 +17,14 @@ try {
   $vm = Get-VM -Id $vm_id -ErrorAction stop
   # Shuts down virtual machine regardless of any unsaved application data
   Stop-VM $vm -Force
+  $state = $vm.state
+  $status = $vm.status
   $resultHash = @{
-    state = $vm.state
-    status = $vm.status
+    state = "$state"
+    status = "$status"
   }
-  Write-Output-Message $resultHash
+  $result = ConvertTo-Json $resultHash
+  Write-Output-Message $result
 }
 catch {
   Write-Error-Message "Failed to stop a VM $_"

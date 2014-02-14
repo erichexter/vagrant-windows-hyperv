@@ -141,7 +141,8 @@ try {
     name = $vm_name
     id = $vm_id
   }
-  Write-Output-Message $resultHash
+  $result = ConvertTo-Json $resultHash
+  Write-Output-Message $result
 }
 catch {
   Write-Error-Message $_

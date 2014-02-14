@@ -16,14 +16,16 @@ module VagrantPlugins
         def call(env)
           @env = env
           smb_shared_folders
-          # Use Net share to share a folder and use a default shared folder set by user
-          # to copy the ACL options
           prepare_smb_share
+          # A BIG Clean UP
+          # There should be a communicator class which branches between windows
+          # and Linux
+          if @smb_shared_folders.length > 0
+            env[:ui].info('Mounting shared folders with VM, This process may take few minutes.')
+          end
           if env[:machine].config.vm.guest == :windows
-            # FIXME:
-            # There are some permission issues while mounting a windows share to
-            # Windows Guest VM
-            mount_shared_folders_to_windows
+            env[:ui].info "Mounting shared folders to windows is under development."
+            # mount_shared_folders_to_windows
           elsif env[:machine].config.vm.guest == :linux
             mount_shared_folders_to_linux
           end
@@ -43,8 +45,6 @@ module VagrantPlugins
           end
         end
 
-        # FIXME:
-        # Need to change the logic in how share folders are created in Windows
         def prepare_smb_share
           @smb_shared_folders.each do |id, data|
             begin
@@ -63,10 +63,12 @@ module VagrantPlugins
           end
         end
 
+        def ssh_info
+          @ssh_info || @env[:machine].ssh_info
+        end
+
         def mount_shared_folders_to_windows
-          ssh_info = @env[:machine].ssh_info
           result = @env[:machine].provider.driver.execute('host_info.ps1', {})
-          @env[:ui].info('Setting up Folders Share, This process may take few minutes.')
           @smb_shared_folders.each do |id, data|
             begin
               options = { :share_name => data[:share_name],
@@ -91,36 +93,24 @@ module VagrantPlugins
           result = @env[:machine].provider.driver.execute('host_info.ps1', {})
           host_share_username = @env[:machine].provider_config.host_share.username
           host_share_password = @env[:machine].provider_config.host_share.password
-          @env[:ui].info('Mounting shared folders with VM, This process may take few minutes.')
           @smb_shared_folders.each do |id, data|
             begin
-              # Create a folder in /mnt with the share_name
-              @env[:machine].communicate.sudo("mkdir -p /mnt/#{data[:share_name]}")
-
-              # FIXME:
-              # Set proper folder permissions and owner permissions
-              # Change permissions set chmod to 644
-              @env[:machine].communicate.sudo("chmod 644 /mnt/#{data[:share_name]}")
-
-              @env[:machine].communicate.sudo("chown vagrant:vagrant /mnt/#{data[:share_name]}")
-
               # Mount the Network drive to Guest VM
               @env[:ui].info("Linking #{data[:share_name]} to Guest at #{data[:guestpath]} ...")
 
-              command  = "mount -t cifs //#{result["host_ip"]}/#{data[:share_name]}"
-              command  += " -o username=#{host_share_username},pass=#{host_share_password},sec=ntlm /mnt/#{data[:share_name]}"
-              @env[:machine].communicate.sudo(command)
-
-              # Remove the guest path is exist
-              command = "rm -rf  #{data[:guestpath]}"
-              @env[:machine].communicate.sudo(command)
-
               # Create a location in guest to guestpath
               @env[:machine].communicate.sudo("mkdir -p #{data[:guestpath]}")
+              owner = data[:owner] || ssh_info[:username]
+              group = data[:group] || ssh_info[:username]
 
-              # Create a symlink from mount point to the actual location to guest path
-              command = "ln -s /mnt/#{data[:share_name]} #{data[:guestpath]}"
+              mount_options  = "-o rw,username=#{host_share_username},pass=#{host_share_password},"
+              mount_options  += "sec=ntlm,file_mode=0777,dir_mode=0777,"
+              mount_options  += "uid=`id -u #{owner}`,gid=`id -g #{group}`,rw #{data[:guestpath]}"
+
+              command = "mount -t cifs //#{result["host_ip"]}/#{data[:share_name]} #{mount_options}"
+
               @env[:machine].communicate.sudo(command)
+
             rescue RuntimeError => e
               @env[:ui].error(e.message)
             end

@@ -4,23 +4,17 @@
 #--------------------------------------------------------------------------
 
 function Write-Error-Message($message) {
+  $error_message = @{
+    error = "$message"
+  }
   Write-Host "===Begin-Error==="
-  Write-Host "{
-    \'error\' : \'$message\'
-  }"
+  $result =  ConvertTo-json $error_message
+  Write-Host $result
   Write-Host "===End-Error==="
 }
 
-function Write-Output-Message($hash) {
-  $result = @()
-  forEach($key in $hash.keys) {
-    $value = $hash.$key
-    $result += "\'$key\' : \'$value\'"
-  }
-  $result = $result -join(" ,")
+function Write-Output-Message($message) {
   Write-Host "===Begin-Output==="
-  Write-Host "{
-    $result
-  }"
+  Write-Host $message
   Write-Host "===End-Output==="
 }
