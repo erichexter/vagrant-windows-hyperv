@@ -24,7 +24,8 @@ module VagrantPlugins
             env[:ui].info('Mounting shared folders with VM, This process may take few minutes.')
           end
           if env[:machine].config.vm.guest == :windows
-            mount_shared_folders_to_windows
+            env[:ui].info "Mounting shared folders to windows is under development."
+            # mount_shared_folders_to_windows
           elsif env[:machine].config.vm.guest == :linux
             mount_shared_folders_to_linux
           end
