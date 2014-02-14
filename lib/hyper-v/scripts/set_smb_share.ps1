@@ -32,7 +32,8 @@ try {
     $resultHash = @{
       message = "OK"
     }
-    Write-Output-Message $resultHash
+    $result = ConvertTo-Json $resultHash
+    Write-Output-Message $result
   } else {
     $reg = "^$share_name(\s+)"
     $existing_share = $shared_folders -Match $reg

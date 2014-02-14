@@ -18,9 +18,10 @@ try {
   $network = Get-VMNetworkAdapter  -VM $vm
   $ip_address = $network.IpAddresses[0]
   $resultHash = @{
-    ip = $ip_address
+    ip = "$ip_address"
   }
-  Write-Output-Message $resultHash
+  $result = ConvertTo-Json $resultHash
+  Write-Output-Message $result
 }
 catch {
   Write-Error-Message "Failed to obtain network info of VM $_"

@@ -16,6 +16,7 @@ module VagrantPlugins
           options = { vm_id: env[:machine].id }
           begin
             response = env[:machine].provider.driver.execute('start_vm.ps1', options)
+            env[:ui].info "Machine #{response["name"]} started"
           rescue Error::SubprocessError => e
             env[:ui].info e.message
             return

@@ -15,11 +15,15 @@ forEach ($module in $modules) { . $module }
 
 try {
   $vm = Get-VM -Id $vm_id -ErrorAction "stop"
+  $state = $vm.state
+  $status = $vm.status
   $resultHash = @{
-    state = $vm.state
-    status = $vm.status
+    state = "$state"
+    status = "$status"
   }
-  Write-Output-Message $resultHash
+  $result = ConvertTo-Json $resultHash
+  Write-Output-Message $result
+
 }
 catch {
   Write-Error-Message $_

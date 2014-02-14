@@ -23,7 +23,6 @@ module VagrantPlugins
           r = execute_powershell(path, options) do |type, data|
             process_output(type, data)
           end
-
           if success?
             JSON.parse(json_output[:success].join) unless json_output[:success].empty?
           else
@@ -51,8 +50,12 @@ module VagrantPlugins
           @output.split("\n").each do |line|
             json_error_begin = false if line.include?("===End-Error===")
             json_success_begin = false if line.include?("===End-Output===")
-            success << line.gsub("\\'","\"") if json_success_begin
-            error << line.gsub("\\'","\"") if json_error_begin
+            message = ""
+            if json_error_begin || json_success_begin
+              message = line.gsub("\\'","\"")
+            end
+            success << message if json_success_begin
+            error << message if json_error_begin
             json_success_begin = true if line.include?("===Begin-Output===")
             json_error_begin = true if line.include?("===Begin-Error===")
           end

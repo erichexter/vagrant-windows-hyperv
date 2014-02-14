@@ -16,13 +16,14 @@ module VagrantPlugins
         def call(env)
           @env = env
           smb_shared_folders
-          # Use Net share to share a folder and use a default shared folder set by user
-          # to copy the ACL options
           prepare_smb_share
+          # A BIG Clean UP
+          # There should be a communicator class which branches between windows
+          # and Linux
+          if @smb_shared_folders.length > 0
+            env[:ui].info('Mounting shared folders with VM, This process may take few minutes.')
+          end
           if env[:machine].config.vm.guest == :windows
-            # FIXME:
-            # There are some permission issues while mounting a windows share to
-            # Windows Guest VM
             mount_shared_folders_to_windows
           elsif env[:machine].config.vm.guest == :linux
             mount_shared_folders_to_linux
@@ -43,8 +44,6 @@ module VagrantPlugins
           end
         end
 
-        # FIXME:
-        # Need to change the logic in how share folders are created in Windows
         def prepare_smb_share
           @smb_shared_folders.each do |id, data|
             begin
@@ -69,7 +68,6 @@ module VagrantPlugins
 
         def mount_shared_folders_to_windows
           result = @env[:machine].provider.driver.execute('host_info.ps1', {})
-          @env[:ui].info('Setting up Folders Share, This process may take few minutes.')
           @smb_shared_folders.each do |id, data|
             begin
               options = { :share_name => data[:share_name],
@@ -94,10 +92,8 @@ module VagrantPlugins
           result = @env[:machine].provider.driver.execute('host_info.ps1', {})
           host_share_username = @env[:machine].provider_config.host_share.username
           host_share_password = @env[:machine].provider_config.host_share.password
-          @env[:ui].info('Mounting shared folders with VM, This process may take few minutes.')
           @smb_shared_folders.each do |id, data|
             begin
-
               # Mount the Network drive to Guest VM
               @env[:ui].info("Linking #{data[:share_name]} to Guest at #{data[:guestpath]} ...")
 
