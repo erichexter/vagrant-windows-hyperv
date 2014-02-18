@@ -29,6 +29,11 @@ module VagrantPlugins
         Config
       end
 
+      command "rdp" do
+        require_relative "command/rdp"
+        Command
+      end
+
       provider(:hyperv, parallel: true) do
         # Setup logging and i18n
         # setup_logging
