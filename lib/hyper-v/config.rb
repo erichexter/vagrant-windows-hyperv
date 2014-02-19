@@ -40,7 +40,7 @@ module VagrantPlugins
         end
 
         unless guest.valid_config?
-          errors << guest.errors.flatten.join(" ")
+          # errors << guest.errors.flatten.join(" ")
         end
         { "HyperV" => errors }
       end

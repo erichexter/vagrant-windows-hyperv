@@ -55,24 +55,18 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   # Example for Hyper-V:
   #
   # Override the default SSH User Name set by vagrant
-  # config.ssh.default.username = "vagrant"
 
   # Override the default SSH Port set by vagrant
   # config.ssh.guest_port = 22
 
   # Set the connection Host machine IP
 
-  # Override the default private key path
-  config.ssh.default.private_key_path = "E:/insecure_private_key"
-
   config.vm.guest = :linux
 
-  config.vm.provider "hyperv" do |hv|
-    # Username and Password of Guest VM
-    hv.guest_config do |config|
-      config.username = "vagrant"
-      config.password = "********"
-    end
+  config.vm.provider "hyperv" do |hv, override|
+    override.ssh.username = "vagrant"
+    override.ssh.private_key_path = "E:/insecure_private_key"
+
     # Host user account which is created to share folders from Hyper-V Host
     # To Guest VM
 
