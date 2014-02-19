@@ -8,7 +8,7 @@ require_relative "host_share/config"
 module VagrantPlugins
   module HyperV
     class Config < Vagrant.plugin("2", :config)
-      # If set to `true`, then VirtualBox will be launched with a GUI.
+      # If set to `true`, then Virtual Machine will be launched with a GUI.
       #
       # @return [Boolean]
       attr_accessor :gui
