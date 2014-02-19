@@ -78,7 +78,7 @@ module VagrantPlugins
                           :guest_ip => ssh_info[:host],
                           :username => ssh_info[:username],
                           :host_ip => result["host_ip"],
-                          :password => "vagrnat"}
+                          :password => "vagrant"}
               @env[:ui].info("Linking #{data[:share_name]} to Guest at #{data[:guestpath]} ...")
               @env[:machine].provider.driver.execute('mount_share.ps1', options)
             rescue Error::SubprocessError => e
