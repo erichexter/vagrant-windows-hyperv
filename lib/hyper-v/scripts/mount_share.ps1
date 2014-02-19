@@ -24,7 +24,6 @@ forEach ($module in $modules) { . $module }
 try {
     function Mount-File($guest_path, $hostpath ) {
         $hostpath = $hostpath.replace(":","")
-        write-host $hostpath
         # If a folder exist remove it.
         if (Test-Path $guest_path) {
           $junction = Get-Item $guest_path

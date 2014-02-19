@@ -15,7 +15,11 @@ $modules = @()
 $modules += $presentDir + "\utils\write_messages.ps1"
 forEach ($module in $modules) { . $module }
 
+
 try {
+
+  $computer_name = $(Get-WmiObject Win32_Computersystem).name
+
   # See all available shares and check alert user for existing / conflicting share name
   $shared_folders = net share
   $reg = "$share_name(\s+)$path(\s)"
@@ -25,7 +29,14 @@ try {
     net share $share_name /delete /y
   }
 
-  $computer_name = $(Get-WmiObject Win32_Computersystem).name
+  # Set ACL for all files in the folder
+  $current_acl = Get-ACL $path
+  $permission = "$computer_name\$host_share_username","FullControl","ContainerInherit,ObjectInherit","None","Allow"
+  $acl_access_rule = New-Object System.Security.AccessControl.FileSystemAccessRule $permission
+  $current_acl.SetAccessRule($acl_access_rule)
+  $current_acl | Set-Acl $path
+
+  # Share the current folder with proper permissions
   $grant_permission = "$computer_name\$host_share_username,Full"
   $result = net share $share_name=$path /unlimited /GRANT:$grant_permission
   if ($result -Match "$share_name was shared successfully.") {
