@@ -1,3 +1,7 @@
+#-------------------------------------------------------------------------
+# Copyright (c) Microsoft Open Technologies, Inc.
+# All Rights Reserved. Licensed under the MIT License.
+#--------------------------------------------------------------------------
 source 'https://rubygems.org'
 
 # Specify your gem's dependencies in hyper-v.gemspec
