@@ -4,7 +4,6 @@
 #--------------------------------------------------------------------------
 
 require "vagrant"
-require_relative "guest_config/config"
 require_relative "host_share/config"
 module VagrantPlugins
   module HyperV
@@ -37,10 +36,6 @@ module VagrantPlugins
         errors = _detected_errors
         unless host_share.valid_config?
           errors << host_share.errors.flatten.join(" ")
-        end
-
-        unless guest.valid_config?
-          # errors << guest.errors.flatten.join(" ")
         end
         { "HyperV" => errors }
       end
