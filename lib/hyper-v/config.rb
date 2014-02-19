@@ -12,14 +12,10 @@ module VagrantPlugins
       #
       # @return [Boolean]
       attr_accessor :gui
-      attr_reader :host_share, :guest
+      attr_reader :host_share
 
       def host_config(&block)
         block.call(@host_share)
-      end
-
-      def guest_config(&block)
-        block.call(@guest)
       end
 
       def finalize!
@@ -29,7 +25,6 @@ module VagrantPlugins
       def initialize(region_specific=false)
         @gui = UNSET_VALUE
         @host_share = HostShare::Config.new
-        @guest = GuestConfig::Config.new
       end
 
       def validate(machine)
