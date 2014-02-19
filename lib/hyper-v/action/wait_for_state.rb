@@ -4,7 +4,6 @@
 #--------------------------------------------------------------------------
 require "log4r"
 require "timeout"
-require "debugger"
 
 module VagrantPlugins
   module HyperV
@@ -24,7 +23,7 @@ module VagrantPlugins
             begin
               Timeout.timeout(@timeout) do
                 until env[:machine].state.id == @state
-                  sleep 2
+                  sleep 5
                 end
               end
             rescue Timeout::Error

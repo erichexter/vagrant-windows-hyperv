@@ -2,7 +2,7 @@
 # Copyright (c) Microsoft Open Technologies, Inc.
 # All Rights Reserved. Licensed under the MIT License.
 #--------------------------------------------------------------------------
-require "debugger"
+
 require "vagrant/util/subprocess"
 module VagrantPlugins
   module HyperV
@@ -16,7 +16,6 @@ module VagrantPlugins
         def call(env)
           @env = env
           smb_shared_folders
-          prepare_smb_share
           # A BIG Clean UP
           # There should be a communicator class which branches between windows
           # and Linux
@@ -24,9 +23,11 @@ module VagrantPlugins
             env[:ui].info('Mounting shared folders with VM, This process may take few minutes.')
           end
           if env[:machine].config.vm.guest == :windows
-            env[:ui].info "Mounting shared folders to windows is under development."
-            # mount_shared_folders_to_windows
+            mount_shared_folders_to_windows
+            env[:ui].info "Generating a RDP file."
+            generate_rdp_file
           elsif env[:machine].config.vm.guest == :linux
+            prepare_smb_share
             mount_shared_folders_to_linux
           end
           @app.call(env)
@@ -70,15 +71,14 @@ module VagrantPlugins
         def mount_shared_folders_to_windows
           result = @env[:machine].provider.driver.execute('host_info.ps1', {})
           @smb_shared_folders.each do |id, data|
+            hostpath  = File.expand_path(data[:hostpath], @env[:root_path])
             begin
-              options = { :share_name => data[:share_name],
-                          :guest_path => data[:guestpath].gsub("/", "\\"),
+              options = { :guest_path => data[:guestpath].gsub("/", "\\"),
+                          :hostpath => hostpath.gsub("/", "\\"),
                           :guest_ip => ssh_info[:host],
                           :username => ssh_info[:username],
                           :host_ip => result["host_ip"],
-                          :password => @env[:machine].provider_config.guest.password,
-                          :host_share_username => @env[:machine].provider_config.host_share.username,
-                          :host_share_password => @env[:machine].provider_config.host_share.password}
+                          :password => @env[:machine].provider_config.guest.password}
               @env[:ui].info("Linking #{data[:share_name]} to Guest at #{data[:guestpath]} ...")
               @env[:machine].provider.driver.execute('mount_share.ps1', options)
             rescue Error::SubprocessError => e
@@ -86,6 +86,20 @@ module VagrantPlugins
               @env[:ui].info e.message
             end
           end
+        end
+
+        def generate_rdp_file
+            rdp_options = {
+              "drivestoredirect:s" => "*",
+              "username:s" => ssh_info[:username],
+              "prompt for credentials:i" => "1",
+              "full address:s" => ssh_info[:host]
+            }
+            file = File.open("machine.rdp", "w")
+              rdp_options.each do |key, value|
+                file.puts "#{key}:#{value}"
+            end
+            file.close
         end
 
         def mount_shared_folders_to_linux
