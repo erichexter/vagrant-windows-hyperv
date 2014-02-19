@@ -7,8 +7,8 @@ function Write-Error-Message($message) {
   $error_message = @{
     error = "$message"
   }
-  Write-Host "===Begin-Error==="
   $result =  ConvertTo-json $error_message
+  Write-Host "===Begin-Error==="
   Write-Host $result
   Write-Host "===End-Error==="
 }

@@ -119,14 +119,13 @@ module VagrantPlugins
 
               mount_options  = "-o rw,username=#{host_share_username},pass=#{host_share_password},"
               mount_options  += "sec=ntlm,file_mode=0777,dir_mode=0777,"
-              mount_options  += "uid=`id -u #{owner}`,gid=`id -g #{group}`,rw #{data[:guestpath]}"
+              mount_options  += "uid=`id -u #{owner}`,gid=`id -g #{group}` #{data[:guestpath]}"
 
               command = "mount -t cifs //#{result["host_ip"]}/#{data[:share_name]} #{mount_options}"
-
               @env[:machine].communicate.sudo(command)
 
             rescue RuntimeError => e
-              @env[:ui].error(e.message)
+              @env[:ui].error("Failed to mount at #{data[:guestpath]}")
             end
           end
 
