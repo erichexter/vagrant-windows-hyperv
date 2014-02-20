@@ -21,13 +21,24 @@ try {
   $computer_name = $(Get-WmiObject Win32_Computersystem).name
 
   # See all available shares and check alert user for existing / conflicting share name
-  $shared_folders = net share
-  $reg = "$share_name(\s+)$path(\s)"
-  $existing_share = $shared_folders -Match $reg
-  if ($existing_share) {
+
+  $filter = "Path=\'$path\'"
+  $filter = $filter.replace("\","")
+  $current_share = Get-WmiObject Win32_Share -Filter $filter
+  $share_conflict = $false
+  if ($current_share) {
     # Always clear the existing share name and create a new one
-    net share $share_name /delete /y
+    if ($current_share.name -ne $share_name) {
+      $share_conflict = $true
+    }
   }
+
+  if ($share_conflict) {
+    Write-Error-Message "IGNORING Conflicting share name, A share name already exist $existing_share"
+    return
+  }
+
+  net share $share_name /delete /y
 
   # Set ACL for all files in the folder
   $current_acl = Get-ACL $path
@@ -46,9 +57,7 @@ try {
     $result = ConvertTo-Json $resultHash
     Write-Output-Message $result
   } else {
-    $reg = "^$share_name(\s+)"
-    $existing_share = $shared_folders -Match $reg
-    Write-Error-Message "IGNORING Conflicting share name, A share name already exist $existing_share"
+    Write-Error-Message $result
   }
 } catch {
   Write-Error-Message $_

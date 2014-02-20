@@ -45,11 +45,37 @@ module VagrantPlugins
         end
       end
 
+      def self.action_suspend
+        Vagrant::Action::Builder.new.tap do |b|
+          b.use ConfigValidate
+          b.use Call, IsCreated do |env, b2|
+            if !env[:result]
+              b2.use MessageNotCreated
+              next
+            end
+            b2.use SuspendInstance
+          end
+        end
+      end
+
       def self.action_start
         Vagrant::Action::Builder.new.tap do |b|
           b.use StartInstance
           b.use ShareFolders
           b.use SyncFolders
+        end
+      end
+
+      def self.action_resume
+        Vagrant::Action::Builder.new.tap do |b|
+          b.use ConfigValidate
+          b.use Call, IsSuspended do |env, b2|
+            if !env[:result]
+              b2.use MessageNotSuspended
+              next
+            end
+            b2.use ResumeInstance
+          end
         end
       end
 
@@ -93,7 +119,13 @@ module VagrantPlugins
               if env1[:result]
                 b3.use MessageNotRunning
               else
-                b3.use SSHExec
+                b3.use Call, IsSuspended do |env1, b4|
+                  if env1[:result]
+                    b4.use MessageNotRunning
+                  else
+                    b4.use SSHExec
+                  end
+                end
               end
             end
           end
@@ -112,17 +144,23 @@ module VagrantPlugins
       action_root = Pathname.new(File.expand_path("../action", __FILE__))
       autoload :IsCreated, action_root.join("is_created")
       autoload :IsStopped, action_root.join("is_stopped")
+      autoload :IsSuspended, action_root.join("is_suspended")
       autoload :ReadState, action_root.join("read_state")
       autoload :Import, action_root.join("import")
       autoload :StartInstance, action_root.join('start_instance')
       autoload :StopInstance, action_root.join('stop_instance')
+      autoload :ResumeInstance, action_root.join('resume_instance')
+      autoload :SuspendInstance, action_root.join('suspend_instance')
       autoload :MessageNotCreated, action_root.join('message_not_created')
       autoload :MessageAlreadyCreated, action_root.join('message_already_created')
       autoload :MessageNotRunning, action_root.join('message_not_running')
+      autoload :MessageNotSuspended, action_root.join('message_not_suspended')
       autoload :SyncFolders, action_root.join('sync_folders')
       autoload :WaitForState, action_root.join('wait_for_state')
       autoload :ReadGuestIP, action_root.join('read_guest_ip')
       autoload :ShareFolders, action_root.join('share_folders')
+      autoload :SSHExec, action_root.join('ssh_exec')
+
     end
   end
 end
