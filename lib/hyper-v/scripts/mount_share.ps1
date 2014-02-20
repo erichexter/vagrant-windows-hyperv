@@ -29,6 +29,13 @@ try {
           $junction = Get-Item $guest_path
           $junction.Delete()
         }
+        # Check if the folder path exists
+        $base_directory_for_mount = [System.IO.Path]::GetDirectoryName($guest_path)
+
+        if (-not (Test-Path $base_directory_for_mount))
+        {
+          New-Item $base_directory_for_mount -Type Directory -Force | Out-Null
+        }
         cmd /c  mklink /d $guest_path  "\\tsclient\$hostpath"
     }
 
