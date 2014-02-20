@@ -10,10 +10,6 @@ When the guest virtual machine is windows, follow the following configurations
 ` vagrant rdp `
 
 ### VagrntFile needs the following changes.
-- Set the type of VM guest
-```ruby
-  config.vm.guest = :windows
-```
 
 - Set the WinRM trusted host certificate configuration
 Type this command from a cmd Administrator terminal
@@ -28,28 +24,32 @@ Type this command from a cmd Administrator terminal
    # Copies the content from host/path to guest once on vagrant up / vagrant reload
    config.vm.synced_folder 'host/path', "guest/path"
 ```
+- Mention the type of VM Guest
 
+```ruby
+config.vm.provider "hyperv" do |hv, override|
+  hv.guest = :windows
+  override.ssh.username = "vagrant"
+end
+```
 
 ## Windows to Linux Configuration
 When the guest virtual machine is linux, follow the following configurations
 ### VagrntFile needs the following changes.
-- Set the type of VM guest
-```ruby
-  config.vm.guest = :linux
-```
+
 
 - Configure the credentials of a local user account created in the host.
 This account is used to share folders between host and the VM
+
 ```ruby
 config.vm.provider "hyperv" do |hv, override|
-  ...
+  hv.guest = :linux
   override.ssh.username = "vagrant"
   override.ssh.private_key_path = "E:/insecure_private_key"
   hv.host_config do |share|
     share.username = ""
     share.password = ""
   end
-  ...
 end
 ```
 

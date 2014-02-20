@@ -2,7 +2,6 @@
 # Copyright (c) Microsoft Open Technologies, Inc.
 # All Rights Reserved. Licensed under the MIT License.
 #--------------------------------------------------------------------------
-
 require "log4r"
 require "vagrant/util/subprocess"
 require "vagrant/util/which"
@@ -22,12 +21,12 @@ module VagrantPlugins
           @app.call(env)
           synced_folders
 
-          if synced_folders.length > 0
+          if @synced_folders.length > 0
             env[:ui].info "Syncing folders from Host to Guest"
           end
-          if env[:machine].config.vm.guest == :windows
+          if env[:machine].provider_config.guest == :windows
             sync_folders_to_windows
-          elsif env[:machine].config.vm.guest == :linux
+          elsif env[:machine].provider_config.guest == :linux
             sync_folders_to_linux
           end
         end
@@ -50,7 +49,7 @@ module VagrantPlugins
         end
 
         def sync_folders_to_windows
-          synced_folders.each do |id, data|
+          @synced_folders.each do |id, data|
             hostpath  = File.expand_path(data[:hostpath], @env[:root_path]).gsub("/", "\\")
             guestpath = data[:guestpath].gsub("/", "\\")
             options = { :guest_ip => ssh_info[:host],
@@ -68,8 +67,7 @@ module VagrantPlugins
             @env[:ui].info('SSH Info not available, Aborting Sync folder')
             return
           end
-
-          synced_folders.each do |id, data|
+          @synced_folders.each do |id, data|
             hostpath  = File.expand_path(data[:hostpath], @env[:root_path])
             guestpath = data[:guestpath]
             @env[:ui].info('Starting Sync folders')

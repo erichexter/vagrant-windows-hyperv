@@ -2,7 +2,6 @@
 # Copyright (c) Microsoft Open Technologies, Inc.
 # All Rights Reserved. Licensed under the MIT License.
 #--------------------------------------------------------------------------
-
 require "vagrant/util/subprocess"
 module VagrantPlugins
   module HyperV
@@ -22,11 +21,12 @@ module VagrantPlugins
           if @smb_shared_folders.length > 0
             env[:ui].info('Mounting shared folders with VM, This process may take few minutes.')
           end
-          if env[:machine].config.vm.guest == :windows
+
+          if env[:machine].provider_config.guest == :windows
             mount_shared_folders_to_windows
             env[:ui].info "Generating a RDP file."
             generate_rdp_file
-          elsif env[:machine].config.vm.guest == :linux
+          elsif env[:machine].provider_config.guest == :linux
             prepare_smb_share
             mount_shared_folders_to_linux
           end
@@ -43,6 +43,7 @@ module VagrantPlugins
             next unless data[:smb]
             # This to prevent overwriting the actual shared folders data
             @smb_shared_folders[id] = data.dup
+            @smb_shared_folders[id][:share_name] = @smb_shared_folders[id][:share_name].gsub(" ","_")
           end
         end
 
@@ -113,13 +114,13 @@ module VagrantPlugins
               @env[:ui].info("Linking #{data[:share_name]} to Guest at #{data[:guestpath]} ...")
 
               # Create a location in guest to guestpath
-              @env[:machine].communicate.sudo("mkdir -p #{data[:guestpath]}")
+              @env[:machine].communicate.sudo("mkdir -p '#{data[:guestpath]}'")
               owner = data[:owner] || ssh_info[:username]
               group = data[:group] || ssh_info[:username]
 
               mount_options  = "-o rw,username=#{host_share_username},pass=#{host_share_password},"
               mount_options  += "sec=ntlm,file_mode=0777,dir_mode=0777,"
-              mount_options  += "uid=`id -u #{owner}`,gid=`id -g #{group}` #{data[:guestpath]}"
+              mount_options  += "uid=`id -u #{owner}`,gid=`id -g #{group}` '#{data[:guestpath]}'"
 
               command = "mount -t cifs //#{result["host_ip"]}/#{data[:share_name]} #{mount_options}"
               @env[:machine].communicate.sudo(command)
