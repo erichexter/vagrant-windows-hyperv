@@ -20,6 +20,11 @@ module VagrantPlugins
         def call(env)
           @env = env
           @app.call(env)
+          synced_folders
+
+          if synced_folders.length > 0
+            env[:ui].info "Syncing folders from Host to Guest"
+          end
           if env[:machine].config.vm.guest == :windows
             sync_folders_to_windows
           elsif env[:machine].config.vm.guest == :linux
@@ -31,10 +36,21 @@ module VagrantPlugins
           @ssh_info ||= @env[:machine].ssh_info
         end
 
-        def sync_folders_to_windows
+        def synced_folders
+          @synced_folders = {}
           @env[:machine].config.vm.synced_folders.each do |id, data|
             # Ignore disabled shared folders
-            next if data[:disabled] || data[:smb]
+            next if data[:disabled]
+
+            # Collect all SMB shares
+            next if data[:smb]
+            # This to prevent overwriting the actual shared folders data
+            @synced_folders[id] = data.dup
+          end
+        end
+
+        def sync_folders_to_windows
+          synced_folders.each do |id, data|
             hostpath  = File.expand_path(data[:hostpath], @env[:root_path]).gsub("/", "\\")
             guestpath = data[:guestpath].gsub("/", "\\")
             options = { :guest_ip => ssh_info[:host],
@@ -53,9 +69,7 @@ module VagrantPlugins
             return
           end
 
-          @env[:machine].config.vm.synced_folders.each do |id, data|
-            # Ignore disabled shared folders
-            next if data[:disabled] || data[:smb]
+          synced_folders.each do |id, data|
             hostpath  = File.expand_path(data[:hostpath], @env[:root_path])
             guestpath = data[:guestpath]
             @env[:ui].info('Starting Sync folders')
