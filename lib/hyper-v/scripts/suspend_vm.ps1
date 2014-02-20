@@ -18,9 +18,11 @@ try {
   Suspend-VM $vm
   $state = $vm.state
   $status = $vm.status
+  $name = $vm.name
   $resultHash = @{
     state = "$state"
     status = "$status"
+    name = "$name"
   }
   $result = ConvertTo-Json $resultHash
   Write-Output-Message $result

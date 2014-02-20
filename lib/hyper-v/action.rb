@@ -159,6 +159,8 @@ module VagrantPlugins
       autoload :WaitForState, action_root.join('wait_for_state')
       autoload :ReadGuestIP, action_root.join('read_guest_ip')
       autoload :ShareFolders, action_root.join('share_folders')
+      autoload :SSHExec, action_root.join('ssh_exec')
+
     end
   end
 end
