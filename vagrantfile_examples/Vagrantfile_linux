@@ -26,6 +26,12 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     override.ssh.username = "vagrant"
     override.ssh.private_key_path = "E:/insecure_private_key"
 
+
+    # customize block
+    hv.customize ["virtual_switch", {:type => "External", :name => "External Switch"}]
+
+    hv.customize ["memory", 512] # Memory in MB
+
     # Host user account which is created to share folders from Hyper-V Host
     # To Guest VM
 

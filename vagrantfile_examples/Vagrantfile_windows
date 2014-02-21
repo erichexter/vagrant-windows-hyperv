@@ -24,5 +24,11 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   config.vm.provider "hyperv" do |hv, override|
     hv.guest = :windows
     override.ssh.username = "vagrant"
+
+    # customize block
+    hv.customize ["virtual_switch", {:type => "External", :name => "External Switch"}]
+
+    hv.customize ["memory", 512] # Memory in MB
+
   end
 end
