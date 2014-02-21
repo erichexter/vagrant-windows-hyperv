@@ -87,6 +87,7 @@ module VagrantPlugins
             if env1[:result]
               b1.use Call, IsStopped do |env2, b2|
                 if env2[:result]
+                  b2.use Customize, "pre-boot"
                   b2.use action_start
                 else
                   b2.use MessageAlreadyCreated
@@ -94,6 +95,7 @@ module VagrantPlugins
               end
             else
               b1.use Import
+              b1.use Customize, "pre-boot"
               b1.use action_start
             end
           end
@@ -160,6 +162,7 @@ module VagrantPlugins
       autoload :ReadGuestIP, action_root.join('read_guest_ip')
       autoload :ShareFolders, action_root.join('share_folders')
       autoload :SSHExec, action_root.join('ssh_exec')
+      autoload :Customize, action_root.join('customize')
 
     end
   end

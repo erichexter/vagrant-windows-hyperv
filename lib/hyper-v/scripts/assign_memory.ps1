@@ -2,8 +2,8 @@
 # Copyright (c) Microsoft Open Technologies, Inc.
 # All Rights Reserved. Licensed under the MIT License.
 #--------------------------------------------------------------------------
-
 param (
+    [string]$ram_memory = $(throw "-ram_memory is required."),
     [string]$vm_id = $(throw "-vm_id is required.")
  )
 
@@ -13,20 +13,10 @@ $modules = @()
 $modules += $presentDir + "\utils\write_messages.ps1"
 forEach ($module in $modules) { . $module }
 
+$vm = Get-Vm -Id $vm_id
 try {
-  $vm = Get-VM -Id $vm_id -ErrorAction "stop"
-  Start-VM $vm -ErrorAction "stop"
-  $state = $vm.state
-  $status = $vm.status
-  $name = $vm.name
-  $resultHash = @{
-    state = "$state"
-    status = "$status"
-    name = "$name"
-  }
-  $result = ConvertTo-Json $resultHash
-  Write-Output-Message $result
+  Set-vm -vm $vm -MemoryStartupBytes (($ram_memory -as [int]) * 1MB) -ErrorAction "stop"
 }
 catch {
-  Write-Error-Message "Failed to start a VM $_"
+  Write-Error-Message "Failed to configure memory $_"
 }

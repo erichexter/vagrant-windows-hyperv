@@ -48,8 +48,6 @@ try {
   $MemoryStartupBytes = ($memory.size."#text" -as [int]) * 1MB
   $MemoryMinimumBytes = ($memory.reservation."#text" -as [int]) * 1MB
 
-  # Get the name of the virtual switch
-  $switchname = (Select-Xml -xml $vmconfig -XPath "//AltSwitchName").node."#text"
 
   # Determine boot device
   Switch ((Select-Xml -xml $vmconfig -XPath "//boot").node.device0."#text") {
@@ -66,7 +64,6 @@ try {
      Name = $vm_name
      NoVHD = $True
      MemoryStartupBytes = $MemoryStartupBytes
-     SwitchName = $switchname
      BootDevice = $bootdevice
      ErrorAction = "Stop"
   }
