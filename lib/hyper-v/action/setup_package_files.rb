@@ -1,5 +1,9 @@
+#-------------------------------------------------------------------------
+# Copyright (c) Microsoft Open Technologies, Inc.
+# All Rights Reserved. Licensed under the MIT License.
+#--------------------------------------------------------------------------
 module VagrantPlugins
-  module ProviderVirtualBox
+  module HyperV
     module Action
       class SetupPackageFiles
         def initialize(app, env)
@@ -36,8 +40,7 @@ module VagrantPlugins
 
           # Verify the mapping
           files.each do |from, _|
-            raise Vagrant::Errors::PackageIncludeMissing,
-              :file => from if !File.exist?(from)
+            raise "File do not exist #{file}" if !File.exist?(from)
           end
 
           # Save the mapping
