@@ -116,17 +116,11 @@ module VagrantPlugins
               b2.use MessageNotCreated
               next
             end
-            b2.use Call, IsStopped do |env1, b3|
-              if env1[:result]
+            b2.use Call, IsRunning do |env1, b3|
+              if !env1[:result]
                 b3.use MessageNotRunning
               else
-                b3.use Call, IsSuspended do |env1, b4|
-                  if env1[:result]
-                    b4.use MessageNotRunning
-                  else
-                    b4.use SSHExec
-                  end
-                end
+                b3.use SSHExec
               end
             end
           end
@@ -159,11 +153,17 @@ module VagrantPlugins
         Vagrant::Action::Builder.new.tap do |b|
           b.use ConfigValidate
           b.use Call, IsCreated do |env, b2|
-          if !env[:result]
-            b2.use MessageNotCreated
-            next
-          end
-          b2.use Provision
+            if !env[:result]
+              b2.use MessageNotCreated
+              next
+            end
+            b2.use Call, IsRunning do |env2, b3|
+              if !env2[:result]
+                b3.use MessageNotRunning
+              else
+                b3.use Provision
+              end
+            end
           end
         end
       end
@@ -172,6 +172,7 @@ module VagrantPlugins
       action_root = Pathname.new(File.expand_path("../action", __FILE__))
       autoload :IsCreated, action_root.join("is_created")
       autoload :IsStopped, action_root.join("is_stopped")
+      autoload :IsRunning, action_root.join("is_running")
       autoload :IsSuspended, action_root.join("is_suspended")
       autoload :ReadState, action_root.join("read_state")
       autoload :Import, action_root.join("import")

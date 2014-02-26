@@ -18,6 +18,7 @@ module VagrantPlugins
           with_windows_script_file do |path|
             begin
             # Upload the script to a TMP file in remote VM
+            @env[:ui].info "Copying the script to Guest"
             hostpath  = path.gsub("/", "\\")
             ssh_info = @env[:machine].ssh_info
             guestpath = "vagrant-powershell.ps1"
@@ -29,6 +30,7 @@ module VagrantPlugins
                        :password => "vagrant" }
             response = @env[:machine].provider.driver.execute('upload_file.ps1', options)
 
+            @env[:ui].info "Executing the script in Guest"
             # Execute the file from remote location
             options = { :guest_ip => ssh_info[:host],
                        :username => ssh_info[:username],
@@ -39,11 +41,9 @@ module VagrantPlugins
               response = @env[:machine].provider.driver.execute('execute_remote_file.ps1', options)
             rescue Error::SubprocessError => e
               @env[:ui].info "Failed to execute remote PowerShell script"
-              @env[:ui].debug e.message
             end
             rescue Error::SubprocessError => e
               @env[:ui].info "Failed to copy files to VM"
-              @env[:ui].debug e.message
             end
           end
         end
