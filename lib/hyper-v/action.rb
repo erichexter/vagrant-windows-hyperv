@@ -139,6 +139,23 @@ module VagrantPlugins
         end
       end
 
+      def self.action_package
+        Vagrant::Action::Builder.new.tap do |b|
+          b.use Call, IsCreated do |env1, b2|
+            if !env1[:result]
+              b2.use MessageNotCreated
+              next
+            end
+            b2.use SetupPackageFiles
+            b2.use action_halt
+            b2.use Export
+            # TODO: Guess this has to be included, need to check
+            # b2.use PackageVagrantfile
+            b2.use Package
+          end
+        end
+      end
+
 
       # The autoload farm
       action_root = Pathname.new(File.expand_path("../action", __FILE__))
@@ -160,7 +177,10 @@ module VagrantPlugins
       autoload :ReadGuestIP, action_root.join('read_guest_ip')
       autoload :ShareFolders, action_root.join('share_folders')
       autoload :SSHExec, action_root.join('ssh_exec')
-
+      autoload :SetupPackageFiles, action_root.join("setup_package_files")
+      autoload :Export, action_root.join("export")
+      autoload :PackageVagrantfile, action_root.join("package_vagrantfile")
+      autoload :Package, action_root.join("package")
     end
   end
 end
