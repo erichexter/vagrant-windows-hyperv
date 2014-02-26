@@ -62,6 +62,7 @@ module VagrantPlugins
         Vagrant::Action::Builder.new.tap do |b|
           b.use StartInstance
           b.use ShareFolders
+          b.use Provision
           b.use SyncFolders
         end
       end
@@ -115,17 +116,11 @@ module VagrantPlugins
               b2.use MessageNotCreated
               next
             end
-            b2.use Call, IsStopped do |env1, b3|
-              if env1[:result]
+            b2.use Call, IsRunning do |env1, b3|
+              if !env1[:result]
                 b3.use MessageNotRunning
               else
-                b3.use Call, IsSuspended do |env1, b4|
-                  if env1[:result]
-                    b4.use MessageNotRunning
-                  else
-                    b4.use SSHExec
-                  end
-                end
+                b3.use SSHExec
               end
             end
           end
@@ -139,11 +134,51 @@ module VagrantPlugins
         end
       end
 
+      def self.action_package
+        Vagrant::Action::Builder.new.tap do |b|
+          b.use Call, IsCreated do |env1, b2|
+            if !env1[:result]
+              b2.use MessageNotCreated
+              next
+            end
+            b2.use SetupPackageFiles
+            b2.use action_halt
+            b2.use Call, WaitForState, :off, 120 do |env2, b3|
+              if env2[:result]
+                b3.use Export
+                b3.use Package
+              else
+                env2[:ui].info("Machine did not reload, Check machine's status")
+              end
+            end
+          end
+        end
+      end
+
+      def self.action_provision
+        Vagrant::Action::Builder.new.tap do |b|
+          b.use ConfigValidate
+          b.use Call, IsCreated do |env, b2|
+            if !env[:result]
+              b2.use MessageNotCreated
+              next
+            end
+            b2.use Call, IsRunning do |env2, b3|
+              if !env2[:result]
+                b3.use MessageNotRunning
+              else
+                b3.use Provision
+              end
+            end
+          end
+        end
+      end
 
       # The autoload farm
       action_root = Pathname.new(File.expand_path("../action", __FILE__))
       autoload :IsCreated, action_root.join("is_created")
       autoload :IsStopped, action_root.join("is_stopped")
+      autoload :IsRunning, action_root.join("is_running")
       autoload :IsSuspended, action_root.join("is_suspended")
       autoload :ReadState, action_root.join("read_state")
       autoload :Import, action_root.join("import")
@@ -160,7 +195,10 @@ module VagrantPlugins
       autoload :ReadGuestIP, action_root.join('read_guest_ip')
       autoload :ShareFolders, action_root.join('share_folders')
       autoload :SSHExec, action_root.join('ssh_exec')
-
+      autoload :SetupPackageFiles, action_root.join("setup_package_files")
+      autoload :Export, action_root.join("export")
+      autoload :Package, action_root.join("package")
+      autoload :Provision, action_root.join('provision')
     end
   end
 end
