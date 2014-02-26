@@ -2,7 +2,6 @@
 # Copyright (c) Microsoft Open Technologies, Inc.
 # All Rights Reserved. Licensed under the MIT License.
 #--------------------------------------------------------------------------
-require "debugger"
 module VagrantPlugins
   module HyperV
     module Provisioner
@@ -74,7 +73,6 @@ module VagrantPlugins
             # Just yield the path to that file...
             yield config.path
           else
-            debugger
             # Otherwise we have an inline script, we need to Tempfile it,
             # and handle it specially...
             file = Tempfile.new(['vagrant-powershell', '.ps1'])

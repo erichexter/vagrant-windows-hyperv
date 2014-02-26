@@ -3,7 +3,6 @@
 # All Rights Reserved. Licensed under the MIT License.
 #--------------------------------------------------------------------------
 require "fileutils"
-require "debugger"
 module VagrantPlugins
   module HyperV
     module Action
@@ -62,6 +61,6 @@ module VagrantPlugins
            end
          end
       end
-  	end
-	end
+    end
+  end
 end

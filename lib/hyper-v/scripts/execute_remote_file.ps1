@@ -25,6 +25,7 @@ try {
     . $path
     Set-ExecutionPolicy $old -force
   }
+
   $response = Create-Remote-Session $guest_ip $username $password
   if (!$response["session"] -and $response["error"]) {
       Write-Error-Message $response["error"]

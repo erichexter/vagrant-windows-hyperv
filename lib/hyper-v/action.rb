@@ -190,7 +190,6 @@ module VagrantPlugins
       autoload :SSHExec, action_root.join('ssh_exec')
       autoload :SetupPackageFiles, action_root.join("setup_package_files")
       autoload :Export, action_root.join("export")
-      autoload :PackageVagrantfile, action_root.join("package_vagrantfile")
       autoload :Package, action_root.join("package")
       autoload :Provision, action_root.join('provision')
     end
