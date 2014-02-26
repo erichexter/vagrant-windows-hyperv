@@ -144,8 +144,12 @@ module VagrantPlugins
             b2.use SetupPackageFiles
             b2.use action_halt
             b2.use Call, WaitForState, :off, 120 do |env2, b3|
-              b3.use Export
-              b3.use Package
+              if env2[:result]
+                b3.use Export
+                b3.use Package
+              else
+                env2[:ui].info("Machine did not reload, Check machine's status")
+              end
             end
           end
         end
