@@ -5,7 +5,6 @@
 require "json"
 require "vagrant/util/which"
 require "vagrant/util/subprocess"
-
 module VagrantPlugins
   module HyperV
     module Driver

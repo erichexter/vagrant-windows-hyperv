@@ -16,6 +16,7 @@ param (
 $presentDir = Split-Path -parent $PSCommandPath
 $modules = @()
 $modules += $presentDir + "\utils\write_messages.ps1"
+$modules += $presentDir + "\utils\create_session.ps1"
 forEach ($module in $modules) { . $module }
 
 function Get-file-hash($source_path, $delimiter) {
@@ -26,12 +27,6 @@ function Get-file-hash($source_path, $delimiter) {
           $source_files += $_.Path.Replace($source_path, "") + $delimiter + $_.Hash
         }
     $source_files
-}
-
-function Get-Remote-Session($guest_ip, $username, $password) {
-    $secstr = convertto-securestring -AsPlainText -Force -String $password
-    $cred = new-object -typename System.Management.Automation.PSCredential -argumentlist $username, $secstr
-    New-PSSession -ComputerName $guest_ip -Credential $cred
 }
 
 function Get-remote-file-hash($source_path, $delimiter, $session) {
@@ -79,8 +74,14 @@ try {
   }
   catch { }
 
-$session = Get-Remote-Session $guest_ip $username $password
 
+$response = Create-Remote-Session $guest_ip $username $password
+if (!$response["session"] -and $response["error"]) {
+    Write-Error-Message $response["error"]
+    return
+}
+
+$session = $response["session"]
 $source_files = Get-file-hash $host_path $delimiter
 $destination_files = Get-remote-file-hash $guest_path $delimiter $session
 

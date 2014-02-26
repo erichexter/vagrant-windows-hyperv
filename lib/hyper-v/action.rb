@@ -62,6 +62,7 @@ module VagrantPlugins
         Vagrant::Action::Builder.new.tap do |b|
           b.use StartInstance
           b.use ShareFolders
+          b.use Provision
           b.use SyncFolders
         end
       end
@@ -149,13 +150,23 @@ module VagrantPlugins
             b2.use SetupPackageFiles
             b2.use action_halt
             b2.use Export
-            # TODO: Guess this has to be included, need to check
-            # b2.use PackageVagrantfile
             b2.use Package
           end
         end
       end
 
+      def self.action_provision
+        Vagrant::Action::Builder.new.tap do |b|
+          b.use ConfigValidate
+          b.use Call, IsCreated do |env, b2|
+          if !env[:result]
+            b2.use MessageNotCreated
+            next
+          end
+          b2.use Provision
+          end
+        end
+      end
 
       # The autoload farm
       action_root = Pathname.new(File.expand_path("../action", __FILE__))
@@ -181,6 +192,7 @@ module VagrantPlugins
       autoload :Export, action_root.join("export")
       autoload :PackageVagrantfile, action_root.join("package_vagrantfile")
       autoload :Package, action_root.join("package")
+      autoload :Provision, action_root.join('provision')
     end
   end
 end
