@@ -70,7 +70,6 @@ module VagrantPlugins
           @synced_folders.each do |id, data|
             hostpath  = File.expand_path(data[:hostpath], @env[:root_path])
             guestpath = data[:guestpath]
-            @env[:ui].info('Starting Sync folders')
             begin
               @env[:machine].communicate.upload(hostpath, guestpath)
             rescue RuntimeError => e

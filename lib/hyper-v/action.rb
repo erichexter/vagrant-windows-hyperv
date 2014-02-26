@@ -60,9 +60,9 @@ module VagrantPlugins
 
       def self.action_start
         Vagrant::Action::Builder.new.tap do |b|
-          b.use Provision
           b.use StartInstance
           b.use ShareFolders
+          b.use Provision
           b.use SyncFolders
         end
       end
@@ -173,7 +173,7 @@ module VagrantPlugins
       autoload :ReadGuestIP, action_root.join('read_guest_ip')
       autoload :ShareFolders, action_root.join('share_folders')
       autoload :SSHExec, action_root.join('ssh_exec')
-
+      autoload :Provision, action_root.join('provision')
     end
   end
 end

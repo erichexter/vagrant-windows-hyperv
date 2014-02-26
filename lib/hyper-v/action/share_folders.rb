@@ -43,7 +43,9 @@ module VagrantPlugins
             next unless data[:smb]
             # This to prevent overwriting the actual shared folders data
             @smb_shared_folders[id] = data.dup
-            @smb_shared_folders[id][:share_name] = @smb_shared_folders[id][:share_name].gsub(" ","_")
+            if @smb_shared_folders[id][:share_name]
+              @smb_shared_folders[id][:share_name] = @smb_shared_folders[id][:share_name].gsub(" ","_")
+            end
           end
         end
 
