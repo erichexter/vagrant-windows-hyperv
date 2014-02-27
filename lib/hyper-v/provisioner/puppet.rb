@@ -99,10 +99,6 @@ module VagrantPlugins
           provisioner.config
         end
 
-        def generate_puppet_ps_script
-
-        end
-
       end
     end
   end
