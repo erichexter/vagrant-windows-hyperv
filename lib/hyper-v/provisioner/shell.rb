@@ -20,28 +20,32 @@ module VagrantPlugins
             # Upload the script to a TMP file in remote VM
             @env[:ui].info "Copying the script to Guest"
             hostpath  = path.gsub("/", "\\")
-            ssh_info = @env[:machine].ssh_info
-            guestpath = "vagrant-powershell.ps1"
-            options = { :guest_ip => ssh_info[:host],
-                       :username => ssh_info[:username],
-                       :host_path => hostpath,
-                       :guest_path => guestpath,
-                       :vm_id => @env[:machine].id,
-                       :password => "vagrant" }
+
+            fixed_upload_path = if File.extname(config.upload_path) == ""
+              "#{config.upload_path}#{File.extname(path.to_s)}"
+            else
+              config.upload_path
+            end
+
+            options = { :host_path => hostpath,
+                       :guest_path => fixed_upload_path,
+                       :vm_id => @env[:machine].id }
             response = @env[:machine].provider.driver.execute('upload_file.ps1', options)
 
             @env[:ui].info "Executing the script in Guest"
             # Execute the file from remote location
+            ssh_info = @env[:machine].ssh_info
             options = { :guest_ip => ssh_info[:host],
                        :username => ssh_info[:username],
-                       :path => response["temp_path"],
+                       :path => fixed_upload_path,
                        :vm_id => @env[:machine].id,
                        :password => "vagrant" }
-            begin
-              response = @env[:machine].provider.driver.execute('execute_remote_file.ps1', options)
-            rescue Error::SubprocessError => e
-              @env[:ui].info "Failed to execute remote PowerShell script"
+            @env[:machine].provider.driver.execute('execute_remote_file.ps1', options) do |type, data|
+              if type == :stdout || type == :stderr
+                @env[:ui].info data
+              end
             end
+
             rescue Error::SubprocessError => e
               @env[:ui].info "Failed to copy files to VM"
             end
@@ -84,7 +88,6 @@ module VagrantPlugins
               yield file.path
             ensure
               file.close
-              file.unlink
             end
           end
         end

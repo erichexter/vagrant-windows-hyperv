@@ -5,7 +5,6 @@
 require "log4r"
 require "vagrant/util/subprocess"
 require "vagrant/util/which"
-
 module VagrantPlugins
   module HyperV
     module Action
@@ -71,6 +70,12 @@ module VagrantPlugins
             hostpath  = File.expand_path(data[:hostpath], @env[:root_path])
             guestpath = data[:guestpath]
             begin
+              # Make sure the guest's parent directory exists
+              pa = Pathname.new(guestpath)
+              @env[:machine].communicate.tap do |comm|
+                comm.sudo("mkdir -p #{pa.parent.to_s}")
+                comm.sudo("chmod 0777 #{pa.parent.to_s}")
+              end
               @env[:machine].communicate.upload(hostpath, guestpath)
             rescue RuntimeError => e
               @env[:ui].error(e.message)

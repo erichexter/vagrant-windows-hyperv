@@ -31,7 +31,6 @@ try {
       Write-Error-Message $response["error"]
       return
   }
-  Write-Host $path
   Invoke-Command -Session $response["session"] -ScriptBlock ${function:Remote-Execute} -ArgumentList $path -ErrorAction "stop"
 } catch {
   Write-Error-Message "Failed to copy file  $_"
