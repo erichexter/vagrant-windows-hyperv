@@ -5,7 +5,6 @@
 require "json"
 require "vagrant/util/which"
 require "vagrant/util/subprocess"
-
 module VagrantPlugins
   module HyperV
     module Driver
@@ -105,6 +104,7 @@ module VagrantPlugins
           clear_output_buffer
           command = ["powershell", "-NoProfile", "-ExecutionPolicy",
               "Bypass", path, ps_options, {notify: [:stdout, :stderr, :stdin]}].flatten
+
           Vagrant::Util::Subprocess.execute(*command, &block)
         end
       end

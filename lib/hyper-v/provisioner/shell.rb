@@ -13,22 +13,22 @@ module VagrantPlugins
         end
 
         def provision_for_windows
-          args = ""
-          args = " #{config.args}" if config.args
+          arguments = ""
+          arguments = " #{config.args}" if config.args
           with_windows_script_file do |path|
             begin
             # Upload the script to a TMP file in remote VM
             @env[:ui].info "Copying the script to Guest"
             hostpath  = path.gsub("/", "\\")
 
-            fixed_upload_path = if File.extname(config.upload_path) == ""
+            guest_path = if File.extname(config.upload_path) == ""
               "#{config.upload_path}#{File.extname(path.to_s)}"
             else
               config.upload_path
             end
 
             options = { :host_path => hostpath,
-                       :guest_path => fixed_upload_path,
+                       :guest_path => guest_path.gsub("/","\\"),
                        :vm_id => @env[:machine].id }
             response = @env[:machine].provider.driver.execute('upload_file.ps1', options)
 
@@ -37,8 +37,9 @@ module VagrantPlugins
             ssh_info = @env[:machine].ssh_info
             options = { :guest_ip => ssh_info[:host],
                        :username => ssh_info[:username],
-                       :path => fixed_upload_path,
+                       :path => guest_path,
                        :vm_id => @env[:machine].id,
+                       :args => arguments,
                        :password => "vagrant" }
             @env[:machine].provider.driver.execute('execute_remote_file.ps1', options) do |type, data|
               if type == :stdout || type == :stderr
