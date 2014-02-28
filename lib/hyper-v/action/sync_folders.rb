@@ -49,15 +49,13 @@ module VagrantPlugins
 
         def sync_folders_to_windows
           @synced_folders.each do |id, data|
-            hostpath  = File.expand_path(data[:hostpath], @env[:root_path]).gsub("/", "\\")
-            guestpath = data[:guestpath].gsub("/", "\\")
-            options = { guest_ip: ssh_info[:host],
-                        username: ssh_info[:username],
-                        host_path: hostpath,
-                        guest_path: guestpath,
-                        vm_id: @env[:machine].id,
-                        password: "vagrant" }
-            response = @env[:machine].provider.driver.execute('file_sync.ps1', options)
+            from = File.expand_path(data[:hostpath], @env[:root_path])
+            to = data[:guestpath]
+            response = @env[:machine].provider.driver.upload(from, to)
+            # TODO
+            # There is a script file_sync which does the delta copy. Just to keep
+            # the upload function clean using upload function
+            # response = @env[:machine].provider.driver.execute('file_sync.ps1', options)
             end
         end
 

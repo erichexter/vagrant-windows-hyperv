@@ -52,20 +52,13 @@ module VagrantPlugins
         end
 
         def mount_shared_folders_to_windows
-          result = @env[:machine].provider.driver.execute('host_info.ps1', {})
           @smb_shared_folders.each do |id, data|
             hostpath  = File.expand_path(data[:hostpath], @env[:root_path])
             begin
-              options = { guest_path: data[:guestpath].gsub("/", "\\"),
-                          hostpath: hostpath.gsub("/", "\\"),
-                          guest_ip: ssh_info[:host],
-                          username: ssh_info[:username],
-                          host_ip: result["host_ip"],
-                          password: "vagrant"}
-              @env[:ui].info("Linking #{data[:share_name]} to Guest at #{data[:guestpath]} ...")
-              @env[:machine].provider.driver.mount_to_windows(options)
+              @env[:ui].info("Mounting #{hostpath} to Guest at #{data[:guestpath]} ...")
+              @env[:machine].provider.driver.mount_to_windows(hostpath, data[:guestpath], ssh_info)
             rescue Error::SubprocessError => e
-              @env[:ui].info "Failed to link #{data[:share_name]} to Guest"
+              @env[:ui].info "Failed to mount #{hostpath} to Guest"
               @env[:ui].info e.message
             end
           end
@@ -87,11 +80,7 @@ module VagrantPlugins
 
         def prepare_smb_share(data)
           hostpath  = File.expand_path(data[:hostpath], @env[:root_path])
-          host_share_username = @env[:machine].provider_config.host_share.username
-          options = { path:  hostpath,
-                     share_name: data[:share_name],
-                     host_share_username: host_share_username }
-          response = @env[:machine].provider.driver.share_folders(options)
+          response = @env[:machine].provider.driver.share_folders(hostpath, data[:share_name])
           if response["message"] == "OK"
             @env[:ui].info "Successfully created SMB share for #{hostpath} with name #{data[:share_name]}"
           end
@@ -106,7 +95,7 @@ module VagrantPlugins
             begin
               prepare_smb_share(data)
               # Mount the Network drive to Guest VM
-              @env[:ui].info("Linking #{data[:share_name]} to Guest at #{data[:guestpath]} ...")
+              @env[:ui].info "Linking #{data[:share_name]} to Guest at #{data[:guestpath]}"
 
               # Create a folder in guest against the guestpath
               @env[:machine].communicate.sudo("mkdir -p '#{data[:guestpath]}'")
@@ -123,6 +112,8 @@ module VagrantPlugins
             rescue RuntimeError => e
               @env[:ui].error("Failed to mount at #{data[:guestpath]}")
             rescue Error::SubprocessError => e
+              @env[:ui].info e.message
+            raise Error::InvalidShareName => e
               @env[:ui].info e.message
             end
           end

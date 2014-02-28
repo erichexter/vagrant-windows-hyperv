@@ -11,10 +11,11 @@ module VagrantPlugins
       class Base
         attr_reader :vmid
 
-        def initialize(id=nil)
-          @vmid = id
+        def initialize(machine)
+          @vmid = @machine.id
           check_power_shell
           @output = nil
+          @machine = machine
         end
 
         def execute(path, options, &block)
@@ -61,11 +62,23 @@ module VagrantPlugins
           execute('resume_vm.ps1', { vm_id: vmid })
         end
 
-        def share_folders(options)
+        def share_folders(hostpath, share_name)
+          options = {
+            path: windows_path(hostpath),
+            share_name: safe_share_name(share_name)
+            host_share_username: @machine.provider_config.host_share.username
+          }
           execute('set_smb_share.ps1', options)
         end
 
-        def mount_to_windows(options)
+        def mount_to_windows(from, to, ssh_info)
+          options = {
+                      hostpath: windows_path(from),
+                      guest_ip: ssh_info[:host],
+                      guest_path: windows_path(to),
+                      username: ssh_info[:username],
+                      password: "vagrant"
+                    }
           execute('mount_share.ps1', options)
         end
 
@@ -81,10 +94,27 @@ module VagrantPlugins
           execute('suspend_vm.ps1', { vm_id: vmid })
         end
 
+        def upload(from, to)
+          options = {
+            vm_id: vmid,
+            host_path: windows_path(path),
+            guest_path: windows_path(to)
+          }
+          execute('upload_file.ps1',options)
+        end
+
         protected
 
         def windows_path(path)
           path.gsub("/","\\")
+        end
+
+        def safe_share_name(name)
+          if name
+            new_path = name.strip.gsub(' ', '_')
+            new_path = "c:#{new_path}" if new_path =~ /^\\/
+          end
+          new_path.length > 0 ? new_path : raise Errors::InvalidShareName
         end
 
         def json_output
