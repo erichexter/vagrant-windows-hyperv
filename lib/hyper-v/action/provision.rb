@@ -13,6 +13,8 @@ module VagrantPlugins
             case p.class.to_s
             when "VagrantPlugins::Shell::Provisioner"
               Provisioner::Shell.new(env,p).provision_for_windows
+            when "VagrantPlugins::Puppet::Provisioner::Puppet"
+              Provisioner::Puppet.new(env,p).provision_for_windows
             end
           else
             p.provision

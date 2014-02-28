@@ -17,15 +17,19 @@ module VagrantPlugins
           @output = nil
         end
 
-        def execute(path, options)
-          r = execute_powershell(path, options) do |type, data|
-            process_output(type, data)
-          end
-          if success?
-            JSON.parse(json_output[:success].join) unless json_output[:success].empty?
+        def execute(path, options, &block)
+          if block_given?
+            r = execute_powershell(path, options, &block)
           else
-            message = json_output[:error].join unless json_output[:error].empty?
-            raise Error::SubprocessError, message if message
+            r = execute_powershell(path, options) do |type, data|
+              process_output(type, data)
+            end
+            if success?
+              JSON.parse(json_output[:success].join) unless json_output[:success].empty?
+            else
+              message = json_output[:error].join unless json_output[:error].empty?
+              raise Error::SubprocessError, message if message
+            end
           end
         end
 
@@ -100,6 +104,7 @@ module VagrantPlugins
           clear_output_buffer
           command = ["powershell", "-NoProfile", "-ExecutionPolicy",
               "Bypass", path, ps_options, {notify: [:stdout, :stderr, :stdin]}].flatten
+
           Vagrant::Util::Subprocess.execute(*command, &block)
         end
       end

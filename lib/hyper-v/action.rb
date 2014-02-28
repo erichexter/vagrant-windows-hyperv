@@ -168,6 +168,7 @@ module VagrantPlugins
                 b3.use MessageNotRunning
               else
                 b3.use Provision
+                b3.use SyncFolders
               end
             end
           end
