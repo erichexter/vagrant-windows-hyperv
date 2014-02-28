@@ -51,12 +51,12 @@ module VagrantPlugins
           @synced_folders.each do |id, data|
             hostpath  = File.expand_path(data[:hostpath], @env[:root_path]).gsub("/", "\\")
             guestpath = data[:guestpath].gsub("/", "\\")
-            options = { :guest_ip => ssh_info[:host],
-                        :username => ssh_info[:username],
-                        :host_path => hostpath,
-                        :guest_path => guestpath,
-                        :vm_id => @env[:machine].id,
-                        :password => "vagrant" }
+            options = { guest_ip: ssh_info[:host],
+                        username: ssh_info[:username],
+                        host_path: hostpath,
+                        guest_path: guestpath,
+                        vm_id: @env[:machine].id,
+                        password: "vagrant" }
             response = @env[:machine].provider.driver.execute('file_sync.ps1', options)
             end
         end

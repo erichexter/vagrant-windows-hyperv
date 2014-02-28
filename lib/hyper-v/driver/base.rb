@@ -41,7 +41,51 @@ module VagrantPlugins
           end
         end
 
+        def export_vm_to(path)
+          options = {
+             vm_id: vmid,
+             path: windows_path(path)
+           }
+          execute("export_vm.ps1", options)
+        end
+
+        def read_guest_ip
+          execute('get_network_config.ps1', { vm_id: vmid })
+        end
+
+        def get_current_state
+          execute('get_vm_status.ps1', { vm_id: vmid })
+        end
+
+        def resume
+          execute('resume_vm.ps1', { vm_id: vmid })
+        end
+
+        def share_folders(options)
+          execute('set_smb_share.ps1', options)
+        end
+
+        def mount_to_windows(options)
+          execute('mount_share.ps1', options)
+        end
+
+        def start
+          execute('start_vm.ps1', { vm_id: vmid })
+        end
+
+        def stop
+          execute('stop_vm.ps1', { vm_id: vmid })
+        end
+
+        def suspend
+          execute('suspend_vm.ps1', { vm_id: vmid })
+        end
+
         protected
+
+        def windows_path(path)
+          path.gsub("/","\\")
+        end
 
         def json_output
           return @json_output if @json_output
