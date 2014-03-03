@@ -12,7 +12,7 @@ module VagrantPlugins
         attr_reader :vmid
 
         def initialize(machine)
-          @vmid = @machine.id
+          @vmid = machine.id
           check_power_shell
           @output = nil
           @machine = machine
@@ -65,7 +65,7 @@ module VagrantPlugins
         def share_folders(hostpath, share_name)
           options = {
             path: windows_path(hostpath),
-            share_name: safe_share_name(share_name)
+            share_name: safe_share_name(share_name),
             host_share_username: @machine.provider_config.host_share.username
           }
           execute('set_smb_share.ps1', options)
@@ -97,10 +97,22 @@ module VagrantPlugins
         def upload(from, to)
           options = {
             vm_id: vmid,
-            host_path: windows_path(path),
+            host_path: windows_path(from),
             guest_path: windows_path(to)
           }
           execute('upload_file.ps1',options)
+        end
+
+        def folder_copy(from, to, ssh_info)
+          options = {
+            vm_id: vmid,
+            username: ssh_info[:username],
+            host_path: windows_path(from),
+            guest_path: windows_path(to),
+            guest_ip: ssh_info[:host],
+            password: "vagrant"
+          }
+          execute('file_sync.ps1', options)
         end
 
         protected
@@ -114,7 +126,11 @@ module VagrantPlugins
             new_path = name.strip.gsub(' ', '_')
             new_path = "c:#{new_path}" if new_path =~ /^\\/
           end
-          new_path.length > 0 ? new_path : raise Errors::InvalidShareName
+          if new_path.length >
+            new_path
+          else
+           raise Errors::InvalidShareName
+         end
         end
 
         def json_output

@@ -19,7 +19,6 @@ module VagrantPlugins
             begin
             # Upload the script to a TMP file in remote VM
             @env[:ui].info "Copying the script to Guest"
-            hostpath  = path.gsub("/", "\\")
 
             guest_path = if File.extname(config.upload_path) == ""
               "#{config.upload_path}#{File.extname(path.to_s)}"
@@ -27,10 +26,9 @@ module VagrantPlugins
               config.upload_path
             end
 
-            options = { :host_path => hostpath,
-                       :guest_path => guest_path.gsub("/","\\"),
-                       :vm_id => @env[:machine].id }
-            response = @env[:machine].provider.driver.execute('upload_file.ps1', options)
+            response = @env[:machine].provider.driver.upload(hostpath, guest_path)
+
+            execute('upload_file.ps1', options)
 
             @env[:ui].info "Executing the script in Guest"
             # Execute the file from remote location
