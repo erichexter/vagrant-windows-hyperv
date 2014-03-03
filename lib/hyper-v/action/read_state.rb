@@ -17,7 +17,7 @@ module VagrantPlugins
           if env[:machine].id
             begin
               options = { vm_id: env[:machine].id }
-              response = env[:machine].provider.driver.execute('get_vm_status.ps1', options)
+              response = env[:machine].provider.driver.get_current_state
               env[:machine_state_id] = response["state"].downcase.to_sym
             rescue Error::SubprocessError => e
               env[:machine].id = nil

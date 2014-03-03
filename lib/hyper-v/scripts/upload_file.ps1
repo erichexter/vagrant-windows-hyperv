@@ -16,6 +16,13 @@ $modules += $presentDir + "\utils\write_messages.ps1"
 forEach ($module in $modules) { . $module }
 
 try {
+
+  # Enable Guest Service Interface if they are disabled
+  try {
+    Get-VM -Id $vm_id | Get-VMIntegrationService -Name "Guest Service Interface" | Enable-VMIntegrationService -Passthru
+    }
+    catch { }
+
   $machine = Get-VM -Id $vm_id
   Copy-VMFile  -VM $machine -SourcePath $host_path -DestinationPath $guest_path -CreateFullPath -FileSource Host -Force -ErrorAction stop
   $resultHash = @{

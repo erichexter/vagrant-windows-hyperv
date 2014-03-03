@@ -9,7 +9,6 @@ param (
     [string]$hostpath = $(throw "-hostpath is required."),
     [string]$guest_ip = $(throw "-guest_ip is required."),
     [string]$username = $(throw "-username is required."),
-    [string]$host_ip  = $(throw "-host_ip is required."),
     [string]$password = $(throw "-password is required.")
  )
 

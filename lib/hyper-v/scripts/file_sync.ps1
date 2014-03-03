@@ -51,6 +51,10 @@ function Create-Remote-Folders($empty_source_folders, $guest_path) {
     }
 }
 
+function Create-Guest-Folder($guest_path) {
+   New-Item "$guest_path" -type directory -Force
+}
+
 function Get-Empty-folders-From-Source($host_path) {
   Get-ChildItem $host_path -recurse |
         Where-Object {$_.PSIsContainer -eq $True} |
@@ -82,6 +86,10 @@ if (!$response["session"] -and $response["error"]) {
 }
 
 $session = $response["session"]
+# Create the guest folder if not exist
+$result = Invoke-Command -Session $session -ScriptBlock ${function:Create-Guest-Folder} -ArgumentList $guest_path
+
+
 $source_files = Get-file-hash $host_path $delimiter
 $destination_files = Get-remote-file-hash $guest_path $delimiter $session
 

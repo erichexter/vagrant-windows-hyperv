@@ -42,11 +42,7 @@ module VagrantPlugins
          def export
            begin
              @env[:ui].info('Exporting the VM, this process may take a while.')
-             options = {
-                vm_id: @env[:machine].id,
-                path: temp_dir.to_s.gsub("/","\\")
-              }
-             result = @env[:machine].provider.driver.execute("export_vm.ps1", options)
+             result = @env[:machine].provider.driver.export_vm_to(temp_dir)
              # Hyper-V Exports the VM under the VM's name in to the temp directory.
              # Set the package directory to this folder, all files should go into this folder
              @env["package.directory"] = @env["export.temp_dir"].join(result["name"])
