@@ -11,10 +11,11 @@ module VagrantPlugins
       class Base
         attr_reader :vmid
 
-        def initialize(id=nil)
-          @vmid = id
+        def initialize(machine)
+          @vmid = machine.id
           check_power_shell
           @output = nil
+          @machine = machine
         end
 
         def execute(path, options, &block)
@@ -41,7 +42,96 @@ module VagrantPlugins
           end
         end
 
+        def export_vm_to(path)
+          options = {
+             vm_id: vmid,
+             path: windows_path(path)
+           }
+          execute("export_vm.ps1", options)
+        end
+
+        def read_guest_ip
+          execute('get_network_config.ps1', { vm_id: vmid })
+        end
+
+        def get_current_state
+          execute('get_vm_status.ps1', { vm_id: vmid })
+        end
+
+        def resume
+          execute('resume_vm.ps1', { vm_id: vmid })
+        end
+
+        def share_folders(hostpath, share_name)
+          options = {
+            path: windows_path(hostpath),
+            share_name: safe_share_name(share_name),
+            host_share_username: @machine.provider_config.host_share.username
+          }
+          execute('set_smb_share.ps1', options)
+        end
+
+        def mount_to_windows(from, to, ssh_info)
+          options = {
+                      hostpath: windows_path(from),
+                      guest_ip: ssh_info[:host],
+                      guest_path: windows_path(to),
+                      username: ssh_info[:username],
+                      password: "vagrant"
+                    }
+          execute('mount_share.ps1', options)
+        end
+
+        def start
+          execute('start_vm.ps1', { vm_id: vmid })
+        end
+
+        def stop
+          execute('stop_vm.ps1', { vm_id: vmid })
+        end
+
+        def suspend
+          execute('suspend_vm.ps1', { vm_id: vmid })
+        end
+
+        def upload(from, to)
+          options = {
+            vm_id: vmid,
+            host_path: windows_path(from),
+            guest_path: windows_path(to)
+          }
+          execute('upload_file.ps1',options)
+        end
+
+        def folder_copy(from, to, ssh_info)
+          options = {
+            vm_id: vmid,
+            username: ssh_info[:username],
+            host_path: windows_path(from),
+            guest_path: windows_path(to),
+            guest_ip: ssh_info[:host],
+            password: "vagrant"
+          }
+          execute('file_sync.ps1', options)
+        end
+
         protected
+
+        def windows_path(path)
+          path.gsub("/","\\")
+        end
+
+        def safe_share_name(name)
+          if name
+            new_path = name.strip.gsub(' ', '_')
+            new_path = "c:#{new_path}" if new_path =~ /^\\/
+          end
+          if new_path.length >
+            new_path
+          else
+           raise Errors::InvalidShareName
+         end
+        end
 
         def json_output
           return @json_output if @json_output

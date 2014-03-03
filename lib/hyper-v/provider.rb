@@ -54,7 +54,7 @@ module VagrantPlugins
       end
 
       def driver
-        @driver ||= Driver::Base.new()
+        @driver ||= Driver::Base.new(@machine)
       end
     end
   end

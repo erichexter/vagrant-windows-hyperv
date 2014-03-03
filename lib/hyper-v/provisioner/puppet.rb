@@ -68,12 +68,8 @@ module VagrantPlugins
 
           # Upload the file to Guest VM
           fixed_upload_path = "/tmp/vagrant-puppet/vagrant-puppet-powershell.ps1"
-          options = { :host_path => source_path.gsub("/","\\"),
-                     :guest_path => fixed_upload_path.gsub("/","\\"),
-                     :vm_id => @env[:machine].id }
           begin
-            response = @env[:machine].provider.driver.execute('upload_file.ps1', options)
-
+            response = @env[:machine].provider.driver.upload(source_path, fixed_upload_path)
             @env[:ui].info "Executing puppet script in Guest"
             # Execute the file from remote location
             ssh_info = @env[:machine].ssh_info
