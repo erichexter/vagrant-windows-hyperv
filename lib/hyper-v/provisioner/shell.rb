@@ -26,9 +26,7 @@ module VagrantPlugins
               config.upload_path
             end
 
-            response = @env[:machine].provider.driver.upload(hostpath, guest_path)
-
-            execute('upload_file.ps1', options)
+            response = @env[:machine].provider.driver.upload(path, guest_path)
 
             @env[:ui].info "Executing the script in Guest"
             # Execute the file from remote location
