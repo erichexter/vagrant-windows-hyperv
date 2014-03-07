@@ -13,6 +13,5 @@ group :development do
   # Vagrant environment itself using `vagrant plugin`.
   # gem "vagrant", :git => "git://github.com/mitchellh/vagrant.git"
 
-  # For My local development I am pointing to a path where I already have this gem
-  gem "vagrant", :path => "C:/HashiCorp/Vagrant/embedded/gems/gems/vagrant-1.3.5"
+  gem "vagrant", :git => 'git://github.com/mitchellh/vagrant.git', :tag => 'v1.4.3'
 end

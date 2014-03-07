@@ -2,7 +2,6 @@
 # Copyright (c) Microsoft Open Technologies, Inc.
 # All Rights Reserved. Licensed under the MIT License.
 #--------------------------------------------------------------------------
-
 require "log4r"
 module VagrantPlugins
   module HyperV
@@ -16,7 +15,6 @@ module VagrantPlugins
         def call(env)
           if env[:machine].id
             begin
-              options = { vm_id: env[:machine].id }
               response = env[:machine].provider.driver.get_current_state
               env[:machine_state_id] = response["state"].downcase.to_sym
             rescue Error::SubprocessError => e
