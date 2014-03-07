@@ -9,9 +9,9 @@ module VagrantPlugins
     module Provisioner
       class Puppet
         attr_reader :provisioner
-        def initialize(env, provisioner)
+        def initialize(env)
           @env = env
-          @provisioner = provisioner
+          @provisioner = env[:provisioner]
         end
 
         def provision_for_windows
