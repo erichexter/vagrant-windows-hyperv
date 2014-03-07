@@ -8,9 +8,19 @@ require "vagrant"
 module VagrantPlugins
   module HyperV
     class Provider < Vagrant.plugin("2", :provider)
+      attr_reader :driver
 
       def initialize(machine)
         @machine = machine
+        # This method will load in our driver, so we call it now to
+        # initialize it.
+        machine_id_changed
+      end
+
+      # If the machine ID changed, then we need to rebuild our underlying
+      # driver.
+      def machine_id_changed
+        @driver = Driver.new(@machine)
       end
 
       def action(name)
@@ -53,9 +63,6 @@ module VagrantPlugins
         end
       end
 
-      def driver
-        @driver ||= Driver::Base.new(@machine)
-      end
     end
   end
 end

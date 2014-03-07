@@ -41,6 +41,7 @@ try {
   net share $share_name /delete /y
 
   # Set ACL for all files in the folder
+
   $current_acl = Get-ACL $path
   $permission = "$computer_name\$host_share_username","FullControl","ContainerInherit,ObjectInherit","None","Allow"
   $acl_access_rule = New-Object System.Security.AccessControl.FileSystemAccessRule $permission
@@ -50,6 +51,7 @@ try {
   # Share the current folder with proper permissions
   $grant_permission = "$computer_name\$host_share_username,Full"
   $result = net share $share_name=$path /unlimited /GRANT:$grant_permission
+
   if ($result -Match "$share_name was shared successfully.") {
     $resultHash = @{
       message = "OK"
