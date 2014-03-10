@@ -5,9 +5,13 @@
 
 module VagrantPlugins
   module HyperV
-    module Error
-      lib_path = Pathname.new(File.expand_path("../error", __FILE__))
-      autoload :SubprocessError, lib_path.join("subprocess_error")
+    module Errors
+      class VagrantHyperVError < Vagrant::Errors::VagrantError
+        error_namespace("vagrant_hyperv.errors")
+      end
+      class AdminRequired < VagrantHyperVError
+        error_key(:admin_required)
+      end
     end
   end
 end

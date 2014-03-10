@@ -1,0 +1,7 @@
+en:
+  vagrant_hyperv:
+    errors:
+      admin_required: |-
+        "You need admin access to run vagrant commands for HyperV"
+    already_status: |-
+      The machine is already %{status}.

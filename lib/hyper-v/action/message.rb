@@ -3,11 +3,21 @@
 # All Rights Reserved. Licensed under the MIT License.
 #--------------------------------------------------------------------------
 
+require "log4r"
 module VagrantPlugins
   module HyperV
-    module Communicator
-      lib_path = Pathname.new(File.expand_path("../communicator", __FILE__))
-      autoload :SSH, lib_path.join("ssh")
+    module Action
+      class Message
+        def initialize(app, env, message)
+          @app = app
+          @message = message
+        end
+
+        def call(env)
+          env[:ui].info @message
+          @app.call(env)
+        end
+      end
     end
   end
 end
