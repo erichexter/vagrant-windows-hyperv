@@ -28,5 +28,10 @@ try {
   Write-Output-Message $result
 }
 catch {
-  Write-Error-Message "Failed to start a VM $_"
+  $errortHash = @{
+    type = "PowerShellError"
+    message ="Failed to mount files VM  $_"
+  }
+  $errorResult = ConvertTo-Json $errortHash
+  Write-Error-Message $errorResult
 }

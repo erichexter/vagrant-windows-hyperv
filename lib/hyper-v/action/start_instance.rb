@@ -13,13 +13,8 @@ module VagrantPlugins
 
         def call(env)
           env[:ui].info('Starting the Machine')
-          begin
-            response = env[:machine].provider.driver.start
-            env[:ui].info "Machine #{response["name"]} started"
-          rescue Error::SubprocessError => e
-            env[:ui].info e.message
-            return
-          end
+          response = env[:machine].provider.driver.start
+          env[:ui].info "Machine #{response["name"]} started"
           @app.call(env)
         end
       end

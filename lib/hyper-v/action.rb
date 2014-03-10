@@ -86,6 +86,9 @@ module VagrantPlugins
           b.use ConfigValidate
           b.use Call, IsState, :not_created do |env1, b1|
             if env1[:result]
+              b1.use Import
+              b1.use action_start
+            else
               b1.use Call, IsState, :off do |env2, b2|
                 if env2[:result]
                   b2.use action_start
@@ -93,9 +96,6 @@ module VagrantPlugins
                   b2.use Message, "Machine already created"
                 end
               end
-            else
-              b1.use Import
-              b1.use action_start
             end
           end
         end

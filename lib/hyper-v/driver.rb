@@ -5,41 +5,54 @@
 require "json"
 require "vagrant/util/which"
 require "vagrant/util/subprocess"
-
+require "debugger"
 module VagrantPlugins
   module HyperV
     class Driver
       attr_reader :vmid
 
+      # Regular Expression to parse the response from PowerShell Script
+      ERROR_REGEXP  = /===Begin-Error===(.+?)===End-Error===/m
+      OUTPUT_REGEXP = /===Begin-Output===(.+?)===End-Output===/m
+
       def initialize(machine)
         @vmid = machine.id
-        check_power_shell
         @output = nil
         @machine = machine
       end
 
       def execute(path, options, &block)
-        if block_given?
-          r = execute_powershell(path, options, &block)
-        else
-          r = execute_powershell(path, options) do |type, data|
-            process_output(type, data)
-          end
-          if success?
-            JSON.parse(json_output[:success].join) unless json_output[:success].empty?
-          else
-            message = json_output[:error].join unless json_output[:error].empty?
-            raise Error::SubprocessError, message if message
-          end
-        end
-      end
+        r = execute_powershell(path, options, &block)
+        output = r.stdout.gsub("\r\n", "\n")
+        error = r.stdout.gsub("\r\n", "\n")
 
-      def raw_execute(command)
-        command = [command , {notify: [:stdout, :stderr, :stdin]}].flatten
-        clear_output_buffer
-        Vagrant::Util::Subprocess.execute(*command) do |type, data|
-          process_output(type, data)
+        if r.exit_code != 0
+          raise Errors::PowerShellError,
+            path: path,
+            stderr: r.stderr
         end
+
+        # if path == "import_vm.ps1"
+        #   debugger
+        # end
+
+        error_response = ERROR_REGEXP.match(error)
+        success_response = OUTPUT_REGEXP.match(output)
+
+        if error_response
+          result = JSON.parse(error_response[1])
+          message = result["message"]
+          type = result["type"]
+          if  type == "PowerShellError"
+            raise Errors::PowerShellError,
+              path: path, stderr: message
+          elsif type == "NetShareError"
+            raise Errors::NetShareError,
+              path: path, stderr: message
+          end
+        end
+        return nil if !success_response
+        return JSON.parse(success_response[1])
       end
 
       def export_vm_to(path)
@@ -133,54 +146,6 @@ module VagrantPlugins
         end
       end
 
-      def json_output
-        return @json_output if @json_output
-        json_success_begin = false
-        json_error_begin = false
-        success = []
-        error = []
-        @output.split("\n").each do |line|
-          json_error_begin = false if line.include?("===End-Error===")
-          json_success_begin = false if line.include?("===End-Output===")
-          message = ""
-          if json_error_begin || json_success_begin
-            message = line.gsub("\\'","\"")
-          end
-          success << message if json_success_begin
-          error << message if json_error_begin
-          json_success_begin = true if line.include?("===Begin-Output===")
-          json_error_begin = true if line.include?("===Begin-Error===")
-        end
-        @json_output = { :success => success, :error => error }
-      end
-
-      def success?
-        @error_messages.empty? && json_output[:error].empty?
-      end
-
-      def process_output(type, data)
-        if type == :stdout
-          @output = data.gsub("\r\n", "\n")
-        end
-        if type == :stdin
-          # $stdin.gets.chomp || ""
-        end
-        if type == :stderr
-          @error_messages = data.gsub("\r\n", "\n")
-        end
-      end
-
-      def clear_output_buffer
-        @output = ""
-        @error_messages = ""
-        @json_output = nil
-      end
-
-      def check_power_shell
-        unless Vagrant::Util::Which.which('powershell')
-          raise "Power Shell not found"
-        end
-      end
 
       def execute_powershell(path, options, &block)
         lib_path = Pathname.new(File.expand_path("../scripts", __FILE__))
@@ -191,7 +156,6 @@ module VagrantPlugins
           ps_options << "-#{key}"
           ps_options << "'#{value}'"
         end
-        clear_output_buffer
         command = ["powershell", "-NoProfile", "-ExecutionPolicy",
             "Bypass", path, ps_options, {notify: [:stdout, :stderr, :stdin]}].flatten
 

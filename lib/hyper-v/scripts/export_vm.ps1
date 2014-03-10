@@ -26,5 +26,10 @@ try {
   $result = ConvertTo-Json $resultHash
   Write-Output-Message $result
   } catch {
-    Write-Error-Message "Failed to export a  VM $_"
+    $errortHash = @{
+      type = "PowerShellError"
+      message = "Failed to export a  VM $_"
+    }
+    $errorResult = ConvertTo-Json $errortHash
+    Write-Error-Message $errorResult
   }

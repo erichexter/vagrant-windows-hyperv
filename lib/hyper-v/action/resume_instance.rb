@@ -14,13 +14,8 @@ module VagrantPlugins
         def call(env)
           env[:ui].info('Resuming the Machine')
           options = { vm_id: env[:machine].id }
-          begin
-            response = env[:machine].provider.driver.resume
-            env[:ui].info "Machine #{response["name"]} resumed"
-          rescue Error::SubprocessError => e
-            env[:ui].info e.message
-            return
-          end
+          response = env[:machine].provider.driver.resume
+          env[:ui].info "Machine #{response["name"]} resumed"
           @app.call(env)
         end
       end

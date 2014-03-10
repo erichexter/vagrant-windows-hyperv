@@ -32,6 +32,11 @@ try {
   $result = ConvertTo-Json $resultHash
   Write-Output-Message $result
 } catch {
-  Write-Error-Message "Failed to copy file  $_"
+  $errortHash = @{
+    type = "PowerShellError"
+    message ="Failed to copy file $_"
+  }
+  $errorResult = ConvertTo-Json $errortHash
+  Write-Error-Message $errorResult
   return
 }

@@ -12,6 +12,14 @@ module VagrantPlugins
       class AdminRequired < VagrantHyperVError
         error_key(:admin_required)
       end
+
+      class PowerShellRequired < VagrantHyperVError
+        error_key(:powershell_required)
+      end
+
+      class PowerShellError < VagrantHyperVError
+        error_key(:powershell_error)
+      end
     end
   end
 end

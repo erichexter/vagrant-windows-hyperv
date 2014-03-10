@@ -4,6 +4,7 @@
 #--------------------------------------------------------------------------
 require "log4r"
 require "vagrant"
+require "vagrant/util/which"
 
 module VagrantPlugins
   module HyperV
@@ -15,6 +16,10 @@ module VagrantPlugins
         # This method will load in our driver, so we call it now to
         # initialize it.
         machine_id_changed
+
+        unless Vagrant::Util::Which.which('powershell')
+          raise Errors::PowerShellRequired
+        end
       end
 
       # If the machine ID changed, then we need to rebuild our underlying

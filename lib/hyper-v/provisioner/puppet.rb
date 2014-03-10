@@ -68,24 +68,20 @@ module VagrantPlugins
 
           # Upload the file to Guest VM
           fixed_upload_path = "/tmp/vagrant-puppet/vagrant-puppet-powershell.ps1"
-          begin
-            response = @env[:machine].provider.driver.upload(source_path, fixed_upload_path)
-            @env[:ui].info "Executing puppet script in Guest"
-            # Execute the file from remote location
-            ssh_info = @env[:machine].ssh_info
-            options = { :guest_ip => ssh_info[:host],
-                       :username => ssh_info[:username],
-                       :path => fixed_upload_path,
-                       :vm_id => @env[:machine].id,
-                       :password => "vagrant" }
+          response = @env[:machine].provider.driver.upload(source_path, fixed_upload_path)
+          @env[:ui].info "Executing puppet script in Guest"
+          # Execute the file from remote location
+          ssh_info = @env[:machine].ssh_info
+          options = { :guest_ip => ssh_info[:host],
+                     :username => ssh_info[:username],
+                     :path => fixed_upload_path,
+                     :vm_id => @env[:machine].id,
+                     :password => "vagrant" }
 
-            @env[:machine].provider.driver.execute('execute_remote_file.ps1', options) do |type, data|
-              if type == :stdout || type == :stderr
-                @env[:ui].info data
-              end
+          @env[:machine].provider.driver.execute('execute_remote_file.ps1', options) do |type, data|
+            if type == :stdout || type == :stderr
+              @env[:ui].info data
             end
-          rescue Error::SubprocessError => e
-            @env[:ui].info e.message
           end
         end
 
