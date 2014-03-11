@@ -18,8 +18,10 @@ module VagrantPlugins
 
         def call(env)
           env[:ui].info "Waiting for the VM to Boot... [default timeout 120 sec]"
-          guest_ip = env[:machine].action("read_guest_ip")[:ssh_info]
-          raise Errors::IPTimeOut if guest_ip.nil? || guest_ip[:host].nil?
+          guest_ip = nil
+          guest_ip = env[:machine].ssh_info[:host]
+          raise Errors::IPTimeOut if guest_ip.nil?
+          env[:ui].info "Virtual Machine's IP is #{guest_ip}"
           @app.call(env)
         end
       end
