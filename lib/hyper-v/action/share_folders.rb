@@ -103,6 +103,8 @@ module VagrantPlugins
 
               command = "mount -t cifs //#{result["host_ip"]}/#{data[:share_name]} #{mount_options}"
               @env[:machine].communicate.sudo(command)
+            rescue Errors::NetShareError => e
+              @env[:ui].error e.message
             rescue RuntimeError => e
               @env[:ui].error("Failed to mount at #{data[:guestpath]}")
             end

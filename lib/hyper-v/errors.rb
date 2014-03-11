@@ -20,6 +20,13 @@ module VagrantPlugins
       class PowerShellError < VagrantHyperVError
         error_key(:powershell_error)
       end
+
+      class NetShareError < RuntimeError
+        attr_reader :message
+        def initialize(options)
+          @message = options[:stderr]
+        end
+      end
     end
   end
 end

@@ -48,7 +48,7 @@ module VagrantPlugins
               path: path, stderr: message
           elsif type == "NetShareError"
             raise Errors::NetShareError,
-              path: path, stderr: message
+              stderr: message
           end
         end
         return nil if !success_response
