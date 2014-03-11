@@ -5,7 +5,7 @@
 require "json"
 require "vagrant/util/which"
 require "vagrant/util/subprocess"
-require "debugger"
+
 module VagrantPlugins
   module HyperV
     class Driver
@@ -166,9 +166,6 @@ module VagrantPlugins
         options.each do |key, value|
           ps_options << "-#{key}"
           ps_options << "'#{value}'"
-        end
-        if path.include?("run_in_remote.ps1")
-          debugger
         end
         command = ["powershell", "-NoProfile", "-ExecutionPolicy",
             "Bypass", path, ps_options, {notify: [:stdout, :stderr, :stdin]}].flatten
