@@ -34,7 +34,12 @@ try {
   }
 
   if ($share_conflict) {
-    Write-Error-Message "IGNORING Conflicting share name, A share name already exist $existing_share"
+    $errortHash = @{
+      type = "NetShareError"
+      message = "IGNORING Conflicting share name, A share name already exist $existing_share"
+    }
+    $errorResult = ConvertTo-Json $errortHash
+    Write-Error-Message $errorResult
     return
   }
 
@@ -59,10 +64,20 @@ try {
     $result = ConvertTo-Json $resultHash
     Write-Output-Message $result
   } else {
-    Write-Error-Message $result
+    $errortHash = @{
+      type = "PowerShellError"
+      message = $result
+    }
+    $errorResult = ConvertTo-Json $errortHash
+    Write-Error-Message $errorResult
   }
 } catch {
-  Write-Error-Message $_
+  $errortHash = @{
+    type = "PowerShellError"
+    message = "$_"
+  }
+  $errorResult = ConvertTo-Json $errortHash
+  Write-Error-Message $errorResult
   return
 }
 

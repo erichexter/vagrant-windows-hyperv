@@ -54,13 +54,8 @@ module VagrantPlugins
         def mount_shared_folders_to_windows
           @smb_shared_folders.each do |id, data|
             hostpath  = File.expand_path(data[:hostpath], @env[:root_path])
-            begin
-              @env[:ui].info("Mounting #{hostpath} to Guest at #{data[:guestpath]} ...")
-              @env[:machine].provider.driver.mount_to_windows(hostpath, data[:guestpath], ssh_info)
-            rescue Error::SubprocessError => e
-              @env[:ui].info "Failed to mount #{hostpath} to Guest"
-              @env[:ui].info e.message
-            end
+            @env[:ui].info("Mounting #{hostpath} to Guest at #{data[:guestpath]} ...")
+            @env[:machine].provider.driver.mount_to_windows(hostpath, data[:guestpath], ssh_info)
           end
         end
 
@@ -108,16 +103,12 @@ module VagrantPlugins
 
               command = "mount -t cifs //#{result["host_ip"]}/#{data[:share_name]} #{mount_options}"
               @env[:machine].communicate.sudo(command)
-
+            rescue Errors::NetShareError => e
+              @env[:ui].error e.message
             rescue RuntimeError => e
               @env[:ui].error("Failed to mount at #{data[:guestpath]}")
-            rescue Error::SubprocessError => e
-              @env[:ui].info e.message
-            raise Error::InvalidShareName => e
-              @env[:ui].info e.message
             end
           end
-
         end
       end
     end

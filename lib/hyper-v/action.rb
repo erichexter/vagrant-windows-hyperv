@@ -15,9 +15,9 @@ module VagrantPlugins
       def self.action_reload
         Vagrant::Action::Builder.new.tap do |b|
           b.use ConfigValidate
-          b.use Call, IsCreated do |env, b2|
-            if !env[:result]
-              b2.use MessageNotCreated
+          b.use Call, IsState, :not_created do |env, b2|
+            if env[:result]
+              b2.use Message, "Machine not created"
               next
             end
             b2.use action_halt
@@ -35,9 +35,9 @@ module VagrantPlugins
       def self.action_halt
         Vagrant::Action::Builder.new.tap do |b|
           b.use ConfigValidate
-          b.use Call, IsCreated do |env, b2|
-            if !env[:result]
-              b2.use MessageNotCreated
+          b.use Call, IsState, :not_created do |env, b2|
+            if env[:result]
+              b2.use Message, "Machine not created"
               next
             end
             b2.use StopInstance
@@ -48,9 +48,9 @@ module VagrantPlugins
       def self.action_suspend
         Vagrant::Action::Builder.new.tap do |b|
           b.use ConfigValidate
-          b.use Call, IsCreated do |env, b2|
-            if !env[:result]
-              b2.use MessageNotCreated
+          b.use Call, IsState, :not_created do |env, b2|
+            if env[:result]
+              b2.use Message, "Machine not created"
               next
             end
             b2.use SuspendInstance
@@ -70,9 +70,9 @@ module VagrantPlugins
       def self.action_resume
         Vagrant::Action::Builder.new.tap do |b|
           b.use ConfigValidate
-          b.use Call, IsSuspended do |env, b2|
+          b.use Call, IsState, :paused do |env, b2|
             if !env[:result]
-              b2.use MessageNotSuspended
+              b2.use Message, "Machine not suspended"
               next
             end
             b2.use ResumeInstance
@@ -84,18 +84,18 @@ module VagrantPlugins
         Vagrant::Action::Builder.new.tap do |b|
           b.use HandleBoxUrl
           b.use ConfigValidate
-          b.use Call, IsCreated do |env1, b1|
+          b.use Call, IsState, :not_created do |env1, b1|
             if env1[:result]
-              b1.use Call, IsStopped do |env2, b2|
+              b1.use Import
+              b1.use action_start
+            else
+              b1.use Call, IsState, :off do |env2, b2|
                 if env2[:result]
                   b2.use action_start
                 else
-                  b2.use MessageAlreadyCreated
+                  b2.use Message, "Machine already created"
                 end
               end
-            else
-              b1.use Import
-              b1.use action_start
             end
           end
         end
@@ -111,14 +111,14 @@ module VagrantPlugins
       def self.action_ssh
         Vagrant::Action::Builder.new.tap do |b|
           b.use ConfigValidate
-          b.use Call, IsCreated do |env, b2|
-            if !env[:result]
-              b2.use MessageNotCreated
+          b.use Call, IsState, :not_created do |env, b2|
+            if env[:result]
+              b2.use Message, "Machine not created"
               next
             end
-            b2.use Call, IsRunning do |env1, b3|
+            b2.use Call, IsState, :running do |env1, b3|
               if !env1[:result]
-                b3.use MessageNotRunning
+                b3.use Message, "Machine is not running, Please turn it on."
               else
                 b3.use SSHExec
               end
@@ -136,9 +136,9 @@ module VagrantPlugins
 
       def self.action_package
         Vagrant::Action::Builder.new.tap do |b|
-          b.use Call, IsCreated do |env1, b2|
-            if !env1[:result]
-              b2.use MessageNotCreated
+          b.use Call, IsState, :not_created do |env1, b2|
+            if env1[:result]
+              b2.use Message, "Machine not created"
               next
             end
             b2.use SetupPackageFiles
@@ -158,12 +158,12 @@ module VagrantPlugins
       def self.action_provision
         Vagrant::Action::Builder.new.tap do |b|
           b.use ConfigValidate
-          b.use Call, IsCreated do |env, b2|
-            if !env[:result]
-              b2.use MessageNotCreated
+          b.use Call, IsState, :not_created do |env, b2|
+            if env[:result]
+              b2.use Message, "Machine not created"
               next
             end
-            b2.use Call, IsRunning do |env2, b3|
+            b2.use Call, IsState, :running do |env2, b3|
               if !env2[:result]
                 b3.use MessageNotRunning
               else
@@ -177,26 +177,24 @@ module VagrantPlugins
 
       # The autoload farm
       action_root = Pathname.new(File.expand_path("../action", __FILE__))
-      autoload :IsCreated, action_root.join("is_created")
-      autoload :IsStopped, action_root.join("is_stopped")
-      autoload :IsRunning, action_root.join("is_running")
-      autoload :IsSuspended, action_root.join("is_suspended")
+      autoload :IsState, action_root.join("is_state")
+      autoload :Message, action_root.join("message")
       autoload :ReadState, action_root.join("read_state")
       autoload :Import, action_root.join("import")
+
       autoload :StartInstance, action_root.join('start_instance')
       autoload :StopInstance, action_root.join('stop_instance')
       autoload :ResumeInstance, action_root.join('resume_instance')
       autoload :SuspendInstance, action_root.join('suspend_instance')
-      autoload :MessageNotCreated, action_root.join('message_not_created')
-      autoload :MessageAlreadyCreated, action_root.join('message_already_created')
-      autoload :MessageNotRunning, action_root.join('message_not_running')
-      autoload :MessageNotSuspended, action_root.join('message_not_suspended')
       autoload :SyncFolders, action_root.join('sync_folders')
+
       autoload :WaitForState, action_root.join('wait_for_state')
       autoload :ReadGuestIP, action_root.join('read_guest_ip')
+
       autoload :ShareFolders, action_root.join('share_folders')
       autoload :SSHExec, action_root.join('ssh_exec')
       autoload :SetupPackageFiles, action_root.join("setup_package_files")
+
       autoload :Export, action_root.join("export")
       autoload :Package, action_root.join("package")
       autoload :Provision, action_root.join('provision')

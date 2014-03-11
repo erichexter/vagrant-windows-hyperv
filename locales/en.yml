@@ -1,0 +1,20 @@
+en:
+  vagrant_hyperv:
+    errors:
+      admin_required: |-
+        "You need admin access to run vagrant commands for HyperV"
+      already_status: |-
+        The machine is already %{status}.
+      powershell_required: |-
+        HyperV provider expects PowerShell to be insatlled in this machine,
+        check if powershell.exe is available in this machine and please update the
+        system path accordingly.
+      powershell_error: |-
+        PowerShell encountered an error, this can be due to environment / configuration
+        related. Please see the error message and report the issue if you fell it is
+        related to the provider
+        =============
+        Error message
+        =============
+        %{path}
+        %{stderr}

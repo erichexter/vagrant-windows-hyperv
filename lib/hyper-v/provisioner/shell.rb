@@ -16,7 +16,6 @@ module VagrantPlugins
           arguments = ""
           arguments = " #{config.args}" if config.args
           with_windows_script_file do |path|
-            begin
             # Upload the script to a TMP file in remote VM
             @env[:ui].info "Copying the script to Guest"
 
@@ -41,10 +40,6 @@ module VagrantPlugins
               if type == :stdout || type == :stderr
                 @env[:ui].info data
               end
-            end
-
-            rescue Error::SubprocessError => e
-              @env[:ui].info "Failed to copy files to VM"
             end
           end
         end

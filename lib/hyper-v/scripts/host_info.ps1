@@ -20,6 +20,11 @@ $ip = (Get-WmiObject -class win32_NetworkAdapterConfiguration -Filter 'ipenabled
   Write-Output-Message $result
 }
 catch {
-  Write-Error-Message $_
+  $errortHash = @{
+    type = "PowerShellError"
+    message = "$_"
+  }
+  $errorResult = ConvertTo-Json $errortHash
+  Write-Error-Message $errorResult
 }
 

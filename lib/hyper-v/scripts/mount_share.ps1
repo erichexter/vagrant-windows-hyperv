@@ -41,14 +41,24 @@ try {
     $response = Create-Remote-Session $guest_ip $username $password
 
     if (!$response["session"] -and $response["error"]) {
-        Write-Error-Message $response["error"]
+        $errortHash = @{
+          type = "PowerShellError"
+          message = $response["error"]
+        }
+        $errorResult = ConvertTo-Json $errortHash
+        Write-Error-Message $errorResult
         return
     }
 
     try {
       Invoke-Command -Session $response["session"] -ScriptBlock ${function:Mount-File} -ArgumentList $guest_path, $hostpath  -ErrorAction "stop"
     } catch {
-        Write-Error-Message "Failed to mount files VM  $_"
+        $errortHash = @{
+          type = "PowerShellError"
+          message ="Failed to mount files VM  $_"
+        }
+        $errorResult = ConvertTo-Json $errortHash
+        Write-Error-Message $errorResult
         return
     }
     Remove-PSSession -Id $response["session"].Id
@@ -59,6 +69,11 @@ try {
     Write-Output-Message $result
 }
 catch {
-    Write-Error-Message "Failed to mount files VM  $_"
+    $errortHash = @{
+      type = "PowerShellError"
+      message ="Failed to mount files VM  $_"
+    }
+    $errorResult = ConvertTo-Json $errortHash
+    Write-Error-Message $errorResult
     return
 }

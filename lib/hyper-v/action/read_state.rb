@@ -14,13 +14,11 @@ module VagrantPlugins
 
         def call(env)
           if env[:machine].id
-            begin
               response = env[:machine].provider.driver.get_current_state
               env[:machine_state_id] = response["state"].downcase.to_sym
-            rescue Error::SubprocessError => e
+            if env[:machine_state_id] == :not_created
               env[:machine].id = nil
               env[:ui].info "Could not find a machine, assuming it to be deleted or terminated."
-              env[:machine_state_id] = :not_created
             end
           else
             env[:machine_state_id] = :not_created
