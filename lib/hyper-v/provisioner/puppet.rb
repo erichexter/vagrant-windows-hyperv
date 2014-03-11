@@ -31,6 +31,10 @@ module VagrantPlugins
 
           if @hiera_config_path
             options << "--hiera_config=#{@hiera_config_path}"
+            # Upload Hiera configuration if we have it
+            local_hiera_path   = File.expand_path(config.hiera_config_path,
+              @env[:machine].env.root_path)
+            @env[:machine].provider.driver.upload(local_hiera_path, @hiera_config_path)
           end
 
           options << "--manifestdir #{provisioner.manifests_guest_path}"
@@ -56,27 +60,15 @@ module VagrantPlugins
 
           @env[:ui].info I18n.t("vagrant.provisioners.puppet.running_puppet",
                                       :manifest => config.manifest_file)
-          file = Tempfile.new(['vagrant-puppet-powershell', '.ps1'])
-          begin
-            file.write command
-            file.fsync
-            file.close
-            source_path = file.path
-          ensure
-            file.close
-          end
 
-          # Upload the file to Guest VM
-          fixed_upload_path = "/tmp/vagrant-puppet/vagrant-puppet-powershell.ps1"
-          response = @env[:machine].provider.driver.upload(source_path, fixed_upload_path)
           @env[:ui].info "Executing puppet script in Guest"
-          # Execute the file from remote location
-          ssh_info = @env[:machine].ssh_info
-          options = { :guest_ip => ssh_info[:host],
-                     :username => ssh_info[:username],
-                     :path => fixed_upload_path,
-                     :vm_id => @env[:machine].id,
-                     :password => "vagrant" }
+
+          @env[:machine].provider.driver.run_remote_ps(command) do |type, data|
+            # Output the data with the proper color based on the stream.
+            if (type == :stdout || type == :stderr)
+              @env[:machine].env.ui.info data
+            end
+          end
 
           @env[:machine].provider.driver.execute('execute_remote_file.ps1', options) do |type, data|
             if type == :stdout || type == :stderr

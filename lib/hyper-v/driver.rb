@@ -32,10 +32,6 @@ module VagrantPlugins
             stderr: r.stderr
         end
 
-        # if path == "import_vm.ps1"
-        #   debugger
-        # end
-
         error_response = ERROR_REGEXP.match(error)
         success_response = OUTPUT_REGEXP.match(output)
 
@@ -53,6 +49,21 @@ module VagrantPlugins
         end
         return nil if !success_response
         return JSON.parse(success_response[1])
+      end
+
+      def ssh_info
+        @ssh_info ||= @machine.ssh_info
+      end
+
+      def remote_credentials
+        @remote_credentials ||= {  guest_ip: ssh_info[:host],
+           username:  ssh_info[:username],
+           password: "vagrant" }
+      end
+
+      def run_remote_ps(command, &block)
+        options = remote_credentials.merge(command: command)
+        execute('run_in_remote.ps1', options, &block)
       end
 
       def export_vm_to(path)
@@ -155,6 +166,9 @@ module VagrantPlugins
         options.each do |key, value|
           ps_options << "-#{key}"
           ps_options << "'#{value}'"
+        end
+        if path.include?("run_in_remote.ps1")
+          debugger
         end
         command = ["powershell", "-NoProfile", "-ExecutionPolicy",
             "Bypass", path, ps_options, {notify: [:stdout, :stderr, :stdin]}].flatten
