@@ -2,21 +2,19 @@
 # Copyright (c) Microsoft Open Technologies, Inc.
 # All Rights Reserved. Licensed under the MIT License.
 #--------------------------------------------------------------------------
-require "log4r"
-
 module VagrantPlugins
   module HyperV
-    module Action
-      class IsState
-        def initialize(app, env, state)
-          @app = app
-          @state = state
-        end
+    class Command < Vagrant.plugin("2", :command)
+      def self.synopsis
+        "opens a RDP session for a vagrant machine"
+      end
 
-        def call(env)
-          env[:result] = env[:machine].state.id == @state
-          @app.call(env)
+      def execute
+        with_target_vms do |vm|
+          vm.action(:rdp)
         end
+        # Success, exit status 0
+        0
       end
     end
   end

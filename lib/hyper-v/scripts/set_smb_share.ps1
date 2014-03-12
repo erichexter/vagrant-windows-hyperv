@@ -36,7 +36,7 @@ try {
   if ($share_conflict) {
     $errortHash = @{
       type = "NetShareError"
-      message = "IGNORING Conflicting share name, A share name already exist $existing_share"
+      message = "IGNORING Conflicting share name, $share_name A name already exist."
     }
     $errorResult = ConvertTo-Json $errortHash
     Write-Error-Message $errorResult

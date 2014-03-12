@@ -22,8 +22,6 @@ module VagrantPlugins
             env[:ui].info('Mounting shared folders with VM, This process may take few minutes.')
             if env[:machine].provider_config.guest == :windows
               mount_shared_folders_to_windows
-              env[:ui].info "Generating a RDP file."
-              generate_rdp_file
             elsif env[:machine].provider_config.guest == :linux
               mount_shared_folders_to_linux
             end
@@ -55,22 +53,8 @@ module VagrantPlugins
           @smb_shared_folders.each do |id, data|
             hostpath  = File.expand_path(data[:hostpath], @env[:root_path])
             @env[:ui].info("Mounting #{hostpath} to Guest at #{data[:guestpath]} ...")
-            @env[:machine].provider.driver.mount_to_windows(hostpath, data[:guestpath], ssh_info)
+            @env[:machine].provider.driver.mount_to_windows(hostpath, data[:guestpath])
           end
-        end
-
-        def generate_rdp_file
-            rdp_options = {
-              "drivestoredirect:s" => "*",
-              "username:s" => ssh_info[:username],
-              "prompt for credentials:i" => "1",
-              "full address:s" => ssh_info[:host]
-            }
-            file = File.open("machine.rdp", "w")
-              rdp_options.each do |key, value|
-                file.puts "#{key}:#{value}"
-            end
-            file.close
         end
 
         def prepare_smb_share(data)

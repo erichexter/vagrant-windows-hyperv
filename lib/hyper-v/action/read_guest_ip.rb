@@ -25,19 +25,22 @@ module VagrantPlugins
           return nil if env[:machine].id.nil?
           # Get Network details from WMI Provider
           # Wait for 120 sec By then the machine should be ready
-          host_ip = nil
+          guest_ip = nil
           begin
             Timeout.timeout(120) do
             begin
               network_info  = env[:machine].provider.driver.read_guest_ip
-              host_ip = network_info["ip"]
-              sleep 10 if host_ip.empty?
-              end while host_ip.empty?
+              guest_ip = network_info["ip"]
+              if !guest_ip.empty? && (/\d+(\.)\d+(\.)\d+(\.)\d+/.match(guest_ip).nil?)
+                guest_ip = ""
+              end
+              sleep 10 if guest_ip.empty?
+              end while guest_ip.empty?
             end
           rescue Timeout::Error
             @logger.info("Cannot find the IP address of the virtual machine")
           end
-          return { host: host_ip } unless host_ip.nil?
+          return { host: guest_ip } unless guest_ip.nil?
         end
       end
     end

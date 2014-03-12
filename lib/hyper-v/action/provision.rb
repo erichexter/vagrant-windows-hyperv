@@ -14,6 +14,8 @@ module VagrantPlugins
               Provisioner::Shell.new(env).provision_for_windows
             when "VagrantPlugins::Puppet::Provisioner::Puppet"
               Provisioner::Puppet.new(env).provision_for_windows
+            when "VagrantPlugins::Chef::Provisioner::ChefSolo"
+              Provisioner::ChefSolo.new(env).provision_for_windows
             end
           else
             env[:provisioner].provision

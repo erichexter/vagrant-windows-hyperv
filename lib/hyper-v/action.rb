@@ -17,17 +17,11 @@ module VagrantPlugins
           b.use ConfigValidate
           b.use Call, IsState, :not_created do |env, b2|
             if env[:result]
-              b2.use Message, "Machine not created"
+              b2.use Message, I18n.t("vagrant_hyperv.message_not_created")
               next
             end
             b2.use action_halt
-            b2.use Call, WaitForState, :off, 120 do |env2, b3|
-              if env2[:result]
-                b3.use action_up
-              else
-                env2[:ui].info("Machine did not reload, Check machine's status")
-              end
-            end
+            b2.use action_start
           end
         end
       end
@@ -37,10 +31,15 @@ module VagrantPlugins
           b.use ConfigValidate
           b.use Call, IsState, :not_created do |env, b2|
             if env[:result]
-              b2.use Message, "Machine not created"
+              b2.use Message, I18n.t("vagrant_hyperv.message_not_created")
               next
             end
             b2.use StopInstance
+            b2.use Call, WaitForState, :off, 120 do |env1, b3|
+              if env1[:result]
+                env[:ui].info I18n.t("vagrant_hyperv.message_turned_off")
+              end
+            end
           end
         end
       end
@@ -50,7 +49,7 @@ module VagrantPlugins
           b.use ConfigValidate
           b.use Call, IsState, :not_created do |env, b2|
             if env[:result]
-              b2.use Message, "Machine not created"
+              b2.use Message, I18n.t("vagrant_hyperv.message_not_created")
               next
             end
             b2.use SuspendInstance
@@ -60,10 +59,17 @@ module VagrantPlugins
 
       def self.action_start
         Vagrant::Action::Builder.new.tap do |b|
-          b.use StartInstance
-          b.use ShareFolders
           b.use Provision
-          b.use SyncFolders
+          b.use StartInstance
+          b.use Call, WaitForState, :running, 10 do |env, b1|
+            if env[:result]
+              b1.use WaitForBootReady
+              b1.use ShareFolders
+              b1.use SyncFolders
+            else
+              env[:ui].info I18n.t("vagrant_hyperv.errors.machine_boot_error")
+            end
+          end
         end
       end
 
@@ -113,7 +119,7 @@ module VagrantPlugins
           b.use ConfigValidate
           b.use Call, IsState, :not_created do |env, b2|
             if env[:result]
-              b2.use Message, "Machine not created"
+              b2.use Message, I18n.t("vagrant_hyperv.message_not_created")
               next
             end
             b2.use Call, IsState, :running do |env1, b3|
@@ -138,7 +144,7 @@ module VagrantPlugins
         Vagrant::Action::Builder.new.tap do |b|
           b.use Call, IsState, :not_created do |env1, b2|
             if env1[:result]
-              b2.use Message, "Machine not created"
+              b2.use Message, I18n.t("vagrant_hyperv.message_not_created")
               next
             end
             b2.use SetupPackageFiles
@@ -160,7 +166,7 @@ module VagrantPlugins
           b.use ConfigValidate
           b.use Call, IsState, :not_created do |env, b2|
             if env[:result]
-              b2.use Message, "Machine not created"
+              b2.use Message, I18n.t("vagrant_hyperv.message_not_created")
               next
             end
             b2.use Call, IsState, :running do |env2, b3|
@@ -168,8 +174,28 @@ module VagrantPlugins
                 b3.use MessageNotRunning
               else
                 b3.use Provision
-                b3.use SyncFolders
               end
+            end
+          end
+        end
+      end
+
+      def self.action_rdp
+        Vagrant::Action::Builder.new.tap do |b|
+          b.use ConfigValidate
+          b.use Call, IsState, :not_created do |env, b2|
+            if env[:result]
+              b2.use Message, I18n.t("vagrant_hyperv.message_not_created")
+              next
+            end
+
+            b2.use Call, IsState, :running do |env1, b3|
+              if !env1[:result]
+                b3.use Message, I18n.t("vagrant_hyperv.message_rdp_not_ready")
+                next
+              end
+
+              b3.use Rdp
             end
           end
         end
@@ -198,6 +224,8 @@ module VagrantPlugins
       autoload :Export, action_root.join("export")
       autoload :Package, action_root.join("package")
       autoload :Provision, action_root.join('provision')
+      autoload :Rdp, action_root.join("rdp")
+      autoload :WaitForBootReady, action_root.join("wait_for_boot_ready")
     end
   end
 end

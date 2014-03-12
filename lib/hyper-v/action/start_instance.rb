@@ -14,7 +14,6 @@ module VagrantPlugins
         def call(env)
           env[:ui].info('Starting the Machine')
           response = env[:machine].provider.driver.start
-          env[:ui].info "Machine #{response["name"]} started"
           @app.call(env)
         end
       end

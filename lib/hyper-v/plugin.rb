@@ -32,7 +32,7 @@ module VagrantPlugins
       end
 
       command "rdp" do
-        require_relative "command/rdp"
+        require_relative "command/rdp/command"
         Command
       end
 

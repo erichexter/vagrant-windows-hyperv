@@ -5,6 +5,7 @@
 require "log4r"
 require "vagrant/util/subprocess"
 require "vagrant/util/which"
+
 module VagrantPlugins
   module HyperV
     module Action

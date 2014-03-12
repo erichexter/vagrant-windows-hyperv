@@ -14,7 +14,8 @@ module VagrantPlugins
 
         def call(env)
           if env[:machine].provider_config.guest == :windows
-            env[:ui].info "SSH is not supported for this VM. use vagrant rdp"
+            raise Errors::SSHNotAvailable,
+              guest: env[:machine].provider_config.guest
           else
             super
           end

@@ -21,6 +21,18 @@ module VagrantPlugins
         error_key(:powershell_error)
       end
 
+      class SSHNotAvailable < VagrantHyperVError
+        error_key(:ssh_not_available)
+      end
+
+      class RDPNotAvailable < VagrantHyperVError
+        error_key(:rdp_not_available)
+      end
+
+      class IPTimeOut < VagrantHyperVError
+        error_key(:ip_time_out)
+      end
+
       class NetShareError < RuntimeError
         attr_reader :message
         def initialize(options)

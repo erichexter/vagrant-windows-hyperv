@@ -2,6 +2,7 @@
 # Copyright (c) Microsoft Open Technologies, Inc.
 # All Rights Reserved. Licensed under the MIT License.
 #--------------------------------------------------------------------------
+
 module VagrantPlugins
   module HyperV
     module Provisioner
@@ -16,8 +17,6 @@ module VagrantPlugins
           arguments = ""
           arguments = " #{config.args}" if config.args
           with_windows_script_file do |path|
-            # Upload the script to a TMP file in remote VM
-            @env[:ui].info "Copying the script to Guest"
 
             guest_path = if File.extname(config.upload_path) == ""
               "#{config.upload_path}#{File.extname(path.to_s)}"
@@ -28,15 +27,8 @@ module VagrantPlugins
             response = @env[:machine].provider.driver.upload(path, guest_path)
 
             @env[:ui].info "Executing the script in Guest"
-            # Execute the file from remote location
-            ssh_info = @env[:machine].ssh_info
-            options = { :guest_ip => ssh_info[:host],
-                       :username => ssh_info[:username],
-                       :path => guest_path,
-                       :vm_id => @env[:machine].id,
-                       :args => arguments,
-                       :password => "vagrant" }
-            @env[:machine].provider.driver.execute('execute_remote_file.ps1', options) do |type, data|
+            command = "powershell.exe #{guest_path} #{arguments}"
+            @env[:machine].provider.driver.run_remote_ps(command) do |type, data|
               if type == :stdout || type == :stderr
                 @env[:ui].info data
               end

@@ -8,6 +8,7 @@ module VagrantPlugins
       lib_path = Pathname.new(File.expand_path("../provisioner", __FILE__))
       autoload :Shell, lib_path.join("shell")
       autoload :Puppet, lib_path.join("puppet")
+      autoload :ChefSolo, lib_path.join("chef_solo")
     end
   end
 end
