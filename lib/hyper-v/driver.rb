@@ -95,7 +95,7 @@ module VagrantPlugins
         execute('set_smb_share.ps1', options)
       end
 
-      def mount_to_windows(from, to, ssh_info)
+      def mount_to_windows(from, to)
         options = {
                     hostpath: windows_path(from),
                     guest_ip: ssh_info[:host],

@@ -53,7 +53,7 @@ module VagrantPlugins
           @smb_shared_folders.each do |id, data|
             hostpath  = File.expand_path(data[:hostpath], @env[:root_path])
             @env[:ui].info("Mounting #{hostpath} to Guest at #{data[:guestpath]} ...")
-            @env[:machine].provider.driver.mount_to_windows(hostpath, data[:guestpath], ssh_info)
+            @env[:machine].provider.driver.mount_to_windows(hostpath, data[:guestpath])
           end
         end
 

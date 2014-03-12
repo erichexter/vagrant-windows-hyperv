@@ -31,10 +31,7 @@ en:
         try again.
       powershell_error: |-
         PowerShell encountered an error, this can be due to environment / configuration
-        related. Please see the error message and report the issue if you fell it is
+        related. Please see the error message and report the issue if you feel it is
         related to the provider
-        =============
-        Error message
-        =============
-        %{path}
+
         %{stderr}

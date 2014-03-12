@@ -59,11 +59,11 @@ module VagrantPlugins
 
       def self.action_start
         Vagrant::Action::Builder.new.tap do |b|
+          b.use Provision
           b.use StartInstance
           b.use Call, WaitForState, :running, 10 do |env, b1|
             if env[:result]
               b1.use WaitForBootReady
-              b1.use Provision
               b1.use ShareFolders
               b1.use SyncFolders
             else
@@ -174,7 +174,6 @@ module VagrantPlugins
                 b3.use MessageNotRunning
               else
                 b3.use Provision
-                b3.use SyncFolders
               end
             end
           end
