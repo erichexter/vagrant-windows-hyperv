@@ -3,6 +3,7 @@
 # All Rights Reserved. Licensed under the MIT License.
 #--------------------------------------------------------------------------
 require "log4r"
+
 module VagrantPlugins
   module HyperV
     module Action

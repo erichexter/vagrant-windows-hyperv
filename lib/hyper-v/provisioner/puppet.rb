@@ -31,6 +31,7 @@ module VagrantPlugins
 
           if @hiera_config_path
             options << "--hiera_config=#{@hiera_config_path}"
+
             # Upload Hiera configuration if we have it
             local_hiera_path   = File.expand_path(config.hiera_config_path,
               @env[:machine].env.root_path)
@@ -67,12 +68,6 @@ module VagrantPlugins
             # Output the data with the proper color based on the stream.
             if (type == :stdout || type == :stderr)
               @env[:machine].env.ui.info data
-            end
-          end
-
-          @env[:machine].provider.driver.execute('execute_remote_file.ps1', options) do |type, data|
-            if type == :stdout || type == :stderr
-              @env[:ui].info data
             end
           end
         end

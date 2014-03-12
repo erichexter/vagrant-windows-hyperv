@@ -167,6 +167,7 @@ module VagrantPlugins
           ps_options << "-#{key}"
           ps_options << "'#{value}'"
         end
+
         command = ["powershell", "-NoProfile", "-ExecutionPolicy",
             "Bypass", path, ps_options, {notify: [:stdout, :stderr, :stdin]}].flatten
 
