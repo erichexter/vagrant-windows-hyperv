@@ -45,6 +45,7 @@ function Sync-Remote-Machine($machine, $remove_files, $copy_files, $host_path, $
 }
 
 function Create-Remote-Folders($empty_source_folders, $guest_path) {
+
     ForEach ($item in $empty_source_folders) {
         $new_name =  $guest_path + $item
         New-Item "$new_name" -type directory -Force
@@ -52,6 +53,16 @@ function Create-Remote-Folders($empty_source_folders, $guest_path) {
 }
 
 function Create-Guest-Folder($guest_path) {
+  try {
+    if (Test-Path $guest_path) {
+      $junction = Get-Item $guest_path
+      $junction.Delete()
+    }
+  }
+  # Catch any [IOException]
+   catch {
+     Remove-Item "$guest_path" -Force -Recurse
+   }
    New-Item "$guest_path" -type directory -Force
 }
 

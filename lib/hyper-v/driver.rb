@@ -127,7 +127,7 @@ module VagrantPlugins
         execute('upload_file.ps1',options)
       end
 
-      def folder_copy(from, to, ssh_info)
+      def folder_copy(from, to)
         options = {
           vm_id: vmid,
           username: ssh_info[:username],

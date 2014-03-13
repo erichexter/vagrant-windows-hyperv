@@ -64,6 +64,9 @@ try {
     $result = ConvertTo-Json $resultHash
     Write-Output-Message $result
   } else {
+    if (-not $result) {
+      $result = "Internal error in creating net share using share name $share_name for path $path"
+    }
     $errortHash = @{
       type = "PowerShellError"
       message = $result

@@ -24,10 +24,17 @@ try {
     function Mount-File($guest_path, $hostpath ) {
         $hostpath = $hostpath.replace(":","")
         # If a folder exist remove it.
-        if (Test-Path $guest_path) {
-          $junction = Get-Item $guest_path
-          $junction.Delete()
+        try {
+          if (Test-Path $guest_path) {
+            $junction = Get-Item $guest_path
+            $junction.Delete()
+          }
         }
+         # Catch any [IOException]
+         catch  {
+           Remove-Item "$guest_path" -Force -Recurse
+         }
+
         # Check if the folder path exists
         $base_directory_for_mount = [System.IO.Path]::GetDirectoryName($guest_path)
 

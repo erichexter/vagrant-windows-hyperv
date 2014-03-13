@@ -4,6 +4,7 @@
 #--------------------------------------------------------------------------
 require "fileutils"
 require "tempfile"
+
 module VagrantPlugins
   module HyperV
     module Provisioner
@@ -15,10 +16,25 @@ module VagrantPlugins
         end
 
         def provision_for_windows
+
           options = [config.options].flatten
           @module_paths = provisioner.instance_variable_get("@module_paths")
           @hiera_config_path = provisioner.instance_variable_get("@hiera_config_path")
           @manifest_file = provisioner.instance_variable_get("@manifest_file")
+
+          # Copy the manifests directory to the guest
+          if config.manifests_path[0].to_sym == :host
+            @env[:ui].info "Copy folders from #{config.manifests_path[1]}"
+            @env[:machine].provider.driver.folder_copy(
+              File.expand_path(config.manifests_path[1], @env[:machine].env.root_path),
+              provisioner.manifests_guest_path)
+          end
+
+          # Copy the module paths to the guest
+          @module_paths.each do |from, to|
+            @env[:machine].provider.driver.folder_copy(from, to)
+          end
+
 
           module_paths = @module_paths.map { |_, to| to }
           if !@module_paths.empty?
