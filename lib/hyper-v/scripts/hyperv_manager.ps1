@@ -4,21 +4,30 @@
 #--------------------------------------------------------------------------
 
 param (
-    [string]$vm_id = $(throw "-vm_id is required.")
+    [string]$vm_id = $(throw "-vm_id is required."),
+    [string]$command = ""
  )
 
 # Include the following modules
 $presentDir = Split-Path -parent $PSCommandPath
-$modules = @()
-$modules += $presentDir + "\utils\write_messages.ps1"
-forEach ($module in $modules) { . $module }
+. ([System.IO.Path]::Combine($presentDir, "utils\write_messages.ps1"))
 
 try {
-  $vm = Get-VM -Id $vm_id -ErrorAction stop
-  Suspend-VM $vm
+  $vm = Get-VM -Id $vm_id -ErrorAction "stop"
+  switch ($command) {
+    "start" { Start-VM $vm }
+    "stop" { Stop-VM $vm }
+    "suspend" { Suspend-VM $vm }
+    "resume" { Resume-VM $vm }
+  }
+
   $state = $vm.state
   $status = $vm.status
   $name = $vm.name
+  } catch [Microsoft.HyperV.PowerShell.VirtualizationOperationFailedException] {
+    $state = "not_created"
+    $status = "Not Created"
+  }
   $resultHash = @{
     state = "$state"
     status = "$status"
@@ -26,12 +35,3 @@ try {
   }
   $result = ConvertTo-Json $resultHash
   Write-Output-Message $result
-}
-catch {
-  $errortHash = @{
-    type = "PowerShellError"
-    message ="Failed to stop a VM $_"
-  }
-  $errorResult = ConvertTo-Json $errortHash
-  Write-Error-Message $errorResult
-}
