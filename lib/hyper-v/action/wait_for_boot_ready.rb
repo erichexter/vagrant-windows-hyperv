@@ -3,30 +3,27 @@
 # All Rights Reserved. Licensed under the MIT License.
 #--------------------------------------------------------------------------
 require "log4r"
+require "timeout"
 
 module VagrantPlugins
   module HyperV
     module Action
-      class ReadState
+      # This action checks if the Virtual Machine's boot sequence is complete
+      # and the machine returns back its IP Address.
+      class WaitForBootReady
         def initialize(app, env)
           @app    = app
           @logger = Log4r::Logger.new("vagrant::hyperv::connection")
         end
 
         def call(env)
-          if env[:machine].id
-              response = env[:machine].provider.driver.get_current_state
-              env[:machine_state_id] = response["state"].downcase.to_sym
-            if env[:machine_state_id] == :not_created
-              env[:machine].id = nil
-              env[:ui].info "Could not find a machine, assuming it to be deleted or terminated."
-            end
-          else
-            env[:machine_state_id] = :not_created
-          end
+          env[:ui].info "Waiting for the VM to Boot... [default timeout 120 sec]"
+          guest_ip = nil
+          guest_ip = env[:machine].ssh_info[:host]
+          raise Errors::IPTimeOut if guest_ip.nil?
+          env[:ui].info "Virtual Machine's IP is #{guest_ip}"
           @app.call(env)
         end
-
       end
     end
   end

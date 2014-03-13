@@ -1,0 +1,37 @@
+en:
+  vagrant_hyperv:
+    message_not_created: |-
+       VM not created. Moving on...
+    message_already_running: |-
+      Hyper-V instance already running.
+    message_turned_off: |-
+      Virtual Machine turned off.
+    generating_rdp: |-
+      Generating a RDP file to establish a remote session. You will soon be prompted to authenticate the
+      RDP session and enter the Virtual Machine's password.
+    errors:
+      admin_required: |-
+        "You need admin access to run vagrant commands for HyperV"
+      already_status: |-
+        The machine is already %{status}.
+      powershell_required: |-
+        HyperV provider expects PowerShell to be insatlled in this machine,
+        check if powershell.exe is available in this machine and please update the
+        system path accordingly.
+      ssh_not_available: |-
+        SSH is available for non windows guest. Vagrant detected guest to be %{guest}
+      rdp_not_available: |-
+        RDP is available for windows guest. Vagrant detected guest to be %{guest}
+      machine_boot_error: |-
+        The current Virtual Machine's state is off, though vagrant tried to turn it on,
+        this looks like an error with the Hyper-V manager.
+      ip_time_out: |-
+        The virtual machine did not respond its IP, this looks like an issue with the
+        Hyper-V Manager's Integrated service management. Please check the configurations and
+        try again.
+      powershell_error: |-
+        PowerShell encountered an error, this can be due to environment / configuration
+        related. Please see the error message and report the issue if you feel it is
+        related to the provider
+
+        %{stderr}

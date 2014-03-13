@@ -2,21 +2,20 @@
 # Copyright (c) Microsoft Open Technologies, Inc.
 # All Rights Reserved. Licensed under the MIT License.
 #--------------------------------------------------------------------------
-
-require "json"
-require "vagrant/util/which"
-require "vagrant/util/subprocess"
+require "log4r"
 
 module VagrantPlugins
   module HyperV
-    module Error
-      class SubprocessError < RuntimeError
-        def initialize(message)
-          @message = JSON.parse(message) if message
+    module Action
+      class IsState
+        def initialize(app, env, state)
+          @app = app
+          @state = state
         end
 
-        def message
-          @message["error"]
+        def call(env)
+          env[:result] = env[:machine].state.id == @state
+          @app.call(env)
         end
       end
     end

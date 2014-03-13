@@ -145,6 +145,11 @@ try {
   Write-Output-Message $result
 }
 catch {
-  Write-Error-Message $_
+  $errortHash = @{
+    type = "PowerShellError"
+    message = "$_"
+  }
+  $errorResult = ConvertTo-Json $errortHash
+  Write-Error-Message $errorResult
   return
 }

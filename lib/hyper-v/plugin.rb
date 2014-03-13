@@ -17,6 +17,8 @@ end
 
 module VagrantPlugins
   module HyperV
+    autoload :Errors, File.expand_path("../errors", __FILE__)
+
     class Plugin < Vagrant.plugin("2")
       name "HyperV"
       description <<-DESC
@@ -30,14 +32,14 @@ module VagrantPlugins
       end
 
       command "rdp" do
-        require_relative "command/rdp"
+        require_relative "command/rdp/command"
         Command
       end
 
       provider(:hyperv, parallel: true) do
         # Setup logging and i18n
         # setup_logging
-        # setup_i18n
+        setup_i18n
 
         # Return the provider
         require_relative "provider"
@@ -46,7 +48,8 @@ module VagrantPlugins
 
       # This initializes the internationalization strings.
       def self.setup_i18n
-
+        I18n.load_path << File.expand_path("locales/en.yml", HyperV.source_root)
+        I18n.reload!
       end
 
       # This sets up our log level to be whatever VAGRANT_LOG is.

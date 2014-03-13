@@ -81,8 +81,13 @@ try {
 
 $response = Create-Remote-Session $guest_ip $username $password
 if (!$response["session"] -and $response["error"]) {
-    Write-Error-Message $response["error"]
-    return
+  $errortHash = @{
+    type = "PowerShellError"
+    message = $response["error"]
+  }
+  $errorResult = ConvertTo-Json $errortHash
+  Write-Error-Message $errorResult
+  return
 }
 
 $session = $response["session"]

@@ -24,5 +24,10 @@ try {
   Write-Output-Message $result
 }
 catch {
-  Write-Error-Message "Failed to obtain network info of VM $_"
+  $errortHash = @{
+    type = "PowerShellError"
+    message = "Failed to obtain network info of VM $_"
+  }
+  $errorResult = ConvertTo-Json $errortHash
+  Write-Error-Message $errorResult
 }

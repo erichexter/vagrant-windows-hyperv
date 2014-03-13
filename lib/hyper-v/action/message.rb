@@ -7,13 +7,14 @@ require "log4r"
 module VagrantPlugins
   module HyperV
     module Action
-      class MessageNotRunning
-        def initialize(app, env)
+      class Message
+        def initialize(app, env, message)
           @app = app
+          @message = message
         end
 
         def call(env)
-          env[:ui].info("Machine is not running, Please turn it on.")
+          env[:ui].info @message
           @app.call(env)
         end
       end
