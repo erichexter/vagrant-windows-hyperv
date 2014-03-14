@@ -4,6 +4,7 @@
 #--------------------------------------------------------------------------
 
 require "log4r"
+
 module VagrantPlugins
   module HyperV
     module Action

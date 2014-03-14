@@ -11,12 +11,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
   config.vm.box = "ubuntu-13-10"
 
-  # Example for SMB Share
-  config.vm.synced_folder 'E:/my_project', "/home/vagrant/my_project",
-    :smb => true, :share_name => "my_project"
-
-  # Example for non SMB share
-  config.vm.synced_folder 'E:/my_other_project', "/home/vagrant/my_other_project"
+  config.vm.synced_folder 'E:/my_project', "/home/vagrant/my_project"
 
   # Example to use disable option
   config.vm.synced_folder "." , "/vagrant", :disabled => true

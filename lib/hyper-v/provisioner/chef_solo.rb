@@ -2,9 +2,9 @@
 # Copyright (c) Microsoft Open Technologies, Inc.
 # All Rights Reserved. Licensed under the MIT License.
 #--------------------------------------------------------------------------
+
 require "fileutils"
 require "tempfile"
-require "debugger"
 
 module VagrantPlugins
   module HyperV

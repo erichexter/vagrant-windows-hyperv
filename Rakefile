@@ -1,3 +1,7 @@
+#-------------------------------------------------------------------------
+# Copyright (c) Microsoft Open Technologies, Inc.
+# All Rights Reserved. Licensed under the MIT License.
+#--------------------------------------------------------------------------
 require 'rubygems'
 require 'bundler/setup'
 require 'rake/testtask'

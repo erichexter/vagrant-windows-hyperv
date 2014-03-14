@@ -2,8 +2,10 @@
 # Copyright (c) Microsoft Open Technologies, Inc.
 # All Rights Reserved. Licensed under the MIT License.
 #--------------------------------------------------------------------------
+
 require "vagrant"
 require_relative "host_share/config"
+
 module VagrantPlugins
   module HyperV
     class Config < Vagrant.plugin("2", :config)
