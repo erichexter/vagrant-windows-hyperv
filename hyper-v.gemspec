@@ -1,6 +1,6 @@
 #-------------------------------------------------------------------------
 # Copyright (c) Microsoft Open Technologies, Inc.
-# All Rights Reserved. Licensed under the MIT License.
+# All Rights Reserved. Licensed under the Apache 2.0 License.
 #--------------------------------------------------------------------------
 # coding: utf-8
 lib = File.expand_path('../lib', __FILE__)
@@ -15,7 +15,7 @@ Gem::Specification.new do |spec|
   spec.description   = "Enable Vagrant to manage Virtual Machine created using Hyper-V"
   spec.summary       = "Enable Vagrant to manage Virtual Machine created using Hyper-V"
   spec.homepage      = ""
-  spec.license       = "MIT"
+  spec.license       = "Apache 2.0"
 
   spec.require_paths = ["lib"]
 
