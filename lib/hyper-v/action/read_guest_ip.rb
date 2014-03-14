@@ -40,7 +40,7 @@ module VagrantPlugins
           rescue Timeout::Error
             @logger.info("Cannot find the IP address of the virtual machine")
           end
-          return { host: guest_ip } unless guest_ip.nil?
+          return { host: guest_ip } unless guest_ip.empty?
         end
       end
     end

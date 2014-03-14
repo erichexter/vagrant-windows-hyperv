@@ -20,8 +20,11 @@ module VagrantPlugins
           # TODO
           # Verify that the proper shared folders exist.
 
-          # TODO
-          # Check if chef-solo is available in the VM
+          # Copy the chef cookbooks roles data bags and environment folders to Guest
+          copy_folder_to_guest(provisioner.cookbook_folders)
+          copy_folder_to_guest(provisioner.role_folders)
+          copy_folder_to_guest(provisioner.data_bags_folders)
+          copy_folder_to_guest(provisioner.environments_folders)
 
           # Upload Encrypted data bag
           upload_encrypted_data_bag_secret if config.encrypted_data_bag_secret_key_path
@@ -164,6 +167,14 @@ module VagrantPlugins
         def chef_binary_path(binary)
           return binary if !config.binary_path
           return File.join(config.binary_path, binary)
+        end
+
+        def copy_folder_to_guest(folders)
+          folders.each do |type, local_path, remote_path|
+            if type == :host
+              @env[:machine].provider.driver.upload(local_path, remote_path)
+            end
+          end
         end
 
       end

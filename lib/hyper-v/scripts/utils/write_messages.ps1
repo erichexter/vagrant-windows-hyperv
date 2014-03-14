@@ -4,13 +4,15 @@
 #--------------------------------------------------------------------------
 
 function Write-Error-Message($message) {
+  $result = ConvertTo-Json $message
   Write-Host "===Begin-Error==="
-   Write-Host $message
+  Write-Host $result
   Write-Host "===End-Error==="
 }
 
 function Write-Output-Message($message) {
+  $result = ConvertTo-Json $message
   Write-Host "===Begin-Output==="
-  Write-Host $message
+  Write-Host $result
   Write-Host "===End-Output==="
 }

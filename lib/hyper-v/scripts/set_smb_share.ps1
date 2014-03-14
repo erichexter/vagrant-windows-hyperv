@@ -11,15 +11,11 @@ param (
 
 # Include the following modules
 $presentDir = Split-Path -parent $PSCommandPath
-$modules = @()
-$modules += $presentDir + "\utils\write_messages.ps1"
-forEach ($module in $modules) { . $module }
+. ([System.IO.Path]::Combine($presentDir, "utils\write_messages.ps1"))
 
 
 try {
-
   $computer_name = $(Get-WmiObject Win32_Computersystem).name
-
   # See all available shares and check alert user for existing / conflicting share name
 
   $filter = "Path=\'$path\'"
@@ -38,8 +34,7 @@ try {
       type = "NetShareError"
       message = "IGNORING Conflicting share name, $share_name A name already exist."
     }
-    $errorResult = ConvertTo-Json $errortHash
-    Write-Error-Message $errorResult
+    Write-Error-Message $errortHash
     return
   }
 
@@ -61,23 +56,22 @@ try {
     $resultHash = @{
       message = "OK"
     }
-    $result = ConvertTo-Json $resultHash
-    Write-Output-Message $result
+    Write-Output-Message $resultHash
   } else {
+    if (-not $result) {
+      $result = "Internal error in creating net share using share name $share_name for path $path"
+    }
     $errortHash = @{
       type = "PowerShellError"
       message = $result
     }
-    $errorResult = ConvertTo-Json $errortHash
-    Write-Error-Message $errorResult
+    Write-Error-Message $errortHash
   }
 } catch {
   $errortHash = @{
     type = "PowerShellError"
     message = "$_"
   }
-  $errorResult = ConvertTo-Json $errortHash
-  Write-Error-Message $errorResult
+  Write-Error-Message $errortHash
   return
 }
-

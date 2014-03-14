@@ -64,8 +64,7 @@ module VagrantPlugins
           b.use Call, WaitForState, :running, 10 do |env, b1|
             if env[:result]
               b1.use WaitForBootReady
-              b1.use ShareFolders
-              b1.use SyncFolders
+              b1.use SyncedFolders
             else
               env[:ui].info I18n.t("vagrant_hyperv.errors.machine_boot_error")
             end
@@ -212,12 +211,11 @@ module VagrantPlugins
       autoload :StopInstance, action_root.join('stop_instance')
       autoload :ResumeInstance, action_root.join('resume_instance')
       autoload :SuspendInstance, action_root.join('suspend_instance')
-      autoload :SyncFolders, action_root.join('sync_folders')
+      autoload :SyncedFolders, action_root.join('synced_folders')
 
       autoload :WaitForState, action_root.join('wait_for_state')
       autoload :ReadGuestIP, action_root.join('read_guest_ip')
 
-      autoload :ShareFolders, action_root.join('share_folders')
       autoload :SSHExec, action_root.join('ssh_exec')
       autoload :SetupPackageFiles, action_root.join("setup_package_files")
 

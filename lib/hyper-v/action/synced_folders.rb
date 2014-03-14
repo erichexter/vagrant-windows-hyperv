@@ -6,7 +6,7 @@ require "vagrant/util/subprocess"
 module VagrantPlugins
   module HyperV
     module Action
-      class ShareFolders
+      class SyncedFolders
 
         def initialize(app, env)
           @app = app
@@ -35,13 +35,9 @@ module VagrantPlugins
             # Ignore disabled shared folders
             next if data[:disabled]
 
-            # Collect all SMB shares
-            next unless data[:smb]
             # This to prevent overwriting the actual shared folders data
             @smb_shared_folders[id] = data.dup
-            if @smb_shared_folders[id][:share_name]
-              @smb_shared_folders[id][:share_name] = @smb_shared_folders[id][:share_name].gsub(" ","_")
-            end
+            @smb_shared_folders[id][:share_name] ||= @smb_shared_folders[id][:hostpath].gsub(/[\/\:\\]/,'_').sub(/^_/, '')
           end
         end
 
@@ -50,9 +46,11 @@ module VagrantPlugins
         end
 
         def mount_shared_folders_to_windows
+          @env[:ui].info "Creating SMB drive mount"
           @smb_shared_folders.each do |id, data|
             hostpath  = File.expand_path(data[:hostpath], @env[:root_path])
-            @env[:ui].info("Mounting #{hostpath} to Guest at #{data[:guestpath]} ...")
+            @env[:ui].info "From #{hostpath}"
+            @env[:ui].info("===>  #{data[:guestpath]} ...")
             @env[:machine].provider.driver.mount_to_windows(hostpath, data[:guestpath])
           end
         end
@@ -61,7 +59,7 @@ module VagrantPlugins
           hostpath  = File.expand_path(data[:hostpath], @env[:root_path])
           response = @env[:machine].provider.driver.share_folders(hostpath, data[:share_name])
           if response["message"] == "OK"
-            @env[:ui].info "Successfully created SMB share for #{hostpath} with name #{data[:share_name]}"
+            @env[:ui].info "Successfully created SMB share for #{hostpath}}"
           end
         end
 
@@ -74,7 +72,7 @@ module VagrantPlugins
             begin
               prepare_smb_share(data)
               # Mount the Network drive to Guest VM
-              @env[:ui].info "Linking #{data[:share_name]} to Guest at #{data[:guestpath]}"
+              @env[:ui].info "Linking to Guest at  ==> #{data[:guestpath]}"
 
               # Create a folder in guest against the guestpath
               @env[:machine].communicate.sudo("mkdir -p '#{data[:guestpath]}'")

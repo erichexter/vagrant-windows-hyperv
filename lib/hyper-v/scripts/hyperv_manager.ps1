@@ -4,7 +4,8 @@
 #--------------------------------------------------------------------------
 
 param (
-    [string]$vm_id = $(throw "-vm_id is required.")
+    [string]$vm_id = $(throw "-vm_id is required."),
+    [string]$command = ""
  )
 
 # Include the following modules
@@ -13,8 +14,16 @@ $presentDir = Split-Path -parent $PSCommandPath
 
 try {
   $vm = Get-VM -Id $vm_id -ErrorAction "stop"
+  switch ($command) {
+    "start" { Start-VM $vm }
+    "stop" { Stop-VM $vm }
+    "suspend" { Suspend-VM $vm }
+    "resume" { Resume-VM $vm }
+  }
+
   $state = $vm.state
   $status = $vm.status
+  $name = $vm.name
   } catch [Microsoft.HyperV.PowerShell.VirtualizationOperationFailedException] {
     $state = "not_created"
     $status = "Not Created"
@@ -22,6 +31,6 @@ try {
   $resultHash = @{
     state = "$state"
     status = "$status"
+    name = "$name"
   }
-  $result = ConvertTo-Json $resultHash
-  Write-Output-Message $result
+  Write-Output-Message $resultHash
