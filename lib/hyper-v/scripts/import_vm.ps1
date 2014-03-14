@@ -11,9 +11,7 @@ param (
 
 # Include the following modules
 $presentDir = Split-Path -parent $PSCommandPath
-$modules = @()
-$modules += $presentDir + "\utils\write_messages.ps1"
-forEach ($module in $modules) { . $module }
+. ([System.IO.Path]::Combine($presentDir, "utils\write_messages.ps1"))
 
 try {
   [xml]$vmconfig = Get-Content -Path  $vm_xml_config
@@ -36,11 +34,9 @@ try {
   } while ($vm_name -ne $name)
 
   $memory = (Select-Xml -xml $vmconfig -XPath "//memory").node.Bank
+  $dynamicmemory = $False
   if ($memory.dynamic_memory_enabled."#text" -eq "True") {
       $dynamicmemory = $True
-  }
-  else {
-      $dynamicmemory = $False
   }
 
   # Memory values need to be in bytes
@@ -141,15 +137,13 @@ try {
     name = $vm_name
     id = $vm_id
   }
-  $result = ConvertTo-Json $resultHash
-  Write-Output-Message $result
+  Write-Output-Message $resultHash
 }
 catch {
   $errortHash = @{
     type = "PowerShellError"
     message = "$_"
   }
-  $errorResult = ConvertTo-Json $errortHash
-  Write-Error-Message $errorResult
+  Write-Error-Message $errortHash
   return
 }

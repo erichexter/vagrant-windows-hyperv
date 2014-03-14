@@ -14,9 +14,8 @@ param (
 
 # Include the following modules
 $presentDir = Split-Path -parent $PSCommandPath
-$modules = @()
-$modules += $presentDir + "\utils\create_session.ps1"
-$modules += $presentDir + "\utils\write_messages.ps1"
+. ([System.IO.Path]::Combine($presentDir, "utils\write_messages.ps1"))
+. ([System.IO.Path]::Combine($presentDir, "utils\create_session.ps1"))
 
 forEach ($module in $modules) { . $module }
 
@@ -24,16 +23,18 @@ try {
     function Mount-File($guest_path, $hostpath ) {
         $hostpath = $hostpath.replace(":","")
         # If a folder exist remove it.
-        try {
-          if (Test-Path $guest_path) {
+        if (Test-Path $guest_path) {
+          try {
+            # When it is a junction drive
             $junction = Get-Item $guest_path
             $junction.Delete()
           }
+          # Catch any [IOException]
+          catch  {
+            # When it is a folder
+            Remove-Item "$guest_path" -Force -Recurse
+          }
         }
-         # Catch any [IOException]
-         catch  {
-           Remove-Item "$guest_path" -Force -Recurse
-         }
 
         # Check if the folder path exists
         $base_directory_for_mount = [System.IO.Path]::GetDirectoryName($guest_path)
@@ -52,8 +53,7 @@ try {
           type = "PowerShellError"
           message = $response["error"]
         }
-        $errorResult = ConvertTo-Json $errortHash
-        Write-Error-Message $errorResult
+        Write-Error-Message $errortHash
         return
     }
 
@@ -64,23 +64,20 @@ try {
           type = "PowerShellError"
           message ="Failed to mount files VM  $_"
         }
-        $errorResult = ConvertTo-Json $errortHash
-        Write-Error-Message $errorResult
+        Write-Error-Message $errortHash
         return
     }
     Remove-PSSession -Id $response["session"].Id
     $resultHash = @{
       message = "OK"
     }
-    $result = ConvertTo-Json $resultHash
-    Write-Output-Message $result
+    Write-Output-Message $resultHash
 }
 catch {
     $errortHash = @{
       type = "PowerShellError"
       message ="Failed to mount files VM  $_"
     }
-    $errorResult = ConvertTo-Json $errortHash
-    Write-Error-Message $errorResult
+    Write-Error-Message $errortHash
     return
 }

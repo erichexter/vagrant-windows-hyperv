@@ -10,9 +10,7 @@ param (
 
 # Include the following modules
 $presentDir = Split-Path -parent $PSCommandPath
-$modules = @()
-$modules += $presentDir + "\utils\write_messages.ps1"
-forEach ($module in $modules) { . $module }
+. ([System.IO.Path]::Combine($presentDir, "utils\write_messages.ps1"))
 
 
 # Export the Virtual Machine
@@ -23,13 +21,11 @@ try {
   $resultHash = @{
     name = "$name"
   }
-  $result = ConvertTo-Json $resultHash
-  Write-Output-Message $result
+  Write-Output-Message $resultHash
   } catch {
     $errortHash = @{
       type = "PowerShellError"
       message = "Failed to export a  VM $_"
     }
-    $errorResult = ConvertTo-Json $errortHash
-    Write-Error-Message $errorResult
+    Write-Error-Message $errortHash
   }

@@ -172,7 +172,7 @@ module VagrantPlugins
         def copy_folder_to_guest(folders)
           folders.each do |type, local_path, remote_path|
             if type == :host
-              @env[:machine].provider.driver.folder_copy(local_path, remote_path)
+              @env[:machine].provider.driver.upload(local_path, remote_path)
             end
           end
         end

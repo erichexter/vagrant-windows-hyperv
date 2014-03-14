@@ -21,7 +21,7 @@ forEach ($module in $modules) { . $module }
 
 function Get-file-hash($source_path, $delimiter) {
     $source_files = @()
-    (Get-ChildItem $source_path -rec | ForEach-Object -Process {
+    (Get-ChildItem $source_path -rec -force | ForEach-Object -Process {
       Get-FileHash -Path $_.FullName -Algorithm MD5 } ) |
         ForEach-Object -Process {
           $source_files += $_.Path.Replace($source_path, "") + $delimiter + $_.Hash
@@ -96,8 +96,7 @@ if (!$response["session"] -and $response["error"]) {
     type = "PowerShellError"
     message = $response["error"]
   }
-  $errorResult = ConvertTo-Json $errortHash
-  Write-Error-Message $errorResult
+  Write-Error-Message $errortHash
   return
 }
 
@@ -143,6 +142,4 @@ Remove-PSSession -Id $session.Id
 $resultHash = @{
   message = "OK"
 }
-$result = ConvertTo-Json $resultHash
-Write-Output-Message $result
-
+Write-Output-Message $resultHash

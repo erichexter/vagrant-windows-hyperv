@@ -33,5 +33,4 @@ try {
     status = "$status"
     name = "$name"
   }
-  $result = ConvertTo-Json $resultHash
-  Write-Output-Message $result
+  Write-Output-Message $resultHash

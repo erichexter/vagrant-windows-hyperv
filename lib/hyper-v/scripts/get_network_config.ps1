@@ -9,9 +9,7 @@ param (
 
 # Include the following modules
 $presentDir = Split-Path -parent $PSCommandPath
-$modules = @()
-$modules += $presentDir + "\utils\write_messages.ps1"
-forEach ($module in $modules) { . $module }
+. ([System.IO.Path]::Combine($presentDir, "utils\write_messages.ps1"))
 
 try {
   $vm = Get-VM -Id $vm_id -ErrorAction "stop"
@@ -20,14 +18,12 @@ try {
   $resultHash = @{
     ip = "$ip_address"
   }
-  $result = ConvertTo-Json $resultHash
-  Write-Output-Message $result
+  Write-Output-Message $resultHash
 }
 catch {
   $errortHash = @{
     type = "PowerShellError"
     message = "Failed to obtain network info of VM $_"
   }
-  $errorResult = ConvertTo-Json $errortHash
-  Write-Error-Message $errorResult
+  Write-Error-Message $errortHash
 }

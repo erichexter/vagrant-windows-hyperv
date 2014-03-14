@@ -123,20 +123,8 @@ module VagrantPlugins
           vm_id: vmid,
           host_path: windows_path(from),
           guest_path: windows_path(to)
-        }
+        }.merge(remote_credentials)
         execute('upload_file.ps1',options)
-      end
-
-      def folder_copy(from, to)
-        options = {
-          vm_id: vmid,
-          username: ssh_info[:username],
-          host_path: windows_path(from),
-          guest_path: windows_path(to),
-          guest_ip: ssh_info[:host],
-          password: "vagrant"
-        }
-        execute('file_sync.ps1', options)
       end
 
       protected
