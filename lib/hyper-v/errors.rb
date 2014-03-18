@@ -33,6 +33,10 @@ module VagrantPlugins
         error_key(:ip_time_out)
       end
 
+      class NoSwitches < VagrantHyperVError
+        error_key(:no_switches)
+      end
+
       class NetShareError < RuntimeError
         attr_reader :message
         def initialize(options)

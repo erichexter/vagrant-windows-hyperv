@@ -6,7 +6,8 @@
 
 param (
     [string]$vm_xml_config = $(throw "-vm_xml_config is required."),
-    [string]$vhdx_path = $(throw "-vhdx_path is required.")
+    [string]$vhdx_path = $(throw "-vhdx_path is required."),
+    [string]$switchname = $(throw "-switchname is required")
  )
 
 # Include the following modules
@@ -44,8 +45,10 @@ try {
   $MemoryStartupBytes = ($memory.size."#text" -as [int]) * 1MB
   $MemoryMinimumBytes = ($memory.reservation."#text" -as [int]) * 1MB
 
-  # Get the name of the virtual switch
-  $switchname = (Select-Xml -xml $vmconfig -XPath "//AltSwitchName").node."#text"
+  if (!$switchname) {
+      # Get the name of the virtual switch
+      $switchname = (Select-Xml -xml $vmconfig -XPath "//AltSwitchName").node."#text"
+  }
 
   # Determine boot device
   Switch ((Select-Xml -xml $vmconfig -XPath "//boot").node.device0."#text") {
