@@ -75,11 +75,11 @@ module VagrantPlugins
         execute("export_vm.ps1", options)
       end
 
-      def share_folders(hostpath, share_name)
+      def share_folders(hostpath, options)
         options = {
           path: hostpath,   # Use Unix path format
-          share_name: safe_share_name(share_name),
-          host_share_username: @machine.provider_config.host_share.username
+          share_name: safe_share_name(options[:share_name]),
+          host_share_username: options[:smb_username]
         }
         execute('set_smb_share.ps1', options)
       end

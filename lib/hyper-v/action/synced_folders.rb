@@ -18,8 +18,8 @@ module VagrantPlugins
 
         def call(env)
           @env = env
-          fetch_smb_shared_folders
           fetch_smb_credentials
+          fetch_smb_shared_folders
           if smb_shared_folders.length > 0
             env[:ui].info('Mounting shared folders with VM, This process may take few minutes.')
             if env[:machine].provider_config.guest == :windows
@@ -40,6 +40,8 @@ module VagrantPlugins
             # This to prevent overwriting the actual shared folders data
             @smb_shared_folders[id] = data.dup
             @smb_shared_folders[id][:share_name] ||= @smb_shared_folders[id][:hostpath].gsub(/[\/\:\\]/,'_').sub(/^_/, '')
+            @smb_shared_folders[id][:smb_username] ||= smb_credentials[:username]
+            @smb_shared_folders[id][:smb_password] ||= smb_credentials[:password]
           end
         end
 
@@ -94,7 +96,7 @@ module VagrantPlugins
 
         def prepare_smb_share(data)
           hostpath  = File.expand_path(data[:hostpath], @env[:root_path])
-          response = @env[:machine].provider.driver.share_folders(hostpath, data[:share_name])
+          response = @env[:machine].provider.driver.share_folders(hostpath, data)
         end
 
         def mount_shared_folders_to_linux
@@ -111,8 +113,8 @@ module VagrantPlugins
               owner = data[:owner] || ssh_info[:username]
               group = data[:group] || ssh_info[:username]
 
-              mount_options  = "-o rw,username=#{smb_credentials[:username]},"
-              mount_options  += "pass=#{smb_credentials[:password]},"
+              mount_options  = "-o rw,username=#{data[:smb_username]},"
+              mount_options  += "pass=#{data[:smb_password]},"
               mount_options  += "sec=ntlm,file_mode=0777,dir_mode=0777,"
               mount_options  += "uid=`id -u #{owner}`,gid=`id -g #{group}` '#{data[:guestpath]}'"
 
