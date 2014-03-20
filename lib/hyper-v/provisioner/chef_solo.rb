@@ -121,7 +121,6 @@ module VagrantPlugins
           command_args = config.arguments ? " #{config.arguments}" : ""
           command = "#{command_env}#{chef_binary_path("chef-solo")} " +
             "#{options.join(" ")} #{command_args}"
-
           config.attempts.times do |attempt|
             if attempt == 0
               @env[:machine].env.ui.info I18n.t("vagrant.provisioners.chef.running_solo")

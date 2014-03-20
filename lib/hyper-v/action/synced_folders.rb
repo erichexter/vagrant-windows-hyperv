@@ -4,11 +4,13 @@
 #--------------------------------------------------------------------------
 
 require "vagrant/util/subprocess"
+require "tempfile"
 
 module VagrantPlugins
   module HyperV
     module Action
       class SyncedFolders
+        attr_reader :smb_shared_folders, :smb_credentials
 
         def initialize(app, env)
           @app = app
@@ -16,11 +18,9 @@ module VagrantPlugins
 
         def call(env)
           @env = env
-          smb_shared_folders
-          # A BIG Clean UP
-          # There should be a communicator class which branches between windows
-          # and Linux
-          if @smb_shared_folders.length > 0
+          fetch_smb_shared_folders
+          fetch_smb_credentials
+          if smb_shared_folders.length > 0
             env[:ui].info('Mounting shared folders with VM, This process may take few minutes.')
             if env[:machine].provider_config.guest == :windows
               mount_shared_folders_to_windows
@@ -31,7 +31,7 @@ module VagrantPlugins
           @app.call(env)
         end
 
-        def smb_shared_folders
+        def fetch_smb_shared_folders
           @smb_shared_folders = {}
           @env[:machine].config.vm.synced_folders.each do |id, data|
             # Ignore disabled shared folders
@@ -49,28 +49,58 @@ module VagrantPlugins
 
         def mount_shared_folders_to_windows
           @env[:ui].info "Creating SMB drive mount"
-          @smb_shared_folders.each do |id, data|
+          result = @env[:machine].provider.driver.execute('host_info.ps1', {})
+          @host_ip = result["host_ip"]
+          smb_shared_folders.each do |id, data|
+            prepare_smb_share(data)
             hostpath  = File.expand_path(data[:hostpath], @env[:root_path])
             @env[:ui].info "From #{hostpath}"
-            @env[:ui].info("===>  #{data[:guestpath]} ...")
-            @env[:machine].provider.driver.mount_to_windows(hostpath, data[:guestpath])
+            guestpath = "\\\\#{@host_ip}\\#{data[:share_name]}"
+            @env[:ui].info("===>  #{guestpath} ...")
           end
+          generate_vm_startup_scripts
+        end
+
+        def generate_vm_startup_scripts
+          # Upload a startup script to VM,
+          # This script will authenticate the Network share with the host, and
+          # the guest can access the share path from a RDP session
+          file = Tempfile.new(['vagrant-smb-auth', '.ps1'])
+          smb_map_command = "New-SmbMapping"
+          smb_map_command += " -RemotePath \\\\#{@host_ip}"
+          smb_map_command += " -UserName #{smb_credentials[:username]}"
+          smb_map_command += " -Password #{smb_credentials[:password]}"
+          begin
+            file.write(smb_map_command)
+            file.fsync
+            file.close
+          ensure
+            file.close
+          end
+          @env[:machine].provider.driver.upload(file.path.to_s, "/tmp/vagrant-smb-auth.ps1")
+        end
+
+        def fetch_smb_credentials
+          @smb_credentials = {}
+          @env[:machine].ui.info (I18n.t("vagrant_sf_smb.warning_password") + "\n ")
+          @smb_credentials[:username] = @env[:machine].ui.ask("Username: ")
+          @smb_credentials[:password] = @env[:machine].ui.ask("Password (will be hidden): ", echo: false)
+          if (@smb_credentials[:username].empty? ||
+              @smb_credentials[:password].empty?)
+            raise Errors::InvalidSMBCredentials
+          end
+          @smb_credentials
         end
 
         def prepare_smb_share(data)
           hostpath  = File.expand_path(data[:hostpath], @env[:root_path])
           response = @env[:machine].provider.driver.share_folders(hostpath, data[:share_name])
-          if response["message"] == "OK"
-            @env[:ui].info "Successfully created SMB share for #{hostpath}}"
-          end
         end
 
         def mount_shared_folders_to_linux
           # Find Host Machine's credentials
           result = @env[:machine].provider.driver.execute('host_info.ps1', {})
-          host_share_username = @env[:machine].provider_config.host_share.username
-          host_share_password = @env[:machine].provider_config.host_share.password
-          @smb_shared_folders.each do |id, data|
+          smb_shared_folders.each do |id, data|
             begin
               prepare_smb_share(data)
               # Mount the Network drive to Guest VM
@@ -81,7 +111,8 @@ module VagrantPlugins
               owner = data[:owner] || ssh_info[:username]
               group = data[:group] || ssh_info[:username]
 
-              mount_options  = "-o rw,username=#{host_share_username},pass=#{host_share_password},"
+              mount_options  = "-o rw,username=#{smb_credentials[:username]},"
+              mount_options  += "pass=#{smb_credentials[:password]},"
               mount_options  += "sec=ntlm,file_mode=0777,dir_mode=0777,"
               mount_options  += "uid=`id -u #{owner}`,gid=`id -g #{group}` '#{data[:guestpath]}'"
 

@@ -37,6 +37,10 @@ module VagrantPlugins
         error_key(:no_switches)
       end
 
+      class InvalidSMBCredentials < VagrantHyperVError
+        error_key(:no_smb_credentials)
+      end
+
       class NetShareError < RuntimeError
         attr_reader :message
         def initialize(options)

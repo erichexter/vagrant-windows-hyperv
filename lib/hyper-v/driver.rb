@@ -84,17 +84,6 @@ module VagrantPlugins
         execute('set_smb_share.ps1', options)
       end
 
-      def mount_to_windows(from, to)
-        options = {
-                    hostpath: windows_path(from),
-                    guest_ip: ssh_info[:host],
-                    guest_path: windows_path(to),
-                    username: ssh_info[:username],
-                    password: "vagrant"
-                  }
-        execute('mount_share.ps1', options)
-      end
-
       def start
         execute('hyperv_manager.ps1', { vm_id: vmid, command: "start" })
       end
