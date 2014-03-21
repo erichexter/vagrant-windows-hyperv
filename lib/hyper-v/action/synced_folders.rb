@@ -40,7 +40,7 @@ module VagrantPlugins
 
             # This to prevent overwriting the actual shared folders data
             @smb_shared_folders[id] = data.dup
-            @smb_shared_folders[id][:share_name] ||= @smb_shared_folders[id][:hostpath].gsub(/[\/\:\\]/,'_').sub(/^_/, '')
+            @smb_shared_folders[id][:smb_id] ||= @smb_shared_folders[id][:hostpath].gsub(/[\/\:\\]/,'_').sub(/^_/, '')
             @smb_shared_folders[id][:smb_username] ||= smb_credentials[:username]
             @smb_shared_folders[id][:smb_password] ||= smb_credentials[:password]
           end
@@ -57,7 +57,7 @@ module VagrantPlugins
             prepare_smb_share(data)
             hostpath  = File.expand_path(data[:hostpath], @env[:root_path])
             @env[:ui].info "From #{hostpath}"
-            guestpath = "\\\\#{@host_ip}\\#{data[:share_name]}"
+            guestpath = "\\\\#{@host_ip}\\#{data[:smb_id]}"
             @env[:ui].info("===>  #{guestpath} ...")
           end
           generate_vm_startup_scripts
@@ -68,18 +68,23 @@ module VagrantPlugins
           # This script will authenticate the Network share with the host, and
           # the guest can access the share path from a RDP session
           file = Tempfile.new(['vagrant-smb-auth', '.ps1'])
-          smb_map_command = "New-SmbMapping"
-          smb_map_command += " -RemotePath \\\\#{@host_ip}"
-          smb_map_command += " -UserName #{smb_credentials[:username]}"
-          smb_map_command += " -Password #{smb_credentials[:password]}"
           begin
-            file.write(smb_map_command)
+            smb_shared_folders.each do |id, data|
+              smb_map_command = "New-SmbMapping"
+              smb_map_command += " -RemotePath \\\\#{@host_ip}\\#{data[:smb_id]}"
+              smb_map_command += " -UserName #{data[:smb_username]}"
+              smb_map_command += " -Password #{data[:smb_password]}"
+              file.puts(smb_map_command)
+            end
             file.fsync
             file.close
           ensure
             file.close
           end
-          @env[:machine].provider.driver.upload(file.path.to_s, "/tmp/vagrant-smb-auth.ps1")
+          @env[:machine].provider.driver.upload(file.path.to_s, "c:\\tmp\\vagrant-smb-auth.ps1")
+          # Invoke Remote Schedule task command in VM
+          command = 'schtasks /create /sc ONLOGON /tn vagrant-smb-auth /tr \"powershell c:\tmp\vagrant-smb-auth.ps1\"'
+          @env[:machine].provider.driver.run_remote_ps(command)
         end
 
         def fetch_smb_credentials
@@ -118,7 +123,7 @@ module VagrantPlugins
               mount_options  += "sec=ntlm,file_mode=0777,dir_mode=0777,"
               mount_options  += "uid=`id -u #{owner}`,gid=`id -g #{group}` '#{data[:guestpath]}'"
 
-              command = "mount -t cifs //#{result["host_ip"]}/#{data[:share_name]} #{mount_options}"
+              command = "mount -t cifs //#{result["host_ip"]}/#{data[:smb_id]} #{mount_options}"
               @env[:machine].communicate.sudo(command)
             rescue Errors::NetShareError => e
               @env[:ui].error e.message
