@@ -4,11 +4,11 @@
 #--------------------------------------------------------------------------
 
 require "pathname"
-require "hyper-v/plugin"
+require "vagrant-win-hyperv/plugin"
 
 module VagrantPlugins
   module HyperV
-    lib_path = Pathname.new(File.expand_path("../hyper-v", __FILE__))
+    lib_path = Pathname.new(File.expand_path("../vagrant-win-hyperv", __FILE__))
     autoload :Action, lib_path.join("action")
     autoload :Driver, lib_path.join("driver")
     autoload :Provisioner, lib_path.join("provisioner")

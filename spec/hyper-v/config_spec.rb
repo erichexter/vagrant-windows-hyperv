@@ -1,4 +1,4 @@
-require "hyper-v/config"
+require "vagrant-win-hyperv/config"
 require_relative "spec_helper"
 
 describe VagrantPlugins::HyperV::Config do

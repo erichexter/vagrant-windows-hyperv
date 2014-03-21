@@ -5,10 +5,10 @@
 # coding: utf-8
 lib = File.expand_path('../lib', __FILE__)
 $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
-require 'hyper-v/version'
+require 'vagrant-win-hyperv/version'
 
 Gem::Specification.new do |spec|
-  spec.name          = "hyper-v"
+  spec.name          = "vagrant-win-hyperv"
   spec.version       = VagrantPlugins::HyperV::VERSION
   spec.authors       = ["Ramakrishnan"]
   spec.email         = ["ramakrishnan.v@happiestminds.com"]

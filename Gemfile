@@ -4,7 +4,7 @@
 #--------------------------------------------------------------------------
 source 'https://rubygems.org'
 
-# Specify your gem's dependencies in hyper-v.gemspec
+# Specify your gem's dependencies in vagrant-win-hyperv.gemspec
 gemspec
 
 group :development do
@@ -17,5 +17,5 @@ group :development do
 end
 
 group :plugins do
-  gem "hyper-v", path: "."
+  gem "vagrant-win-hyperv", path: "."
 end
