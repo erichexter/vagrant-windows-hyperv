@@ -1,6 +1,6 @@
 #-------------------------------------------------------------------------
 # Copyright (c) Microsoft Open Technologies, Inc.
-# All Rights Reserved. Licensed under the MIT License.
+# All Rights Reserved. Licensed under the Apache 2.0 License.
 #--------------------------------------------------------------------------
 
 param (
@@ -12,10 +12,8 @@ param (
 
 # Include the following modules
 $presentDir = Split-Path -parent $PSCommandPath
-$modules = @()
-$modules += $presentDir + "\utils\write_messages.ps1"
-$modules += $presentDir + "\utils\create_session.ps1"
-forEach ($module in $modules) { . $module }
+. ([System.IO.Path]::Combine($presentDir, "utils\write_messages.ps1"))
+. ([System.IO.Path]::Combine($presentDir, "utils\create_session.ps1"))
 
 try {
   $response = Create-Remote-Session $guest_ip $username $password

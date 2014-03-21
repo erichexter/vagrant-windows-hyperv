@@ -1,7 +1,8 @@
 #-------------------------------------------------------------------------
 # Copyright (c) Microsoft Open Technologies, Inc.
-# All Rights Reserved. Licensed under the MIT License.
+# All Rights Reserved. Licensed under the Apache 2.0 License.
 #--------------------------------------------------------------------------
+
 require "json"
 require "vagrant/util/which"
 require "vagrant/util/subprocess"
@@ -74,48 +75,37 @@ module VagrantPlugins
         execute("export_vm.ps1", options)
       end
 
-      def read_guest_ip
-        execute('get_network_config.ps1', { vm_id: vmid })
-      end
-
-      def get_current_state
-        execute('get_vm_status.ps1', { vm_id: vmid })
-      end
-
-      def resume
-        execute('resume_vm.ps1', { vm_id: vmid })
-      end
-
-      def share_folders(hostpath, share_name)
+      def share_folders(hostpath, options)
         options = {
           path: hostpath,   # Use Unix path format
-          share_name: safe_share_name(share_name),
-          host_share_username: @machine.provider_config.host_share.username
+          share_name: safe_share_name(options[:smb_id]),
+          host_share_username: options[:smb_username]
         }
         execute('set_smb_share.ps1', options)
       end
 
-      def mount_to_windows(from, to)
-        options = {
-                    hostpath: windows_path(from),
-                    guest_ip: ssh_info[:host],
-                    guest_path: windows_path(to),
-                    username: ssh_info[:username],
-                    password: "vagrant"
-                  }
-        execute('mount_share.ps1', options)
-      end
-
       def start
-        execute('start_vm.ps1', { vm_id: vmid })
+        execute('hyperv_manager.ps1', { vm_id: vmid, command: "start" })
       end
 
       def stop
-        execute('stop_vm.ps1', { vm_id: vmid })
+        execute('hyperv_manager.ps1', { vm_id: vmid, command: "stop" })
       end
 
       def suspend
-        execute('suspend_vm.ps1', { vm_id: vmid })
+        execute('hyperv_manager.ps1', { vm_id: vmid, command: "suspend" })
+      end
+
+      def get_current_state
+        execute('hyperv_manager.ps1', { vm_id: vmid, command: "status" })
+      end
+
+      def resume
+        execute('hyperv_manager.ps1', { vm_id: vmid, command: "resume" })
+      end
+
+      def read_guest_ip
+        execute('get_network_config.ps1', { vm_id: vmid })
       end
 
       def upload(from, to)
@@ -123,20 +113,8 @@ module VagrantPlugins
           vm_id: vmid,
           host_path: windows_path(from),
           guest_path: windows_path(to)
-        }
+        }.merge(remote_credentials)
         execute('upload_file.ps1',options)
-      end
-
-      def folder_copy(from, to, ssh_info)
-        options = {
-          vm_id: vmid,
-          username: ssh_info[:username],
-          host_path: windows_path(from),
-          guest_path: windows_path(to),
-          guest_ip: ssh_info[:host],
-          password: "vagrant"
-        }
-        execute('file_sync.ps1', options)
       end
 
       protected

@@ -1,6 +1,6 @@
 #-------------------------------------------------------------------------
 # Copyright (c) Microsoft Open Technologies, Inc.
-# All Rights Reserved. Licensed under the MIT License.
+# All Rights Reserved. Licensed under the Apache 2.0 License.
 #--------------------------------------------------------------------------
 
 module VagrantPlugins
@@ -31,6 +31,14 @@ module VagrantPlugins
 
       class IPTimeOut < VagrantHyperVError
         error_key(:ip_time_out)
+      end
+
+      class NoSwitches < VagrantHyperVError
+        error_key(:no_switches)
+      end
+
+      class InvalidSMBCredentials < VagrantHyperVError
+        error_key(:no_smb_credentials)
       end
 
       class NetShareError < RuntimeError

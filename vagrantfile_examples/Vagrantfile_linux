@@ -1,6 +1,6 @@
 #-------------------------------------------------------------------------
 # Copyright (c) Microsoft Open Technologies, Inc.
-# All Rights Reserved. Licensed under the MIT License.
+# All Rights Reserved. Licensed under the Apache 2.0 License.
 #--------------------------------------------------------------------------
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
@@ -11,12 +11,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
   config.vm.box = "ubuntu-13-10"
 
-  # Example for SMB Share
-  config.vm.synced_folder 'E:/my_project', "/home/vagrant/my_project",
-    :smb => true, :share_name => "my_project"
-
-  # Example for non SMB share
-  config.vm.synced_folder 'E:/my_other_project', "/home/vagrant/my_other_project"
+  config.vm.synced_folder 'E:/my_project', "/home/vagrant/my_project"
 
   # Example to use disable option
   config.vm.synced_folder "." , "/vagrant", :disabled => true
@@ -25,13 +20,5 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     hv.guest = :linux
     override.ssh.username = "vagrant"
     override.ssh.private_key_path = "E:/insecure_private_key"
-
-    # Host user account which is created to share folders from Hyper-V Host
-    # To Guest VM
-
-    hv.host_config do |share|
-      share.username = "my_local_account"
-      share.password = "my_secret_password"
-    end
   end
 end

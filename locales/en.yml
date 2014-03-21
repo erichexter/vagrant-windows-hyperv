@@ -1,4 +1,10 @@
 en:
+  vagrant_sf_smb:
+    warning_password: |-
+
+      You will be asked for the username and password to use to mount the
+      folders shortly. Please use the proper username/password of your
+      Windows account.
   vagrant_hyperv:
     message_not_created: |-
        VM not created. Moving on...
@@ -9,6 +15,10 @@ en:
     generating_rdp: |-
       Generating a RDP file to establish a remote session. You will soon be prompted to authenticate the
       RDP session and enter the Virtual Machine's password.
+    choose_switch: |-
+      Please choose a switch to attach to your Hyper-V instance.
+      If none of these are appropriate, please open the Hyper-V manager
+      to create a new virtual switch.
     errors:
       admin_required: |-
         "You need admin access to run vagrant commands for HyperV"
@@ -29,9 +39,21 @@ en:
         The virtual machine did not respond its IP, this looks like an issue with the
         Hyper-V Manager's Integrated service management. Please check the configurations and
         try again.
+      no_switches: |-
+        There are no virtual switches created for Hyper-V! Please open
+        the Hyper-V Manager, go to the "Virtual Switch Manager", and create
+        at least one virtual switch.
+
+        A virtual switch is required for Vagrant to create a Hyper-V
+        machine that is connected to a network so it can access it.
+
+        For more help, please see the documentation on the Vagrant website
+        for Hyper-V.
+      no_smb_credentials: |-
+        No Username or Password provided for the windows account.
       powershell_error: |-
         PowerShell encountered an error, this can be due to environment / configuration
         related. Please see the error message and report the issue if you feel it is
         related to the provider
-
+        %{path}
         %{stderr}

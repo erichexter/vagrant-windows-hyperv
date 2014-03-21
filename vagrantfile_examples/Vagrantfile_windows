@@ -1,6 +1,6 @@
 #-------------------------------------------------------------------------
 # Copyright (c) Microsoft Open Technologies, Inc.
-# All Rights Reserved. Licensed under the MIT License.
+# All Rights Reserved. Licensed under the Apache 2.0 License.
 #--------------------------------------------------------------------------
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
@@ -8,15 +8,10 @@
 VAGRANTFILE_API_VERSION = "2"
 
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
-  config.vm.guest = :windows
 
   config.vm.box = "hyperv-win8"
 
-  # Example for SMB Share
-  config.vm.synced_folder 'E:/my_project', "C:/Users/vagrant/my_project", :smb => true
-
-  # Example to non SMB
-  config.vm.synced_folder 'E:/my_other_project', "C:/Users/vagrant/my_other_project"
+  config.vm.synced_folder 'E:/my_project', "C:/Users/vagrant/my_project"
 
   # Example to use disable option
   config.vm.synced_folder "." , "/vagrant", :disabled => true

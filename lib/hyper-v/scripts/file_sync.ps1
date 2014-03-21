@@ -1,6 +1,6 @@
 #-------------------------------------------------------------------------
 # Copyright (c) Microsoft Open Technologies, Inc.
-# All Rights Reserved. Licensed under the MIT License.
+# All Rights Reserved. Licensed under the Apache 2.0 License.
 #--------------------------------------------------------------------------
 
 param (
@@ -21,7 +21,7 @@ forEach ($module in $modules) { . $module }
 
 function Get-file-hash($source_path, $delimiter) {
     $source_files = @()
-    (Get-ChildItem $source_path -rec | ForEach-Object -Process {
+    (Get-ChildItem $source_path -rec -force | ForEach-Object -Process {
       Get-FileHash -Path $_.FullName -Algorithm MD5 } ) |
         ForEach-Object -Process {
           $source_files += $_.Path.Replace($source_path, "") + $delimiter + $_.Hash
@@ -45,6 +45,7 @@ function Sync-Remote-Machine($machine, $remove_files, $copy_files, $host_path, $
 }
 
 function Create-Remote-Folders($empty_source_folders, $guest_path) {
+
     ForEach ($item in $empty_source_folders) {
         $new_name =  $guest_path + $item
         New-Item "$new_name" -type directory -Force
@@ -52,6 +53,16 @@ function Create-Remote-Folders($empty_source_folders, $guest_path) {
 }
 
 function Create-Guest-Folder($guest_path) {
+  try {
+    if (Test-Path $guest_path) {
+      $junction = Get-Item $guest_path
+      $junction.Delete()
+    }
+  }
+  # Catch any [IOException]
+   catch {
+     Remove-Item "$guest_path" -Force -Recurse
+   }
    New-Item "$guest_path" -type directory -Force
 }
 
@@ -85,8 +96,7 @@ if (!$response["session"] -and $response["error"]) {
     type = "PowerShellError"
     message = $response["error"]
   }
-  $errorResult = ConvertTo-Json $errortHash
-  Write-Error-Message $errorResult
+  Write-Error-Message $errortHash
   return
 }
 
@@ -132,6 +142,4 @@ Remove-PSSession -Id $session.Id
 $resultHash = @{
   message = "OK"
 }
-$result = ConvertTo-Json $resultHash
-Write-Output-Message $result
-
+Write-Output-Message $resultHash

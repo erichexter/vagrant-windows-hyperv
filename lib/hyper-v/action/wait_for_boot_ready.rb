@@ -1,7 +1,8 @@
 #-------------------------------------------------------------------------
 # Copyright (c) Microsoft Open Technologies, Inc.
-# All Rights Reserved. Licensed under the MIT License.
+# All Rights Reserved. Licensed under the Apache 2.0 License.
 #--------------------------------------------------------------------------
+
 require "log4r"
 require "timeout"
 
@@ -17,11 +18,12 @@ module VagrantPlugins
         end
 
         def call(env)
-          env[:ui].info "Waiting for the VM to Boot... [default timeout 120 sec]"
-          guest_ip = nil
-          guest_ip = env[:machine].ssh_info[:host]
-          raise Errors::IPTimeOut if guest_ip.nil?
-          env[:ui].info "Virtual Machine's IP is #{guest_ip}"
+          timeout = env[:machine].provider_config.ip_address_timeout
+          env[:ui].info "Waiting for the VM to Boot... [default timeout #{timeout} sec]"
+          ssh_info = nil
+          ssh_info = env[:machine].ssh_info
+          raise Errors::IPTimeOut if ssh_info.nil? || ssh_info[:host].nil?
+          env[:ui].info "Virtual Machine's IP is #{ssh_info[:host]}"
           @app.call(env)
         end
       end

@@ -1,8 +1,10 @@
 #-------------------------------------------------------------------------
 # Copyright (c) Microsoft Open Technologies, Inc.
-# All Rights Reserved. Licensed under the MIT License.
+# All Rights Reserved. Licensed under the Apache 2.0 License.
 #--------------------------------------------------------------------------
+
 require "fileutils"
+
 module VagrantPlugins
   module HyperV
     module Action
@@ -18,19 +20,13 @@ module VagrantPlugins
            raise "Please off the machine before package" if \
              @env[:machine].provider.state.id != :off
 
-           setup_temp_dir
+           @temp_dir = env[:tmp_path].join(Time.now.to_i.to_s)
            export
            add_metadata_json
 
            @app.call(env)
 
            recover(env) # called to cleanup temp directory
-         end
-
-         def setup_temp_dir
-           @env[:ui].info I18n.t("vagrant.actions.vm.export.create_dir")
-           @temp_dir = @env["export.temp_dir"] = @env[:tmp_path].join(Time.now.to_i.to_s)
-           FileUtils.mkpath(@env["export.temp_dir"])
          end
 
          def recover(env)
@@ -41,10 +37,10 @@ module VagrantPlugins
 
          def export
            @env[:ui].info('Exporting the VM, this process may take a while.')
-           result = @env[:machine].provider.driver.export_vm_to(temp_dir)
+           result = @env[:machine].provider.driver.export_vm_to(temp_dir.to_s)
            # Hyper-V Exports the VM under the VM's name in to the temp directory.
            # Set the package directory to this folder, all files should go into this folder
-           @env["package.directory"] = @env["export.temp_dir"].join(result["name"])
+           @env["package.directory"] = temp_dir.join(result["name"])
          end
 
          def add_metadata_json

@@ -1,19 +1,18 @@
 #-------------------------------------------------------------------------
 # Copyright (c) Microsoft Open Technologies, Inc.
-# All Rights Reserved. Licensed under the MIT License.
+# All Rights Reserved. Licensed under the Apache 2.0 License.
 #--------------------------------------------------------------------------
 
 
 param (
     [string]$vm_xml_config = $(throw "-vm_xml_config is required."),
-    [string]$vhdx_path = $(throw "-vhdx_path is required.")
+    [string]$vhdx_path = $(throw "-vhdx_path is required."),
+    [string]$switchname = $(throw "-switchname is required")
  )
 
 # Include the following modules
 $presentDir = Split-Path -parent $PSCommandPath
-$modules = @()
-$modules += $presentDir + "\utils\write_messages.ps1"
-forEach ($module in $modules) { . $module }
+. ([System.IO.Path]::Combine($presentDir, "utils\write_messages.ps1"))
 
 try {
   [xml]$vmconfig = Get-Content -Path  $vm_xml_config
@@ -36,11 +35,9 @@ try {
   } while ($vm_name -ne $name)
 
   $memory = (Select-Xml -xml $vmconfig -XPath "//memory").node.Bank
+  $dynamicmemory = $False
   if ($memory.dynamic_memory_enabled."#text" -eq "True") {
       $dynamicmemory = $True
-  }
-  else {
-      $dynamicmemory = $False
   }
 
   # Memory values need to be in bytes
@@ -48,8 +45,10 @@ try {
   $MemoryStartupBytes = ($memory.size."#text" -as [int]) * 1MB
   $MemoryMinimumBytes = ($memory.reservation."#text" -as [int]) * 1MB
 
-  # Get the name of the virtual switch
-  $switchname = (Select-Xml -xml $vmconfig -XPath "//AltSwitchName").node."#text"
+  if (!$switchname) {
+      # Get the name of the virtual switch
+      $switchname = (Select-Xml -xml $vmconfig -XPath "//AltSwitchName").node."#text"
+  }
 
   # Determine boot device
   Switch ((Select-Xml -xml $vmconfig -XPath "//boot").node.device0."#text") {
@@ -141,15 +140,13 @@ try {
     name = $vm_name
     id = $vm_id
   }
-  $result = ConvertTo-Json $resultHash
-  Write-Output-Message $result
+  Write-Output-Message $resultHash
 }
 catch {
   $errortHash = @{
     type = "PowerShellError"
     message = "$_"
   }
-  $errorResult = ConvertTo-Json $errortHash
-  Write-Error-Message $errorResult
+  Write-Error-Message $errortHash
   return
 }
