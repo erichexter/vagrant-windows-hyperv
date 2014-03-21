@@ -92,6 +92,7 @@ module VagrantPlugins
           @env[:machine].ui.info (I18n.t("vagrant_sf_smb.warning_password") + "\n ")
           @smb_credentials[:username] = @env[:machine].ui.ask("Username: ")
           @smb_credentials[:password] = @env[:machine].ui.ask("Password (will be hidden): ", echo: false)
+          @env[:machine].ui.info ("\n")
           if (@smb_credentials[:username].empty? ||
               @smb_credentials[:password].empty?)
             raise Errors::InvalidSMBCredentials
