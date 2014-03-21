@@ -78,7 +78,7 @@ module VagrantPlugins
       def share_folders(hostpath, options)
         options = {
           path: hostpath,   # Use Unix path format
-          share_name: safe_share_name(options[:share_name]),
+          share_name: safe_share_name(options[:smb_id]),
           host_share_username: options[:smb_username]
         }
         execute('set_smb_share.ps1', options)
