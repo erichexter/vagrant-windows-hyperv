@@ -21,10 +21,11 @@ module VagrantPlugins
           fetch_smb_credentials
           fetch_smb_shared_folders
           if smb_shared_folders.length > 0
-            env[:ui].info('Mounting shared folders with VM, This process may take few minutes.')
             if env[:machine].provider_config.guest == :windows
+              env[:ui].info('Preparing SMB shared folders.')
               mount_shared_folders_to_windows
             elsif env[:machine].provider_config.guest == :linux
+              env[:ui].info('Mounting shared folders with VM, This process may take few minutes.')
               mount_shared_folders_to_linux
             end
           end
@@ -50,7 +51,6 @@ module VagrantPlugins
         end
 
         def mount_shared_folders_to_windows
-          @env[:ui].info "Creating SMB drive mount"
           result = @env[:machine].provider.driver.execute('host_info.ps1', {})
           @host_ip = result["host_ip"]
           smb_shared_folders.each do |id, data|
