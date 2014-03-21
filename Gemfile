@@ -13,5 +13,9 @@ group :development do
   # Vagrant environment itself using `vagrant plugin`.
   # gem "vagrant", :git => "git://github.com/mitchellh/vagrant.git"
 
-  gem "vagrant", :git => 'git://github.com/mitchellh/vagrant.git', :tag => 'v1.4.3'
+  gem "vagrant", :path => "D:/git_repo/vagrant_core"
+end
+
+group :plugins do
+  gem "hyper-v", path: "."
 end
