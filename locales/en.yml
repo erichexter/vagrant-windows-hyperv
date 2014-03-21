@@ -1,4 +1,10 @@
 en:
+  vagrant_sf_smb:
+    warning_password: |-
+
+      You will be asked for the username and password to use to mount the
+      folders shortly. Please use the proper username/password of your
+      Windows account.
   vagrant_hyperv:
     message_not_created: |-
        VM not created. Moving on...
@@ -43,6 +49,8 @@ en:
 
         For more help, please see the documentation on the Vagrant website
         for Hyper-V.
+      no_smb_credentials: |-
+        No Username or Password provided for the windows account.
       powershell_error: |-
         PowerShell encountered an error, this can be due to environment / configuration
         related. Please see the error message and report the issue if you feel it is

@@ -75,24 +75,13 @@ module VagrantPlugins
         execute("export_vm.ps1", options)
       end
 
-      def share_folders(hostpath, share_name)
+      def share_folders(hostpath, options)
         options = {
           path: hostpath,   # Use Unix path format
-          share_name: safe_share_name(share_name),
-          host_share_username: @machine.provider_config.host_share.username
+          share_name: safe_share_name(options[:smb_id]),
+          host_share_username: options[:smb_username]
         }
         execute('set_smb_share.ps1', options)
-      end
-
-      def mount_to_windows(from, to)
-        options = {
-                    hostpath: windows_path(from),
-                    guest_ip: ssh_info[:host],
-                    guest_path: windows_path(to),
-                    username: ssh_info[:username],
-                    password: "vagrant"
-                  }
-        execute('mount_share.ps1', options)
       end
 
       def start

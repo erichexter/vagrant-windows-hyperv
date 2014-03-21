@@ -18,7 +18,8 @@ module VagrantPlugins
         end
 
         def call(env)
-          env[:ui].info "Waiting for the VM to Boot... [default timeout 120 sec]"
+          timeout = env[:machine].provider_config.ip_address_timeout
+          env[:ui].info "Waiting for the VM to Boot... [default timeout #{timeout} sec]"
           ssh_info = nil
           ssh_info = env[:machine].ssh_info
           raise Errors::IPTimeOut if ssh_info.nil? || ssh_info[:host].nil?

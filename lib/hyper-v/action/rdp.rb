@@ -33,7 +33,6 @@ module VagrantPlugins
         def generate_rdp_file
           ssh_info = @env[:machine].ssh_info
           rdp_options = {
-            "drivestoredirect:s" => "*",
             "username:s" => ssh_info[:username],
             "prompt for credentials:i" => "1",
             "full address:s" => ssh_info[:host]
