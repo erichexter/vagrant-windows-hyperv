@@ -10,7 +10,7 @@ module VagrantPlugins
     module Action
       class SSHExec  < Vagrant::Action::Builtin::SSHExec
         def initialize(app, env)
-          @app  = app
+          super
         end
 
         def call(env)

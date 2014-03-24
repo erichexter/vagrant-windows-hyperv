@@ -20,6 +20,10 @@ module VagrantPlugins
         end
       end
 
+      def machine_id_changed
+        @driver = VagrantPlugins::HyperV::Driver.new(@machine)
+      end
+
     end
   end
 end

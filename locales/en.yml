@@ -8,3 +8,13 @@ en:
         SSH is available for non windows guest. Vagrant detected guest to be %{guest}
       rdp_not_available: |-
         RDP is available for windows guest. Vagrant detected guest to be %{guest}
+      powershell_error: |-
+          An error occurred while executing a PowerShell script. This error
+          is shown below. Please read the error message and see if this is
+          a configuration error with your system. If it is not, then please
+          report a bug.
+
+          Script: %{script}
+          Error:
+
+          %{stderr}

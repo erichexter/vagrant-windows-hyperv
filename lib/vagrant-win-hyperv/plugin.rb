@@ -11,8 +11,6 @@ end
 
 module VagrantPlugins
   module VagrantHyperV
-    autoload :Errors, File.expand_path("../errors", __FILE__)
-
     class Plugin < Vagrant.plugin("2")
       name "VagrantHyperV"
       description <<-DESC

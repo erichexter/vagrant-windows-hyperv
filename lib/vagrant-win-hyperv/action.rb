@@ -94,9 +94,7 @@ module VagrantPlugins
 
       # The autoload farm
       action_root = Pathname.new(File.expand_path("../action", __FILE__))
-
-      autoload :SyncedFolders, action_root.join('synced_folders')
-      # autoload :WaitForState, action_root.join('wait_for_state')
+      autoload :WaitForState, action_root.join('wait_for_state')
       autoload :SSHExec, action_root.join('ssh_exec')
       autoload :Export, action_root.join("export")
       autoload :Package, action_root.join("package")

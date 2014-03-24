@@ -3,11 +3,18 @@
 # All Rights Reserved. Licensed under the Apache 2.0 License.
 #--------------------------------------------------------------------------
 
+require "json"
 require "#{Vagrant::source_root}/plugins/providers/hyperv/driver"
+require "vagrant/util/powershell"
 
 module VagrantPlugins
-  module VagrantHyperV
-    class Driver < VagrantPlugins::HyperV::Driver
+  module HyperV
+    class Driver
+
+      def initialize(machine)
+        @vm_id = machine.id
+        @machine = machine
+      end
 
       def ssh_info
         @ssh_info ||= @machine.ssh_info
@@ -21,7 +28,8 @@ module VagrantPlugins
 
       def run_remote_ps(command, &block)
         options = remote_credentials.merge(command: command)
-        execute('run_in_remote.ps1', options, &block)
+        path = local_script_path('run_in_remote.ps1')
+        execute(path, options, &block)
       end
 
       def export_vm_to(path)
@@ -29,7 +37,8 @@ module VagrantPlugins
            vm_id: vm_id,
            path: windows_path(path)
          }
-        execute("export_vm.ps1", options)
+        path = local_script_path('export_vm.ps1')
+        execute(path, options)
       end
 
       def upload(from, to)
@@ -38,10 +47,16 @@ module VagrantPlugins
           host_path: windows_path(from),
           guest_path: windows_path(to)
         }.merge(remote_credentials)
-        execute('upload_file.ps1',options)
+        path = local_script_path('upload_file.ps1')
+        execute(path,options)
       end
 
       protected
+
+      def local_script_path(path)
+        lib_path = Pathname.new(File.expand_path("../scripts", __FILE__))
+        lib_path.join(path).to_s
+      end
 
       def windows_path(path)
         if path
