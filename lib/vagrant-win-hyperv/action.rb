@@ -62,7 +62,7 @@ module VagrantPlugins
             end
             b2.use Call, IsState, :running do |env2, b3|
               if !env2[:result]
-                b3.use MessageNotRunning
+                b3.use Message, I18n.t("vagrant_hyperv.message_not_running")
               else
                 b3.use Provision
               end
