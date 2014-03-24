@@ -3,8 +3,6 @@
 # All Rights Reserved. Licensed under the Apache 2.0 License.
 #--------------------------------------------------------------------------
 
-require "vagrant/util/subprocess"
-
 require "#{Vagrant::source_root}/plugins/providers/hyperv/driver"
 
 module VagrantPlugins
