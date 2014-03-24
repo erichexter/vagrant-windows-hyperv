@@ -94,28 +94,14 @@ module VagrantPlugins
 
       # The autoload farm
       action_root = Pathname.new(File.expand_path("../action", __FILE__))
-      autoload :IsState, action_root.join("is_state")
-      autoload :Message, action_root.join("message")
-      autoload :ReadState, action_root.join("read_state")
-      autoload :Import, action_root.join("import")
 
-      autoload :StartInstance, action_root.join('start_instance')
-      autoload :StopInstance, action_root.join('stop_instance')
-      autoload :ResumeInstance, action_root.join('resume_instance')
-      autoload :SuspendInstance, action_root.join('suspend_instance')
       autoload :SyncedFolders, action_root.join('synced_folders')
-
-      autoload :WaitForState, action_root.join('wait_for_state')
-      autoload :ReadGuestIP, action_root.join('read_guest_ip')
-
+      # autoload :WaitForState, action_root.join('wait_for_state')
       autoload :SSHExec, action_root.join('ssh_exec')
-      autoload :SetupPackageFiles, action_root.join("setup_package_files")
-
       autoload :Export, action_root.join("export")
       autoload :Package, action_root.join("package")
       autoload :Provision, action_root.join('provision')
       autoload :Rdp, action_root.join("rdp")
-      autoload :WaitForBootReady, action_root.join("wait_for_boot_ready")
     end
   end
 end
