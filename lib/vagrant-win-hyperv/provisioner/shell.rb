@@ -4,7 +4,7 @@
 #--------------------------------------------------------------------------
 
 module VagrantPlugins
-  module HyperV
+  module VagrantHyperV
     module Provisioner
       class Shell
         attr_reader :provisioner

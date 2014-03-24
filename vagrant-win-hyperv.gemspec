@@ -9,7 +9,7 @@ require 'vagrant-win-hyperv/version'
 
 Gem::Specification.new do |spec|
   spec.name          = "vagrant-win-hyperv"
-  spec.version       = VagrantPlugins::HyperV::VERSION
+  spec.version       = VagrantPlugins::VagrantHyperV::VERSION
   spec.authors       = ["Ramakrishnan"]
   spec.email         = ["ramakrishnan.v@happiestminds.com"]
   spec.description   = "Enable Vagrant to manage Virtual Machine created using Hyper-V"

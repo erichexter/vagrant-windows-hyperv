@@ -4,7 +4,7 @@
 #--------------------------------------------------------------------------
 
 module VagrantPlugins
-  module HyperV
+  module VagrantHyperV
     module Action
       class Provision < Vagrant::Action::Builtin::Provision
         # Override this method from core vagrant, here we branch out the provision for windows

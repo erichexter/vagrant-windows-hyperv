@@ -6,7 +6,7 @@
 require "log4r"
 
 module VagrantPlugins
-  module HyperV
+  module VagrantHyperV
     module Action
       class SuspendInstance
         def initialize(app, env)

@@ -3,27 +3,21 @@
 # All Rights Reserved. Licensed under the Apache 2.0 License.
 #--------------------------------------------------------------------------
 
-begin
-  require "vagrant"
-rescue LoadError
-  raise "The Vagrant Hyper-V plugin must be run within Vagrant."
-end
-
 # This is a sanity check to make sure no one is attempting to install
 # this into an early Vagrant version.
-if Vagrant::VERSION < "1.3.5"
-  raise "The Vagrant Hyper-V plugin is only compatible with Vagrant 1.3+"
+if Vagrant::VERSION < "1.5.0"
+  raise "The Vagrant Hyper-V plugin is only compatible with Vagrant 1.5+"
 end
 
 module VagrantPlugins
-  module HyperV
+  module VagrantHyperV
     autoload :Errors, File.expand_path("../errors", __FILE__)
 
     class Plugin < Vagrant.plugin("2")
-      name "HyperV"
+      name "VagrantHyperV"
       description <<-DESC
       This plugin installs a provider that allows Vagrant to manage
-      machines in Hyper-V.
+      windows guest machines in Hyper-V.
       DESC
 
       config(:hyperv, :provider) do
@@ -36,7 +30,7 @@ module VagrantPlugins
         Command
       end
 
-      provider(:hyperv, parallel: true) do
+      provider(:hyperv) do
         # Setup logging and i18n
         # setup_logging
         setup_i18n
@@ -48,7 +42,7 @@ module VagrantPlugins
 
       # This initializes the internationalization strings.
       def self.setup_i18n
-        I18n.load_path << File.expand_path("locales/en.yml", HyperV.source_root)
+        I18n.load_path << File.expand_path("locales/en.yml", VagrantHyperV.source_root)
         I18n.reload!
       end
 

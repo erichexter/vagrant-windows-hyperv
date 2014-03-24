@@ -6,7 +6,7 @@
 require 'vagrant/action/general/package'
 
 module VagrantPlugins
-  module HyperV
+  module VagrantHyperV
     module Action
       class Package < Vagrant::Action::General::Package
         # Doing this so that we can test that the parent is properly

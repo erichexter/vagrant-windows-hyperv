@@ -4,7 +4,7 @@
 #--------------------------------------------------------------------------
 
 module VagrantPlugins
-  module HyperV
+  module VagrantHyperV
     module Action
       class SetupPackageFiles
         def initialize(app, env)

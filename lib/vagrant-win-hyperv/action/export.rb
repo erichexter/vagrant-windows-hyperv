@@ -6,7 +6,7 @@
 require "fileutils"
 
 module VagrantPlugins
-  module HyperV
+  module VagrantHyperV
     module Action
       class Export
          attr_reader :temp_dir

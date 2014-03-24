@@ -6,7 +6,7 @@
 require "log4r"
 
 module VagrantPlugins
-  module HyperV
+  module VagrantHyperV
     module Action
       class SSHExec  < Vagrant::Action::Builtin::SSHExec
         def initialize(app, env)

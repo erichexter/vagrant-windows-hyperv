@@ -8,7 +8,7 @@ require "pathname"
 require "vagrant/util/subprocess"
 
 module VagrantPlugins
-  module HyperV
+  module VagrantHyperV
     module Action
       # This action generates a .rdp file into the root path of the project.
       # and establishes a RDP session with necessary resource sharing

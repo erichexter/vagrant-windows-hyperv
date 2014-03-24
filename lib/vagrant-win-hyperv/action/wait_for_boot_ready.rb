@@ -7,7 +7,7 @@ require "log4r"
 require "timeout"
 
 module VagrantPlugins
-  module HyperV
+  module VagrantHyperV
     module Action
       # This action checks if the Virtual Machine's boot sequence is complete
       # and the machine returns back its IP Address.

@@ -4,26 +4,26 @@
 #--------------------------------------------------------------------------
 
 require "vagrant"
+require "#{Vagrant::source_root}/plugins/providers/hyperv/config"
 
 module VagrantPlugins
-  module HyperV
-    class Config < Vagrant.plugin("2", :config)
+  module VagrantHyperV
+    class Config < VagrantPlugins::HyperV::Config
 
-      attr_accessor :guest, :ip_address_timeout
+      attr_accessor :guest
 
       def finalize!
+        super
         @guest = nil if @guest == UNSET_VALUE
-        if @ip_address_timeout == UNSET_VALUE
-          @ip_address_timeout = 120
-        end
       end
 
       def initialize
-        @gui = UNSET_VALUE
-        @ip_address_timeout = UNSET_VALUE
+        super
+        @guest = UNSET_VALUE
       end
 
       def validate(machine)
+        super
         errors = _detected_errors
         if (guest == UNSET_VALUE)
           errors << "Please mention the type of VM Guest"

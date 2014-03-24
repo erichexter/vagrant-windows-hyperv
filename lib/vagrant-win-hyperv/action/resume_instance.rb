@@ -4,7 +4,7 @@
 #--------------------------------------------------------------------------
 
 module VagrantPlugins
-  module HyperV
+  module VagrantHyperV
     module Action
       class ResumeInstance
         def initialize(app, env)

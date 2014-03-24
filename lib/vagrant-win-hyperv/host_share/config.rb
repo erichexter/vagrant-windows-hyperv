@@ -4,7 +4,7 @@
 #--------------------------------------------------------------------------
 
 module VagrantPlugins
-  module HyperV
+  module VagrantHyperV
     module HostShare
       class Config < Vagrant.plugin("2", :config)
         attr_accessor :username, :password

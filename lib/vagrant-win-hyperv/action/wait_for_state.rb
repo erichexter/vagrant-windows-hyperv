@@ -7,7 +7,7 @@ require "log4r"
 require "timeout"
 
 module VagrantPlugins
-  module HyperV
+  module VagrantHyperV
     module Action
       class WaitForState
         def initialize(app, env, state, timeout)

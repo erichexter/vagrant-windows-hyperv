@@ -4,7 +4,7 @@
 #--------------------------------------------------------------------------
 
 module VagrantPlugins
-  module HyperV
+  module VagrantHyperV
     module Provisioner
       lib_path = Pathname.new(File.expand_path("../provisioner", __FILE__))
       autoload :Shell, lib_path.join("shell")

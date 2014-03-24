@@ -7,7 +7,7 @@ require "fileutils"
 require "tempfile"
 
 module VagrantPlugins
-  module HyperV
+  module VagrantHyperV
     module Provisioner
       class Puppet
         attr_reader :provisioner

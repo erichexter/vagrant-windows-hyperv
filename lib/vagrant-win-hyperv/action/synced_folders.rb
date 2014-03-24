@@ -7,7 +7,7 @@ require "vagrant/util/subprocess"
 require "tempfile"
 
 module VagrantPlugins
-  module HyperV
+  module VagrantHyperV
     module Action
       class SyncedFolders
         attr_reader :smb_shared_folders, :smb_credentials

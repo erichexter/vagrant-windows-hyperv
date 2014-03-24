@@ -14,6 +14,7 @@ group :development do
   # gem "vagrant", :git => "git://github.com/mitchellh/vagrant.git"
 
   gem "vagrant", :path => "D:/git_repo/vagrant_core"
+  gem "debugger"
 end
 
 group :plugins do

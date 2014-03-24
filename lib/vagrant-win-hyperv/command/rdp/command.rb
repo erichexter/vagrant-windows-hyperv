@@ -4,7 +4,7 @@
 #--------------------------------------------------------------------------
 
 module VagrantPlugins
-  module HyperV
+  module VagrantHyperV
     class Command < Vagrant.plugin("2", :command)
       def self.synopsis
         "opens a RDP session for a vagrant machine"

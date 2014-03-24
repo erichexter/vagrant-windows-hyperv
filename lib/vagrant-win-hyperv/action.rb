@@ -7,111 +7,10 @@ require "pathname"
 require "vagrant/action/builder"
 
 module VagrantPlugins
-  module HyperV
+  module VagrantHyperV
     module Action
       # Include the built-in modules so we can use them as top-level things.
       include Vagrant::Action::Builtin
-
-      def self.action_reload
-        Vagrant::Action::Builder.new.tap do |b|
-          b.use ConfigValidate
-          b.use Call, IsState, :not_created do |env, b2|
-            if env[:result]
-              b2.use Message, I18n.t("vagrant_hyperv.message_not_created")
-              next
-            end
-            b2.use action_halt
-            b2.use action_start
-          end
-        end
-      end
-
-      def self.action_halt
-        Vagrant::Action::Builder.new.tap do |b|
-          b.use ConfigValidate
-          b.use Call, IsState, :not_created do |env, b2|
-            if env[:result]
-              b2.use Message, I18n.t("vagrant_hyperv.message_not_created")
-              next
-            end
-            b2.use StopInstance
-            b2.use Call, WaitForState, :off, 120 do |env1, b3|
-              if env1[:result]
-                env[:ui].info I18n.t("vagrant_hyperv.message_turned_off")
-              end
-            end
-          end
-        end
-      end
-
-      def self.action_suspend
-        Vagrant::Action::Builder.new.tap do |b|
-          b.use ConfigValidate
-          b.use Call, IsState, :not_created do |env, b2|
-            if env[:result]
-              b2.use Message, I18n.t("vagrant_hyperv.message_not_created")
-              next
-            end
-            b2.use SuspendInstance
-          end
-        end
-      end
-
-      def self.action_start
-        Vagrant::Action::Builder.new.tap do |b|
-          b.use Provision
-          b.use StartInstance
-          b.use Call, WaitForState, :running, 10 do |env, b1|
-            if env[:result]
-              b1.use WaitForBootReady
-              b1.use SyncedFolders
-            else
-              env[:ui].info I18n.t("vagrant_hyperv.errors.machine_boot_error")
-            end
-          end
-        end
-      end
-
-      def self.action_resume
-        Vagrant::Action::Builder.new.tap do |b|
-          b.use ConfigValidate
-          b.use Call, IsState, :paused do |env, b2|
-            if !env[:result]
-              b2.use Message, "Machine not suspended"
-              next
-            end
-            b2.use ResumeInstance
-          end
-        end
-      end
-
-      def self.action_up
-        Vagrant::Action::Builder.new.tap do |b|
-          b.use HandleBoxUrl
-          b.use ConfigValidate
-          b.use Call, IsState, :not_created do |env1, b1|
-            if env1[:result]
-              b1.use Import
-              b1.use action_start
-            else
-              b1.use Call, IsState, :off do |env2, b2|
-                if env2[:result]
-                  b2.use action_start
-                else
-                  b2.use Message, "Machine already created"
-                end
-              end
-            end
-          end
-        end
-      end
-
-      def self.action_read_state
-        Vagrant::Action::Builder.new.tap do |b|
-          b.use ConfigValidate
-          b.use ReadState
-        end
-      end
 
       def self.action_ssh
         Vagrant::Action::Builder.new.tap do |b|
@@ -129,13 +28,6 @@ module VagrantPlugins
               end
             end
           end
-        end
-      end
-
-      def self.action_read_guest_ip
-        Vagrant::Action::Builder.new.tap do |b|
-          b.use ConfigValidate
-          b.use ReadGuestIP
         end
       end
 
