@@ -28,8 +28,17 @@ module VagrantPlugins
 
       def run_remote_ps(command, &block)
         options = remote_credentials.merge(command: command)
-        path = local_script_path('run_in_remote.ps1')
-        execute(path, options, &block)
+        script_path = local_script_path('run_in_remote.ps1')
+        # FIXME:  Vagrant's core driver method which executes PowerShell,
+        # need to take an &block so that this piece of code can be avoided.
+        ps_options = []
+        options.each do |key, value|
+          ps_options << "-#{key}"
+          ps_options << "'#{value}'"
+        end
+        ps_options << "-ErrorAction" << "Stop"
+        opts = { notify: [:stdout, :stderr, :stdin] }
+        Vagrant::Util::PowerShell.execute(script_path, *ps_options, **opts, &block)
       end
 
       def export_vm_to(path)
@@ -37,8 +46,8 @@ module VagrantPlugins
            vm_id: vm_id,
            path: windows_path(path)
          }
-        path = local_script_path('export_vm.ps1')
-        execute(path, options)
+        script_path = local_script_path('export_vm.ps1')
+        execute(script_path, options)
       end
 
       def upload(from, to)
@@ -47,8 +56,8 @@ module VagrantPlugins
           host_path: windows_path(from),
           guest_path: windows_path(to)
         }.merge(remote_credentials)
-        path = local_script_path('upload_file.ps1')
-        execute(path,options)
+        script_path = local_script_path('upload_file.ps1')
+        execute(script_path, options)
       end
 
       protected

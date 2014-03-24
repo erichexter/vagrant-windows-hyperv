@@ -30,7 +30,7 @@ module VagrantPlugins
             command = "powershell.exe #{guest_path} #{arguments}"
             @env[:machine].provider.driver.run_remote_ps(command) do |type, data|
               if type == :stdout || type == :stderr
-                @env[:ui].info data
+                @env[:ui].detail data
               end
             end
           end

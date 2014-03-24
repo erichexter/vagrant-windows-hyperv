@@ -81,12 +81,10 @@ module VagrantPlugins
 
           @env[:ui].info "Executing puppet script in Guest"
 
-          debugger
-
           @env[:machine].provider.driver.run_remote_ps(command) do |type, data|
             # Output the data with the proper color based on the stream.
             if (type == :stdout || type == :stderr)
-              @env[:machine].env.ui.info data
+              @env[:ui].detail data
             end
           end
         end
