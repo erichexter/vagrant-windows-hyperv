@@ -65,6 +65,11 @@ module VagrantPlugins
         execute(script_path, remote_credentials)
       end
 
+      def get_host_ip
+        script_path = local_script_path('host_info.ps1')
+        execute(script_path, {})
+      end
+
       protected
 
       def local_script_path(path)
