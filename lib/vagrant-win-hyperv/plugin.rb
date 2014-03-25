@@ -18,14 +18,14 @@ module VagrantPlugins
       windows guest machines in Hyper-V.
       DESC
 
-      config(:hyperv, :provider) do
+      config(:guest) do
         require_relative "config"
-        Config
+        VagrantPlugins::VagrantHyperV::Config
       end
 
       command "rdp" do
         require_relative "command/rdp/command"
-        Command
+        VagrantPlugins::VagrantHyperV::Command
       end
 
       provider(:hyperv) do
@@ -35,7 +35,7 @@ module VagrantPlugins
 
         # Return the provider
         require_relative "provider"
-        Provider
+        VagrantPlugins::VagrantHyperV::Provider
       end
 
       # This initializes the internationalization strings.

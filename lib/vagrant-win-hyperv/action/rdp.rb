@@ -5,7 +5,7 @@
 
 require "log4r"
 require "pathname"
-require "vagrant/util/subprocess"
+require "vagrant/util/powershell"
 
 module VagrantPlugins
   module VagrantHyperV
@@ -15,19 +15,19 @@ module VagrantPlugins
       class Rdp
         def initialize(app, env)
           @app    = app
-          @logger = Log4r::Logger.new("vagrant::hyperv::connection")
+          @logger = Log4r::Logger.new("vagrant::hyperv::rdp")
         end
 
         def call(env)
-          if env[:machine].provider_config.guest != :windows
+          if env[:machine].config.guest.type != :windows
             raise Errors::RDPNotAvailable,
-              guest: env[:machine].provider_config.guest
+              guest: env[:machine].config.guest.type
           end
           @env = env
-          @env[:ui].info I18n.t("vagrant_hyperv.generating_rdp")
+          @env[:ui].detail I18n.t("vagrant_win_hyperv.generating_rdp")
           generate_rdp_file
           command = ["mstsc", "machine.rdp"]
-          Vagrant::Util::Subprocess.execute(*command)
+          Vagrant::Util::PowerShell.execute(*command)
         end
 
         def generate_rdp_file

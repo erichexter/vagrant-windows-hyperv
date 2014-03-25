@@ -4,32 +4,27 @@
 #--------------------------------------------------------------------------
 
 require "vagrant"
-require "#{Vagrant::source_root}/plugins/providers/hyperv/config"
-require "debugger"
 
 module VagrantPlugins
   module VagrantHyperV
-    class Config < VagrantPlugins::HyperV::Config
+    class Config < Vagrant.plugin("2", :config)
 
-      attr_accessor :guest
+      attr_accessor :type
 
       def finalize!
-        @guest = nil if @guest == UNSET_VALUE
-        super
+        @type = nil if @type == UNSET_VALUE
       end
 
       def initialize
-        @guest = UNSET_VALUE
-        super
+        @type = UNSET_VALUE
       end
 
       def validate(machine)
-        core_errors = super
-        errors = core_errors["Hyper-V"] if core_errors["Hyper-V"]
-        if (!guest)
-          errors << "Please mention the type of VM Guest"
+        errors = []
+        if (!type)
+          errors << "Please mention the type of VM Guest config.guest.type"
         end
-        { "Hyper-V" => errors }
+        { "Hyper-V-Windows" => errors }
       end
 
     end

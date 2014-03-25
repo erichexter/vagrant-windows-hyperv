@@ -25,8 +25,6 @@ module VagrantPlugins
 
           # Copy the manifests directory to the guest
           if config.manifests_path[0].to_sym == :host
-            @env[:ui].info "Copy folders from #{config.manifests_path[1]}"
-            @env[:machine].provider.driver.upload(
               File.expand_path(config.manifests_path[1], @env[:machine].env.root_path),
               provisioner.manifests_guest_path)
           end
@@ -80,7 +78,6 @@ module VagrantPlugins
                                       :manifest => config.manifest_file)
 
           @env[:ui].info "Executing puppet script in Guest"
-
           @env[:machine].provider.driver.run_remote_ps(command) do |type, data|
             # Output the data with the proper color based on the stream.
             if (type == :stdout || type == :stderr)

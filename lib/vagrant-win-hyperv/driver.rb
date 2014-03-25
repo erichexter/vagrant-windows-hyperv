@@ -8,8 +8,8 @@ require "#{Vagrant::source_root}/plugins/providers/hyperv/driver"
 require "vagrant/util/powershell"
 
 module VagrantPlugins
-  module HyperV
-    class Driver
+  module VagrantHyperV
+    class Driver < VagrantPlugins::HyperV::Driver
 
       def initialize(machine)
         @vm_id = machine.id

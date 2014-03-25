@@ -12,7 +12,7 @@ module VagrantPlugins
       alias_method :original_enable, :enable
 
       def enable(machine, folders, nfsopts)
-        if machine.provider_config.guest == :windows
+        if machine.config.guest.type == :windows
           machine.ui.output("My code. Thanks GOD")
         else
           original_enable

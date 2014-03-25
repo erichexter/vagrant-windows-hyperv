@@ -26,7 +26,6 @@ module VagrantPlugins
 
             response = @env[:machine].provider.driver.upload(path, guest_path)
 
-            @env[:ui].info "Executing the script in Guest"
             command = "powershell.exe #{guest_path} #{arguments}"
             @env[:machine].provider.driver.run_remote_ps(command) do |type, data|
               if type == :stdout || type == :stderr

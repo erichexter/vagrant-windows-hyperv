@@ -5,19 +5,22 @@
 
 require "pathname"
 require "vagrant-win-hyperv/plugin"
-require "debugger"
 
 module VagrantPlugins
   module VagrantHyperV
     lib_path = Pathname.new(File.expand_path("../vagrant-win-hyperv", __FILE__))
     autoload :Action, lib_path.join("action")
+    autoload :Errors, lib_path.join("errors")
+    autoload :Driver, lib_path.join("driver")
 
-    autoload :Provisioner, lib_path.join("provisioner")
-    autoload :Errors, File.expand_path("../errors", __FILE__)
-
-    # Monkey Patch the synced folders for SMB share for Windows guest
+    # Monkey Patch the core Hyper-V vagrant with the following
     require lib_path.join("synced_folders/smb/synced_folders")
-    require lib_path.join("driver")
+    require lib_path.join("action/provision")
+
+    # Include the provision scripts for Windows
+    require lib_path.join("provisioner/shell")
+    require lib_path.join("provisioner/puppet")
+    require lib_path.join("provisioner/chef_solo")
 
     # This returns the path to the source of this plugin.
     #
