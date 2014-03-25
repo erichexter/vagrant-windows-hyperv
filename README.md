@@ -1,8 +1,11 @@
 # Vagrant Hyper-V Provider
-Hyper-V provider is available by default starting from Vagrant 1.5 onwards. This plugin is created to provide windows guest features for Hyper-V.
+
+Hyper-V provider is available by default starting in Vagrant starting from version 1.5 onwards. This plugin is created to provide windows guest features for Hyper-V.
 
 
 # Installation
+Install Vagrant 1.5
+
 vagrant plugin install vagrant-hyperv
 
 # Configuration
@@ -10,6 +13,7 @@ vagrant plugin install vagrant-hyperv
 ## Windows to Windows Configuration
 When the guest virtual machine is windows, follow the following configurations
 
+# New RDP Command
 * A new command vagrant rdp is introduced to connect to the Windows VM
 ` vagrant rdp `
 
@@ -40,7 +44,7 @@ end
 
 # Troubleshooting
 
-## Remote PowerShell
+*### Remote PowerShell
 Vagrant-HyperV uses remote PowerShell to communicate with the guest VMs, the guest VMs should have WinRM service running and remote PowerShell running.
 
 To Enable remote PowerShell in the guest.
@@ -48,7 +52,7 @@ Go to the guest VM, open a cmd terminal and type the following command
 ```
 powershell Enable-PSRemoting –force
 ```
-## Trustedhosts
+*### Trustedhosts
 With PowerShell being enabled in the remote VM, the host has to trust this guest for further communication to happen.
 One can add the guest IP under trustedhost. Here "*" can be used as a wildcard to trust all hosts, or replace the * with the IP address of the guest..
 
