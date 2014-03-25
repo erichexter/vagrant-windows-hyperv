@@ -12,9 +12,7 @@ module VagrantPlugins
         end
 
         def wait_for_ready(timeout)
-          ready_state =  ready?
-          debugger
-          ready_state
+          ready?
         end
 
         def ready?
