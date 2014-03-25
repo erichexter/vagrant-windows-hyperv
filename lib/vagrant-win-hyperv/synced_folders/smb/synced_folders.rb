@@ -15,7 +15,7 @@ module VagrantPlugins
         if machine.config.vm.guest == :windows
           machine.ui.output("My code. Thanks GOD")
         else
-          original_enable
+          original_enable(machine, folders, nfsopts)
         end
       end
 
