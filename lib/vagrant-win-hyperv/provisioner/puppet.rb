@@ -25,6 +25,7 @@ module VagrantPlugins
 
           # Copy the manifests directory to the guest
           if config.manifests_path[0].to_sym == :host
+            @env[:machine].provider.driver.upload(
               File.expand_path(config.manifests_path[1], @env[:machine].env.root_path),
               provisioner.manifests_guest_path)
           end
