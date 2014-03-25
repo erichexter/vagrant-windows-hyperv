@@ -22,6 +22,10 @@ module VagrantPlugins
         error_key(:no_smb_credentials)
       end
 
+      class WinRMNotReady < VagrantHyperVError
+        error_key(:win_rm_not_ready)
+      end
+
     end
   end
 end

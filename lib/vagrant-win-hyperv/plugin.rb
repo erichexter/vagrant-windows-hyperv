@@ -25,7 +25,7 @@ module VagrantPlugins
 
       command "rdp" do
         require_relative "command/rdp/command"
-        VagrantPlugins::VagrantHyperV::Command
+        Command
       end
 
       provider(:hyperv) do
@@ -35,8 +35,20 @@ module VagrantPlugins
 
         # Return the provider
         require_relative "provider"
-        VagrantPlugins::VagrantHyperV::Provider
+        Provider
       end
+
+      guest(:windows) do
+        require_relative "guest/windows"
+        Guest::Windows
+      end
+
+      guest_capability(:windows, :halt) do
+        require_relative "guest/cap/halt"
+        Guest::Cap::Halt
+      end
+
+
 
       # This initializes the internationalization strings.
       def self.setup_i18n_hyperv
