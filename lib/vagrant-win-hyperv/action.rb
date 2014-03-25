@@ -82,7 +82,7 @@ module VagrantPlugins
 
             b2.use Call, IsState, :running do |env1, b3|
               if !env1[:result]
-                b3.use Message, I18n.t("vagrant_hyperv.message_rdp_not_ready")
+                b3.use Message, I18n.t("vagrant_win_hyperv.message_rdp_not_ready")
                 next
               end
 
