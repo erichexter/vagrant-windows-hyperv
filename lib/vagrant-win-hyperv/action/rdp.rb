@@ -19,9 +19,9 @@ module VagrantPlugins
         end
 
         def call(env)
-          if env[:machine].config.guest.type != :windows
+          if env[:machine].config.vm.guest != :windows
             raise Errors::RDPNotAvailable,
-              guest: env[:machine].config.guest.type
+              guest: env[:machine].config.vm.guest
           end
           @env = env
           @env[:ui].detail I18n.t("vagrant_win_hyperv.generating_rdp")

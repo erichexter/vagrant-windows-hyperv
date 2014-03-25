@@ -12,7 +12,7 @@ module Vagrant
 
         # Override this method from core vagrant, here we branch out the provision for windows
         def run_provisioner(env)
-          if env[:machine].config.guest.type == :windows
+          if env[:machine].config.vm.guest == :windows
             case env[:provisioner].class.to_s
             when "VagrantPlugins::Shell::Provisioner"
               VagrantPlugins::VagrantHyperV::Provisioner::Shell.new(env).provision_for_windows

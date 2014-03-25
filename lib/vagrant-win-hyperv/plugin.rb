@@ -18,11 +18,6 @@ module VagrantPlugins
       windows guest machines in Hyper-V.
       DESC
 
-      config(:guest) do
-        require_relative "config"
-        VagrantPlugins::VagrantHyperV::Config
-      end
-
       command "rdp" do
         require_relative "command/rdp/command"
         Command
