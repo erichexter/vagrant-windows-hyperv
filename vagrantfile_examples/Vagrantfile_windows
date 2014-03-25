@@ -16,8 +16,9 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   # Example to use disable option
   config.vm.synced_folder "." , "/vagrant", :disabled => true
 
+  config.vm.guest = :windows
+
   config.vm.provider "hyperv" do |hv, override|
-    hv.guest = :windows
     override.ssh.username = "vagrant"
   end
 end
