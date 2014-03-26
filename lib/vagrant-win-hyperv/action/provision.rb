@@ -10,6 +10,7 @@ module Vagrant
     module Builtin
       class Provision
 
+        alias_method :original_run_provisioner, :run_provisioner
         # Override this method from core vagrant, here we branch out the provision for windows
         def run_provisioner(env)
           if env[:machine].config.vm.guest == :windows
@@ -22,7 +23,7 @@ module Vagrant
               VagrantPlugins::VagrantHyperV::Provisioner::ChefSolo.new(env).provision_for_windows
             end
           else
-            env[:provisioner].provision
+            original_run_provisioner(env)
           end
         end
       end

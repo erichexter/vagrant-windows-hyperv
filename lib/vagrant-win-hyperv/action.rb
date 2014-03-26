@@ -12,25 +12,6 @@ module VagrantPlugins
       # Include the built-in modules so we can use them as top-level things.
       include Vagrant::Action::Builtin
 
-      def self.action_ssh
-        Vagrant::Action::Builder.new.tap do |b|
-          b.use ConfigValidate
-          b.use Call, IsState, :not_created do |env, b2|
-            if env[:result]
-              b2.use Message, I18n.t("vagrant_hyperv.message_not_created")
-              next
-            end
-            b2.use Call, IsState, :running do |env1, b3|
-              if !env1[:result]
-                b3.use Message, "Machine is not running, Please turn it on."
-              else
-                b3.use SSHExec
-              end
-            end
-          end
-        end
-      end
-
       def self.action_package
         Vagrant::Action::Builder.new.tap do |b|
           b.use Call, IsState, :not_created do |env1, b2|
@@ -46,25 +27,6 @@ module VagrantPlugins
                 b3.use Package
               else
                 env2[:ui].info("Machine did not reload, Check machine's status")
-              end
-            end
-          end
-        end
-      end
-
-      def self.action_provision
-        Vagrant::Action::Builder.new.tap do |b|
-          b.use ConfigValidate
-          b.use Call, IsState, :not_created do |env, b2|
-            if env[:result]
-              b2.use Message, I18n.t("vagrant_hyperv.message_not_created")
-              next
-            end
-            b2.use Call, IsState, :running do |env2, b3|
-              if !env2[:result]
-                b3.use Message, I18n.t("vagrant_hyperv.message_not_running")
-              else
-                b3.use Provision
               end
             end
           end
