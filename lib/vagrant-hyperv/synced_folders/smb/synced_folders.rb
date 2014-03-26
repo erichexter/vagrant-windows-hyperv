@@ -34,8 +34,8 @@ module VagrantPlugins
           folders.each do |id, data|
             smb_map_command = "New-SmbMapping"
             smb_map_command += " -RemotePath \\\\#{host_ip}\\#{data[:smb_id]}"
-            smb_map_command += " -UserName #{data[:smb_username]}"
-            smb_map_command += " -Password #{data[:smb_password]}"
+            smb_map_command += " -UserName #{@creds[:username]}"
+            smb_map_command += " -Password #{@creds[:password]}"
             file.puts(smb_map_command)
           end
           file.fsync
