@@ -94,7 +94,7 @@ $response = Create-Remote-Session $guest_ip $username $password
 if (!$response["session"] -and $response["error"]) {
   $errortHash = @{
     type = "PowerShellError"
-    message = $response["error"]
+    error = $response["error"]
   }
   Write-Error-Message $errortHash
   return

@@ -19,7 +19,7 @@ $ip = (Get-WmiObject -class win32_NetworkAdapterConfiguration -Filter 'ipenabled
 catch {
   $errortHash = @{
     type = "PowerShellError"
-    message = "$_"
+    error = "$_"
   }
   Write-Error-Message $errortHash
 }

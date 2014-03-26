@@ -25,7 +25,7 @@ try {
   } catch {
     $errortHash = @{
       type = "PowerShellError"
-      message = "Failed to export a  VM $_"
+      error = "Failed to export a  VM $_"
     }
     Write-Error-Message $errortHash
   }
