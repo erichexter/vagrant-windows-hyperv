@@ -17,7 +17,6 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   config.vm.synced_folder "." , "/vagrant", :disabled => true
 
   config.vm.provider "hyperv" do |hv, override|
-    hv.guest = :linux
     override.ssh.username = "vagrant"
     override.ssh.private_key_path = "E:/insecure_private_key"
   end
