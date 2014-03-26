@@ -1,64 +1,63 @@
 # Vagrant Hyper-V Provider
-A Vagrant provider for Hyper-V, Use vagrant commands for Virtual Machines created using Hyper-V
 
-# Configuration
+Hyper-V provider is available by default starting in Vagrant starting from version 1.5 onwards. This plugin is created to provide windows guest features for Hyper-V.
 
-## Windows to Windows Configuration
-When the guest virtual machine is windows, follow the following configurations
 
-* A new command vagrant rdp is introduced to connect to the Windows VM
-` vagrant rdp `
+## Installation
+Install Vagrant 1.5
+
+vagrant plugin install vagrant-hyperv
+
+## Configuration
+
 
 ### VagrntFile needs the following changes.
 
-- Set the WinRM trusted host certificate configuration
-Type this command from a cmd Administrator terminal
-`powershell set-item wsman:\localhost\client\trustedhosts *`
-
 - Sync Folder configuration
+
+With Vagrant 1.5 SMB share is available by default and vagrant picks the most suitable
+implementation for the providers.
+
+You can even specify the following options
+
+ :type
+ 
+ :smb_id
+
+For more information please visit the Vagrant Documentation.
 
 ```ruby
    # Mounts the host/path to guest/path and will have realtime sync
-   config.vm.synced_folder 'host/path', "guest/path", smb: true
-
-   # Copies the content from host/path to guest once on vagrant up / vagrant reload
    config.vm.synced_folder 'host/path', "guest/path"
 ```
 - Mention the type of VM Guest
 
 ```ruby
+config.vm.guest = :windows
 config.vm.provider "hyperv" do |hv, override|
-  hv.guest = :windows
   override.ssh.username = "vagrant"
 end
 ```
+### New RDP Command
+* A new command vagrant rdp is introduced to connect to the Windows VM
+` vagrant rdp `
 
-## Windows to Linux Configuration
-When the guest virtual machine is linux, follow the following configurations
-### VagrntFile needs the following changes.
+## Troubleshooting
 
+### Remote PowerShell
+Vagrant-HyperV uses remote PowerShell to communicate with the guest VMs, the guest VMs should have WinRM service running and remote PowerShell running.
 
-- Configure the credentials of a local user account created in the host.
-This account is used to share folders between host and the VM
-
-```ruby
-config.vm.provider "hyperv" do |hv, override|
-  hv.guest = :linux
-  override.ssh.username = "vagrant"
-  override.ssh.private_key_path = "E:/insecure_private_key"
-  hv.host_config do |share|
-    share.username = ""
-    share.password = ""
-  end
-end
+To Enable remote PowerShell in the guest.
+Go to the guest VM, open a cmd terminal and type the following command
 ```
-
-- Sync Folder configuration
-
-```ruby
-   # Mounts the host/path to guest/path and will have realtime sync
-   config.vm.synced_folder 'host/path', "guest/path", smb: true, :share_name => unique_share_name
-
-   # Copies the content from host/path to guest once on vagrant up / vagrant reload
-   config.vm.synced_folder 'host/path', "guest/path"
+powershell Enable-PSRemoting –force
 ```
+### Trustedhosts
+With PowerShell being enabled in the remote VM, the host has to trust this guest for further communication to happen.
+One can add the guest IP under trustedhost. Here "*" can be used as a wildcard to trust all hosts, or replace the * with the IP address of the guest..
+
+Type this command from a cmd Administrator terminal
+
+`
+powershell set-item wsman:\localhost\client\trustedhosts *
+`
