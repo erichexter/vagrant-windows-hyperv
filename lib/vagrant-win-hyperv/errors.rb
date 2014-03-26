@@ -23,7 +23,7 @@ module VagrantPlugins
       end
 
       class WinRMNotReady < VagrantHyperVError
-        error_key(:win_rm_not_ready)
+        error_key(:win_rm_not_available)
       end
 
     end

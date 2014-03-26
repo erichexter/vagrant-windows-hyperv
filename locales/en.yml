@@ -3,6 +3,8 @@ en:
     generating_rdp: |-
       Generating a RDP file to establish a remote session. You will soon be prompted to authenticate the
       RDP session and enter the Virtual Machine's password.
+    message_rdp_not_ready: |-
+        Hyper-V machine isn't running. Can't RDP in!
     errors:
       ssh_not_available: |-
         SSH is available for non windows guest. Vagrant detected guest to be %{guest}

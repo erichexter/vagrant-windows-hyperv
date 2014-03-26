@@ -4,7 +4,7 @@
 #--------------------------------------------------------------------------
 source 'https://rubygems.org'
 
-# Specify your gem's dependencies in vagrant-win-hyperv.gemspec
+# Specify your gem's dependencies in vagrant-hyperv.gemspec
 gemspec
 
 group :development do
@@ -14,4 +14,9 @@ group :development do
   # gem "vagrant", :git => "git://github.com/mitchellh/vagrant.git"
 
   gem "vagrant", :path => "D:/git_repo/vagrant_core"
+  gem "debugger"
+end
+
+group :plugins do
+  gem "vagrant-hyperv", path: "."
 end
