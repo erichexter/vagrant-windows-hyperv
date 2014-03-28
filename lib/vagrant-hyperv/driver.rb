@@ -5,7 +5,6 @@
 
 require "json"
 require "#{Vagrant::source_root}/plugins/providers/hyperv/driver"
-require "vagrant/util/powershell"
 
 module VagrantPlugins
   module VagrantHyperV
