@@ -13,7 +13,6 @@ group :development do
   # Vagrant environment itself using `vagrant plugin`.
   gem "vagrant", :git => "git://github.com/mitchellh/vagrant.git"
 
-  # gem "vagrant", :path => "D:/git_repo/vagrant_core"
 end
 
 group :plugins do
