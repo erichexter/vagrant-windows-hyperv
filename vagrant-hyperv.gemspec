@@ -16,7 +16,7 @@ Gem::Specification.new do |spec|
   spec.summary       = "Enable Vagrant to manage Virtual Machine created using Hyper-V"
   spec.homepage      = ""
   spec.license       = "Apache 2.0"
-  s.required_rubygems_version = ">= 2.0.0"
+  spec.required_rubygems_version = ">= 2.0.0"
 
   spec.require_paths = ["lib"]
 
