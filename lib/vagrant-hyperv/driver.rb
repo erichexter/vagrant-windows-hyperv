@@ -70,6 +70,16 @@ module VagrantPlugins
         execute(script_path, {})
       end
 
+      def create_network_switch(options)
+        script_path = local_script_path('create_switch.ps1')
+        execute(script_path, options)
+      end
+
+      def list_net_adapters
+        script_path = local_script_path('get_adapters.ps1')
+        execute(script_path, {})
+      end
+
       protected
 
       def local_script_path(path)

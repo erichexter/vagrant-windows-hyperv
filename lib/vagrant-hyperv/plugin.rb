@@ -33,6 +33,11 @@ module VagrantPlugins
         Provider
       end
 
+      config(:hyperv, :provider) do
+        require_relative "config"
+        Config
+      end
+
       guest(:windows) do
         require_relative "guest/windows"
         Guest::Windows
