@@ -54,18 +54,17 @@ module VagrantPlugins
 
         def setup_solo_config
           cookbooks_path = guest_paths(provisioner.cookbook_folders)
-          roles_path = guest_paths(provisioner.role_folders).first
+          roles_path = guest_paths(provisioner.role_folders)
           data_bags_path = guest_paths(provisioner.data_bags_folders).first
           environments_path = guest_paths(provisioner.environments_folders).first
-          setup_config("provisioners/chef_solo/solo", "solo.rb", {
-            :node_name => config.node_name,
+          source_path = "#{VagrantPlugins::VagrantHyperV.source_root}"
+          template_path = source_path + "/templates/provisioners/chef-solo/solo"
+          setup_config(template_path, "solo.rb", {
             :cookbooks_path => cookbooks_path,
             :recipe_url => config.recipe_url,
             :roles_path => roles_path,
             :data_bags_path => data_bags_path,
-            :encrypted_data_bag_secret => config.encrypted_data_bag_secret,
-            :environments_path => environments_path,
-            :environment => config.environment,
+            :environments_path => environments_path
           })
         end
 
