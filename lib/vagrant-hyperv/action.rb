@@ -52,11 +52,29 @@ module VagrantPlugins
         end
       end
 
+      def self.action_provision
+        Vagrant::Action::Builder.new.tap do |b|
+          b.use ConfigValidate
+          b.use Call, IsState, :not_created do |env1, b1|
+            if env1[:result]
+              b1.use Message, I18n.t("vagrant_hyperv.message_not_created")
+              next
+            end
+            b1.use Call, IsState, :running do |env2, b2|
+              if !env2[:result]
+                b2.use Message, I18n.t("vagrant_hyperv.message_not_running")
+              else
+                b2.use Provision
+              end
+            end
+          end
+        end
+      end
+
       # The autoload farm
       action_root = Pathname.new(File.expand_path("../action", __FILE__))
       autoload :Export, action_root.join("export")
       autoload :Package, action_root.join("package")
-      autoload :Provision, action_root.join('provision')
       autoload :Rdp, action_root.join("rdp")
     end
   end

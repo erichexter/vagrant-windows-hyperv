@@ -13,7 +13,7 @@ module VagrantPlugins
     autoload :Errors, lib_path.join("errors")
     autoload :Driver, lib_path.join("driver")
 
-    # Local a communicator for Windows guest
+    # Load a communicator for Windows guest
     require lib_path.join("communication/powershell")
 
     # Include the provision scripts for Windows
@@ -21,10 +21,12 @@ module VagrantPlugins
     require lib_path.join("provisioner/puppet")
     require lib_path.join("provisioner/chef_solo")
 
+    monkey_patch = Pathname.new(File.expand_path("../vagrant-hyperv/monkey_patch", __FILE__))
     # Monkey Patch the core Hyper-V vagrant with the following
-    require lib_path.join("synced_folders/smb/synced_folders")
-    require lib_path.join("action/provision")
-    require lib_path.join("machine")
+    require monkey_patch.join("plugins/synced_folders/smb/synced_folders")
+    require monkey_patch.join("action/provision")
+    require monkey_patch.join("machine")
+    require monkey_patch.join("util/powershell")
 
     # This returns the path to the source of this plugin.
     #
