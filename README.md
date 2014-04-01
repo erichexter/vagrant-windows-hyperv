@@ -22,7 +22,8 @@ You can even specify the following options
 
  :type
 
- :smb_id
+ :smb_id   Specify a unique share name, with which the network share will be available. By default vagrant will generate a smb_id if not specified.
+ 
 
 For more information please visit the Vagrant Documentation.
 
@@ -61,3 +62,6 @@ Type this command from a cmd Administrator terminal
 `
 powershell set-item wsman:\localhost\client\trustedhosts *
 `
+
+### SMB Share
+There is a bug in the current vagrant release (1.5.1) where the smb_id may get conflicted when the share names are used for different VMs. To overcome this use the smb_id option and make sure the share name do not conflict with the existing shares.
