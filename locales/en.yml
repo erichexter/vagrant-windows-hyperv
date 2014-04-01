@@ -11,5 +11,5 @@ en:
       rdp_not_available: |-
         RDP is available for windows guest. Vagrant detected guest to be %{guest}
       win_rm_not_ready: |-
-        WinRM is not enabled in the remot guest. Vagrant-HyperV uses remote PowerShell scripts
+        WinRM is not enabled in the remot guest. Vagrant-Windows-HyperV uses remote PowerShell scripts
         to communicate to the remote machine. Please check the same and try again.

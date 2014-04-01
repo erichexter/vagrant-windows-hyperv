@@ -4,7 +4,7 @@
 #--------------------------------------------------------------------------
 source 'https://rubygems.org'
 
-# Specify your gem's dependencies in vagrant-hyperv.gemspec
+# Specify your gem's dependencies in vagrant-windows-hyperv.gemspec
 gemspec
 
 group :development do
