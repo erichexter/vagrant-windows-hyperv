@@ -6,7 +6,7 @@ Hyper-V provider is available by default starting in Vagrant starting from versi
 ## Installation
 Install Vagrant 1.5
 
-vagrant plugin install vagrant-hyperv
+vagrant plugin install vagrant-windows-hyperv
 
 ## Configuration
 
@@ -21,7 +21,7 @@ implementation for the providers.
 You can even specify the following options
 
  :type
- 
+
  :smb_id
 
 For more information please visit the Vagrant Documentation.
@@ -45,7 +45,7 @@ end
 ## Troubleshooting
 
 ### Remote PowerShell
-Vagrant-HyperV uses remote PowerShell to communicate with the guest VMs, the guest VMs should have WinRM service running and remote PowerShell running.
+Vagrant-Windows-HyperV uses remote PowerShell to communicate with the guest VMs, the guest VMs should have WinRM service running and remote PowerShell running.
 
 To Enable remote PowerShell in the guest.
 Go to the guest VM, open a cmd terminal and type the following command
