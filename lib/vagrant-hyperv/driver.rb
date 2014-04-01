@@ -21,8 +21,8 @@ module VagrantPlugins
 
       def remote_credentials
         @remote_credentials ||= {  guest_ip: ssh_info[:host],
-           username: ssh_info[:username],
-           password: ssh_info[:password] || "vagrant" }
+           username:  ssh_info[:username],
+           password: "vagrant" }
       end
 
       def run_remote_ps(command, &block)
