@@ -7,7 +7,7 @@ Hyper-V provider is available by default in Vagrant with version 1.5 and up. Thi
 
 ## Installation
 Install Vagrant 1.5 (or higher)
-*http://www.vagrantup.com/downloads.html
+http://www.vagrantup.com/downloads.html
 
 
 Install plugin like so: 
@@ -16,7 +16,7 @@ vagrant plugin install vagrant-windows-hyperv
 
 ## Configuration settings 
 For more information on general configuration settings please visit the Vagrant Documentation.
-*http://docs.vagrantup.com/v2/
+http://docs.vagrantup.com/v2/
 
 
 ##Setting specific to this plugin
