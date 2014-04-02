@@ -71,7 +71,7 @@ Vagrant-Windows-HyperV uses remote PowerShell to communicate with the guest VMs,
 To Enable remote PowerShell in the guest.
 Go to the guest VM, open a cmd terminal and type the following command
 ```
-powershell Enable-PSRemoting â€“force
+powershell Enable-PSRemoting –force
 ```
 ### Trustedhosts
 With PowerShell being enabled in the remote VM, the host has to trust this guest to establish the connection.
