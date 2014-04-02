@@ -33,7 +33,8 @@ For more information please visit the Vagrant Documentation.
    # Mounts the host/path to guest/path and will have realtime sync
    config.vm.synced_folder 'host/path', "guest/path"
 ```
-- Mention the type of VM Guest
+### VM Type
+* Set the VM guest type 
 
 ```ruby
 config.vm.guest = :windows
