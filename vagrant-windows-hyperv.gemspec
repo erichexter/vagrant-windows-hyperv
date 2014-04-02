@@ -10,11 +10,10 @@ require 'vagrant-windows-hyperv/version'
 Gem::Specification.new do |spec|
   spec.name          = "vagrant-windows-hyperv"
   spec.version       = VagrantPlugins::VagrantHyperV::VERSION
-  spec.authors       = ["Ramakrishnan"]
-  spec.email         = ["ramakrishnan.v@happiestminds.com"]
-  spec.description   = "Enable Vagrant to manage Virtual Machine created using Hyper-V"
-  spec.summary       = "Enable Vagrant to manage Virtual Machine created using Hyper-V"
-  spec.homepage      = ""
+  spec.authors       = ["MSOpenTech"]
+  spec.description   = "Windows guest support for Hyper-V"
+  spec.summary       = "Enable Vagrant to manage Windows Virtual Machine created using Hyper-V"
+  spec.homepage      = "https://github.com/MSOpenTech/Vagrant-Windows-Hyperv"
   spec.license       = "Apache 2.0"
   spec.required_rubygems_version = ">= 2.0.0"
 
