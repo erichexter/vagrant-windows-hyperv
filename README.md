@@ -15,7 +15,7 @@ vagrant plugin install vagrant-windows-hyperv
 
 ## Configuration settings specific to this plugin
 
-- Sync Folder configuration
+### Sync Folder configuration
 
 With Vagrant 1.5 SMB share is available by default and vagrant picks the most suitable
 implementation for the providers.
