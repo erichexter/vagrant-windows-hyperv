@@ -32,7 +32,7 @@ module VagrantPlugins
 
           # Copy the module paths to the guest
           @module_paths.each do |from, to|
-            @env[:machine].provider.driver.upload(from, to)
+            @env[:machine].provider.driver.upload(from.to_s, to)
           end
 
 
@@ -42,7 +42,7 @@ module VagrantPlugins
             module_paths.unshift("/ProgramData/PuppetLabs/puppet/etc/modules")
 
             # Add the command line switch to add the module path
-            options << "--modulepath '#{module_paths.join(':')}'"
+            options << "--modulepath \"#{module_paths.join(':')}\""
           end
 
           if @hiera_config_path
