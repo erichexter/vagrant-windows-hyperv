@@ -45,8 +45,14 @@ You can even specify the following options
 
 ```ruby
 config.vm.guest = :windows
+```
+
+### Override user name
+* If you're building a custom box and want to customize the user name, you can use the hyper-v custom block to add it in
+
+```ruby
 config.vm.provider "hyperv" do |hv, override|
-  override.ssh.username = "vagrant"
+  override.ssh.username = "myuser"
 end
 ```
 ### New RDP Command
