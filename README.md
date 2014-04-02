@@ -10,11 +10,11 @@ Install Vagrant 1.5 (or higher)
 http://www.vagrantup.com/downloads.html
 
 
-Install plugin like so: 
+Install plugin like so:
 vagrant plugin install vagrant-windows-hyperv
 
 
-## Configuration settings 
+## Configuration settings
 For more information on general configuration settings please visit the Vagrant Documentation.
 http://docs.vagrantup.com/v2/
 
@@ -29,17 +29,17 @@ implementation for the providers.
 You can even specify the following options
 
  :smb_id   Specify a unique share name, with which the network share will be available. By default vagrant will generate a smb_id if not specified.
- 
+
 
 
 
 ```ruby
    # Mounts the host/path to guest/path and will have realtime sync
-    config.vm.synced_folder 'C:/test_sync_2', "C:/Users/vagrant/test_sync_2" 
+    config.vm.synced_folder 'C:/test_sync_2', "C:/Users/vagrant/test_sync_2"
 
 ```
 ### VM Type
-* Set the VM guest type 
+* Set the VM guest type
 
 ```ruby
 config.vm.guest = :windows
@@ -71,7 +71,7 @@ Vagrant-Windows-HyperV uses remote PowerShell to communicate with the guest VMs,
 To Enable remote PowerShell in the guest.
 Go to the guest VM, open a cmd terminal and type the following command
 ```
-powershell Enable-PSRemoting –force
+powershell Enable-PSRemoting â€“force
 ```
 ### Trustedhosts
 With PowerShell being enabled in the remote VM, the host has to trust this guest to establish the connection.
