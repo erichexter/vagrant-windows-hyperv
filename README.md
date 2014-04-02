@@ -28,8 +28,6 @@ implementation for the providers.
 
 You can even specify the following options
 
- :type
-
  :smb_id   Specify a unique share name, with which the network share will be available. By default vagrant will generate a smb_id if not specified.
  
 
@@ -37,7 +35,7 @@ You can even specify the following options
 
 ```ruby
    # Mounts the host/path to guest/path and will have realtime sync
-   `   config.vm.synced_folder 'C:/test_sync_2', "C:/Users/vagrant/test_sync_2" `
+    config.vm.synced_folder 'C:/test_sync_2', "C:/Users/vagrant/test_sync_2" 
 
 ```
 ### VM Type
@@ -88,4 +86,4 @@ powershell set-item wsman:\localhost\client\trustedhosts *
 ### SMB Share
 There is a bug in the current vagrant release (1.5.1) you may run into collisions when you create shares. To avoid this, user smb_id option and make sure the share name does not collide with existing shares.
 
-`   config.vm.synced_folder 'C:/test_sync_2', "C:/Users/vagrant/test_sync_2", :smb_id => "test_my_share" `
+` config.vm.synced_folder 'C:/test_sync_2', "C:/Users/vagrant/test_sync_2", :smb_id => "test_my_share" `
