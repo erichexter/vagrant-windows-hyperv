@@ -29,6 +29,6 @@ function Create-Remote-Session($guest_ip, $username, $password) {
 
     return  @{
         session = $session
-        error = $session_error
+        error = "$session_error"
     }
 }
