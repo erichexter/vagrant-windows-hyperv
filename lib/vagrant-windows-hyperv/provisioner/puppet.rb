@@ -42,7 +42,7 @@ module VagrantPlugins
             module_paths.unshift("/ProgramData/PuppetLabs/puppet/etc/modules")
 
             # Add the command line switch to add the module path
-            options << "--modulepath \"#{module_paths.join(';')}\""
+            options << "--modulepath \"#{module_paths.join(':')}\""
           end
 
           if @hiera_config_path
