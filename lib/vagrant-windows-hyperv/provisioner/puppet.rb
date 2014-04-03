@@ -64,7 +64,7 @@ module VagrantPlugins
           if !config.facter.empty?
             facts = []
             config.facter.each do |key, value|
-              facts << "FACTER_#{key}='#{value}'"
+              facts << "FACTER_#{key}=\"#{value}\""
             end
 
             facter = "#{facts.join(" ")} "
