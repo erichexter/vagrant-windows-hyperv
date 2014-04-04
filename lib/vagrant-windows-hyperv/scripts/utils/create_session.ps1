@@ -13,6 +13,7 @@ function Create-Remote-Session($guest_ip, $username, $password) {
     $count = 0
     $session_error = ""
     $session = ""
+    $max_attempts = 5
     do {
         $count++
         try {
@@ -20,12 +21,17 @@ function Create-Remote-Session($guest_ip, $username, $password) {
             $session_error = ""
         }
         catch {
-            Start-Sleep -s 1
-            $session_error = $_
-            $session = ""
+            $session_error = $_.Exception.message
+            if ($_.FullyQualifiedErrorID -eq "AccessDenied,PSSessionOpenFailed") {
+                $count = $max_attempts
+            }
+            elseif ( $_.FullyQualifiedErrorID -eq "WinRMOperationTimeout,PSSessionOpenFailed") {
+                Start-Sleep -s 5
+                $session = ""
+            }
         }
     }
-    while (!$session -and $count -lt 20)
+    while (!$session -and $count -lt $max_attempts)
 
     return  @{
         session = $session
