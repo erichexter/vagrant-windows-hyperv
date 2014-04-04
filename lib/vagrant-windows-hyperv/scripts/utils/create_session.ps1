@@ -25,6 +25,9 @@ function Create-Remote-Session($guest_ip, $username, $password) {
             if ($_.FullyQualifiedErrorID -eq "AccessDenied,PSSessionOpenFailed") {
                 $count = $max_attempts
             }
+            elseif ($_FullyQualifiedErrorID -eq "CannotUseIPAddress,PSSessionOpenFailed") {
+                $count = $max_attempts
+            }
             elseif ( $_.FullyQualifiedErrorID -eq "WinRMOperationTimeout,PSSessionOpenFailed") {
                 Start-Sleep -s 5
                 $session = ""
