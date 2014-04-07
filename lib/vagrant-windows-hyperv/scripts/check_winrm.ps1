@@ -38,7 +38,7 @@ try {
   } catch {
     $errortHash = @{
       type = "PowerShellError"
-      error ="Failed to copy file $_"
+      error ="$_"
     }
     Write-Error-Message $errortHash
     return
