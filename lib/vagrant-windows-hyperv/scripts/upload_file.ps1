@@ -21,6 +21,12 @@ try {
   # Enable Guest Service Interface if they are disabled
   try {
     Get-VM -Id $vm_id | Get-VMIntegrationService -Name "Guest Service Interface" | Enable-VMIntegrationService -Passthru
+        Do
+        {    
+            sleep 1
+            $Operational = Get-VM  -Id $vm_id | Get-VMIntegrationService -Name "Guest Service Interface" 
+        }
+        While ($Operational.PrimaryStatusDescription -ne "OK")
     }
     catch { }
 
